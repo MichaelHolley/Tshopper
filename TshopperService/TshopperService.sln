@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TshopperService", "TshopperService\TshopperService.csproj", "{8F949AB9-15DC-4930-B43F-ED847293D3AC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F949AB9-15DC-4930-B43F-ED847293D3AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F949AB9-15DC-4930-B43F-ED847293D3AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F949AB9-15DC-4930-B43F-ED847293D3AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F949AB9-15DC-4930-B43F-ED847293D3AC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
