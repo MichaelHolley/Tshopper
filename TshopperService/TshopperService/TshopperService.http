@@ -1,6 +1,0 @@
-@TshopperService_HostAddress = http://localhost:5157
-
-GET {{TshopperService_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
