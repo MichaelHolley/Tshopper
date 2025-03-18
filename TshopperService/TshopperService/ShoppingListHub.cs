@@ -14,7 +14,10 @@ public sealed class ShoppingListHub : Hub
 
     public async Task<List<ShoppingItem>> GetAllItems()
     {
-        return await _dbContext.ShoppingList.ToListAsync();
+        return await _dbContext.ShoppingList
+            .OrderBy(i => i.Checked)
+            .ThenBy(i => i.Item)
+            .ToListAsync();
     }
 
     public async Task AddItem(string item, int quantity)

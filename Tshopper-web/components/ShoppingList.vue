@@ -2,28 +2,35 @@
 import type { HubConnection } from "@microsoft/signalr";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 import { onMounted, ref } from "vue";
-
-interface ShoppingItem {
-  id: number;
-  item: string;
-  quantity: number;
-  checked: boolean;
-}
+import type { FormError, FormSubmitEvent } from "@nuxt/ui";
+import type { ItemFormState, ShoppingItem } from "./types";
 
 const shoppingList = ref<ShoppingItem[]>([]);
 const conn = ref<HubConnection | null>(null);
-const inputItem = ref("");
-const inputAmount = ref(1);
 
-const addItem = () => {
+const state = reactive<ItemFormState>({
+  item: "",
+  amount: 1,
+});
+
+const addItem = (event: FormSubmitEvent<ItemFormState>) => {
   conn.value
-    ?.invoke("AddItem", inputItem.value, inputAmount.value)
+    ?.invoke("AddItem", event.data.item, event.data.amount)
     .then(() => {
       console.log("✅ Item Added!");
-      inputItem.value = "";
-      inputAmount.value = 1;
+      state.item = "";
+      state.amount = 1;
     })
     .catch((err) => console.error("❌ Error adding item:", err));
+};
+
+const validate = (state: Partial<ItemFormState>): FormError[] => {
+  const errors = [];
+  if (!state.item) errors.push({ name: "item", message: "Required" });
+  if (!state.amount) errors.push({ name: "amount", message: "Required" });
+  if (state.amount && state.amount < 1)
+    errors.push({ name: "amount", message: "Must be greater than 0" });
+  return errors;
 };
 
 const checkItem = (itemId: number) => {
@@ -82,24 +89,39 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <h2>Shopping List</h2>
-    <ul>
-      <li v-for="item in shoppingList" :key="item.id" @click="toggleItem(item)">
-        <span>{{ item.item }}</span> - <span>x{{ item.quantity }}</span
-        ><span>{{ item.checked ? "✅" : "" }}</span>
-      </li>
-    </ul>
-  </div>
-  <div>
-    <input v-model="inputItem" type="text" required placeholder="Item" />
-    <input
-      v-model="inputAmount"
-      type="number"
-      min-value="1"
-      required
-      placeholder="Amount"
-    />
-    <button @click="addItem">Add</button>
+  <div class="p-3 flex flex-col gap-4">
+    <div>
+      <ul>
+        <li
+          v-for="item in shoppingList"
+          :key="item.id"
+          class="hover:cursor-pointer"
+          @click="toggleItem(item)"
+        >
+          <div>
+            <span :class="{ 'line-through': item.checked }">
+              {{ item.item }}
+            </span>
+            <span class="ml-4 text-primary-400">{{ item.quantity }}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <UForm
+      :validate="validate"
+      :state="state"
+      class="border border-gray-700 rounded-4xl space-y-4 p-4"
+      @submit="addItem"
+    >
+      <UFormField label="Item" name="item">
+        <UInput v-model="state.item" />
+      </UFormField>
+
+      <UFormField label="Amount" name="amount">
+        <UInput v-model="state.amount" type="number" />
+      </UFormField>
+
+      <UButton type="submit">Add</UButton>
+    </UForm>
   </div>
 </template>

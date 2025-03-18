@@ -1,6 +1,9 @@
 <template>
-  <div>
-    <SignalREvents />
-    <NuxtRouteAnnouncer />
-  </div>
+  <UApp>
+    <div>
+      <NavBar />
+      <ShoppingList />
+      <NuxtRouteAnnouncer />
+    </div>
+  </UApp>
 </template>
