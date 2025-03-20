@@ -110,7 +110,7 @@ onMounted(() => {
     </div>
   </div>
   <div class="p-3 px-2">
-    <ul>
+    <ul v-auto-animate>
       <li v-for="item in shoppingList" :key="item.id" class="flex">
         <div
           class="px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row items-center"

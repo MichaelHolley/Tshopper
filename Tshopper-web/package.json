@@ -10,6 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@formkit/auto-animate": "^0.8.2",
     "@microsoft/signalr": "^8.0.7",
     "@nuxt/eslint": "1.2.0",
     "@nuxt/icon": "1.11.0",
