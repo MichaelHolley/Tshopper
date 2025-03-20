@@ -10,7 +10,7 @@ const conn = ref<HubConnection | null>(null);
 
 const state = reactive<ItemFormState>({
   item: "",
-  amount: "1",
+  amount: "",
 });
 
 const addItem = (event: FormSubmitEvent<ItemFormState>) => {
@@ -19,7 +19,7 @@ const addItem = (event: FormSubmitEvent<ItemFormState>) => {
     .then(() => {
       console.log("✅ Item Added!");
       state.item = "";
-      state.amount = "1";
+      state.amount = "";
     })
     .catch((err) => console.error("❌ Error adding item:", err));
 };
@@ -27,7 +27,6 @@ const addItem = (event: FormSubmitEvent<ItemFormState>) => {
 const validate = (state: Partial<ItemFormState>): FormError[] => {
   const errors = [];
   if (!state.item) errors.push({ name: "item", message: "Required" });
-  if (!state.amount) errors.push({ name: "amount", message: "Required" });
   return errors;
 };
 
@@ -87,36 +86,34 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-3 flex flex-col gap-4">
-    <div class="flex">
-      <UForm
-        :validate="validate"
-        :state="state"
-        class="border border-gray-700 rounded-2xl space-y-4 p-4"
-        @submit="addItem"
-      >
-        <UFormField label="Item" name="item">
-          <UInput v-model="state.item" />
-        </UFormField>
+  <UForm
+    :validate="validate"
+    :state="state"
+    class="flex flex-row gap-2"
+    @submit="addItem"
+  >
+    <UFormField name="item">
+      <UInput v-model="state.item" placeholder="Item" :required="true" />
+    </UFormField>
 
-        <UFormField label="Amount" name="amount">
-          <UInput v-model="state.amount" type="text" />
-        </UFormField>
+    <UFormField name="amount">
+      <UInput v-model="state.amount" placeholder="Amount" />
+    </UFormField>
 
-        <UButton type="submit" icon="ci:add-plus" class="float-end">
-          Add
-        </UButton>
-      </UForm>
+    <div>
+      <UButton type="submit" icon="ci:add-plus" class="float-end">
+        Add
+      </UButton>
     </div>
-  </div>
-  <div class="p-3 px-2">
-    <ul v-auto-animate>
+  </UForm>
+  <div class="mt-3">
+    <ul v-auto-animate="{ duration: 300, delay: 300 }">
       <li v-for="item in shoppingList" :key="item.id" class="flex">
         <div
-          class="px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row items-center"
+          class="px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row items-center shadow"
         >
           <span
-            :class="{ 'line-through': item.checked }"
+            :class="{ 'line-through text-neutral-500': item.checked }"
             class="hover:cursor-pointer flex flex-row items-center"
             @click="toggleItem(item)"
           >
