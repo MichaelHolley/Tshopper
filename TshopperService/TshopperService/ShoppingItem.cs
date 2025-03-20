@@ -4,6 +4,6 @@ public class ShoppingItem
 {
     public int Id { get; set; }
     public string Item { get; set; } = string.Empty;
-    public int Quantity { get; set; } = 1;
+    public string Quantity { get; set; } = string.Empty;
     public DateTime? Checked { get; set; }
 }

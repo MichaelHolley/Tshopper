@@ -20,7 +20,7 @@ public sealed class ShoppingListHub : Hub
             .ToListAsync();
     }
 
-    public async Task AddItem(string item, int quantity)
+    public async Task AddItem(string item, string quantity)
     {
         var newItem = new ShoppingItem
         {
