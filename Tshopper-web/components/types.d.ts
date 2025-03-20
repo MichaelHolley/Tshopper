@@ -1,11 +1,11 @@
 export interface ShoppingItem {
   id: number;
   item: string;
-  quantity: number;
+  quantity: string;
   checked?: Date;
 }
 
 export interface ItemFormState {
   item: string;
-  amount: number;
+  amount: string;
 }

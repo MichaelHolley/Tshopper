@@ -10,7 +10,7 @@ const conn = ref<HubConnection | null>(null);
 
 const state = reactive<ItemFormState>({
   item: "",
-  amount: 1,
+  amount: "1",
 });
 
 const addItem = (event: FormSubmitEvent<ItemFormState>) => {
@@ -19,7 +19,7 @@ const addItem = (event: FormSubmitEvent<ItemFormState>) => {
     .then(() => {
       console.log("✅ Item Added!");
       state.item = "";
-      state.amount = 1;
+      state.amount = "1";
     })
     .catch((err) => console.error("❌ Error adding item:", err));
 };
@@ -28,8 +28,6 @@ const validate = (state: Partial<ItemFormState>): FormError[] => {
   const errors = [];
   if (!state.item) errors.push({ name: "item", message: "Required" });
   if (!state.amount) errors.push({ name: "amount", message: "Required" });
-  if (state.amount && state.amount < 1)
-    errors.push({ name: "amount", message: "Must be greater than 0" });
   return errors;
 };
 
@@ -105,7 +103,9 @@ onMounted(() => {
           <UInput v-model="state.amount" type="text" />
         </UFormField>
 
-        <UButton type="submit">Add</UButton>
+        <UButton type="submit" icon="ci:add-plus" class="float-end">
+          Add
+        </UButton>
       </UForm>
     </div>
   </div>
@@ -120,9 +120,12 @@ onMounted(() => {
             class="hover:cursor-pointer flex flex-row items-center"
             @click="toggleItem(item)"
           >
-            <UCheckbox :model-value="!!item.checked" class="mr-2" />{{
-              item.item
-            }}
+            <UIcon
+              :name="
+                item.checked ? 'ci:checkbox-check' : 'ci:checkbox-unchecked'
+              "
+              class="size-5 mr-1"
+            />{{ item.item }}
           </span>
           <span
             class="ml-4 text-primary-400"
