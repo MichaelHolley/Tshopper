@@ -109,7 +109,7 @@ onMounted(() => {
       </UForm>
     </div>
   </div>
-  <div class="p-3">
+  <div class="p-3 px-2">
     <ul>
       <li v-for="item in shoppingList" :key="item.id" class="flex">
         <div
@@ -120,12 +120,9 @@ onMounted(() => {
             class="hover:cursor-pointer flex flex-row items-center"
             @click="toggleItem(item)"
           >
-            <UIcon
-              :name="
-                item.checked ? 'ci:checkbox-check' : 'ci:checkbox-unchecked'
-              "
-              class="size-5 mr-1"
-            />{{ item.item }}
+            <UCheckbox :model-value="!!item.checked" class="mr-2" />{{
+              item.item
+            }}
           </span>
           <span
             class="ml-4 text-primary-400"
