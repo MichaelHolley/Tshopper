@@ -107,21 +107,23 @@ onMounted(() => {
         </li>
       </ul>
     </div>
-    <UForm
-      :validate="validate"
-      :state="state"
-      class="border border-gray-700 rounded-4xl space-y-4 p-4"
-      @submit="addItem"
-    >
-      <UFormField label="Item" name="item">
-        <UInput v-model="state.item" />
-      </UFormField>
+    <div class="flex">
+      <UForm
+        :validate="validate"
+        :state="state"
+        class="border border-gray-700 rounded-2xl space-y-4 p-4"
+        @submit="addItem"
+      >
+        <UFormField label="Item" name="item">
+          <UInput v-model="state.item" />
+        </UFormField>
 
-      <UFormField label="Amount" name="amount">
-        <UInput v-model="state.amount" type="number" />
-      </UFormField>
+        <UFormField label="Amount" name="amount">
+          <UInput v-model="state.amount" type="number" />
+        </UFormField>
 
-      <UButton type="submit">Add</UButton>
-    </UForm>
+        <UButton type="submit">Add</UButton>
+      </UForm>
+    </div>
   </div>
 </template>

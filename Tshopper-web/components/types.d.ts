@@ -2,7 +2,7 @@ export interface ShoppingItem {
   id: number;
   item: string;
   quantity: number;
-  checked: boolean;
+  checked?: Date;
 }
 
 export interface ItemFormState {

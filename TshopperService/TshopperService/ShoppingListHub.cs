@@ -43,7 +43,7 @@ public sealed class ShoppingListHub : Hub
             return;
         }
 
-        item.Checked = true;
+        item.Checked = DateTime.Now;
         await _dbContext.SaveChangesAsync();
 
         await ReceiveUpdate();
@@ -58,7 +58,7 @@ public sealed class ShoppingListHub : Hub
             return;
         }
 
-        item.Checked = false;
+        item.Checked = null;
         await _dbContext.SaveChangesAsync();
 
         await ReceiveUpdate();
