@@ -33,7 +33,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseCors();
 app.MapControllers();
-app.MapHub<ShoppingListHub>("/shoppingListHub");
+app.MapHub<ShoppingListHub>("/shoppingList");
 
 using (var scope = app.Services.CreateScope())
 {

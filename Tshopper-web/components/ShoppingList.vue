@@ -61,7 +61,7 @@ const toggleItem = (item: ShoppingItem) => {
 
 onMounted(() => {
   const connection: HubConnection = new HubConnectionBuilder()
-    .withUrl(`http://localhost:5157/shoppingListHub`)
+    .withUrl(`http://localhost:5157/shoppingList`)
     .withAutomaticReconnect()
     .build();
 
@@ -90,28 +90,6 @@ onMounted(() => {
 
 <template>
   <div class="p-3 flex flex-col gap-4">
-    <div>
-      <ul>
-        <li v-for="item in shoppingList" :key="item.id" class="flex">
-          <div class="px-2 py-1 hover:bg-slate-950 rounded-sm">
-            <span
-              :class="{ 'line-through': item.checked }"
-              class="hover:cursor-pointer"
-              @click="toggleItem(item)"
-            >
-              {{ item.item }}
-            </span>
-            <span
-              class="ml-4 text-primary-400"
-              :class="{
-                'text-primary-800': item.checked,
-              }"
-              >{{ item.quantity }}</span
-            >
-          </div>
-        </li>
-      </ul>
-    </div>
     <div class="flex">
       <UForm
         :validate="validate"
@@ -130,5 +108,34 @@ onMounted(() => {
         <UButton type="submit">Add</UButton>
       </UForm>
     </div>
+  </div>
+  <div class="p-3">
+    <ul>
+      <li v-for="item in shoppingList" :key="item.id" class="flex">
+        <div
+          class="px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row items-center"
+        >
+          <span
+            :class="{ 'line-through': item.checked }"
+            class="hover:cursor-pointer flex flex-row items-center"
+            @click="toggleItem(item)"
+          >
+            <UIcon
+              :name="
+                item.checked ? 'ci:checkbox-check' : 'ci:checkbox-unchecked'
+              "
+              class="size-5 mr-1"
+            />{{ item.item }}
+          </span>
+          <span
+            class="ml-4 text-primary-400"
+            :class="{
+              'text-primary-800': item.checked,
+            }"
+            >{{ item.quantity }}</span
+          >
+        </div>
+      </li>
+    </ul>
   </div>
 </template>

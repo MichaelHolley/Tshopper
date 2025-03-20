@@ -15,6 +15,7 @@ public sealed class ShoppingListHub : Hub
     public async Task<List<ShoppingItem>> GetAllItems()
     {
         return await _dbContext.ShoppingList
+            .Where(i => i.Checked == null || i.Checked > DateTime.Now.AddDays(-7))
             .OrderBy(i => i.Checked)
             .ThenBy(i => i.Item)
             .ToListAsync();
