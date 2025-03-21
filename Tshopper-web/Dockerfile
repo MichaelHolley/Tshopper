@@ -2,7 +2,7 @@
 FROM node:22-alpine as build
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@10.6.4 --activate
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
