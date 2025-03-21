@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddDbContext<ShoppingListDbContext>(options => options.UseSqlite("Data Source=shoppinglist.db"));
+builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
