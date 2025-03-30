@@ -1,12 +1,34 @@
 <script setup lang="ts">
 import type { HubConnection } from "@microsoft/signalr";
 import { HubConnectionBuilder } from "@microsoft/signalr";
-import { onMounted, ref } from "vue";
 import type { FormError, FormSubmitEvent } from "@nuxt/ui";
+import { onMounted, ref } from "vue";
 import type { ItemFormState, ShoppingItem } from "./types";
+
+const VISIBLE_CHECKED = 3;
 
 const shoppingList = ref<ShoppingItem[]>([]);
 const conn = ref<HubConnection | null>(null);
+const checkedCollapsed = ref(true);
+const itemInput = useTemplateRef("itemInput");
+
+const activeItems = computed(() => {
+  return shoppingList.value.filter((item) => !item.checked);
+});
+
+const checkedItems = computed(() => {
+  return shoppingList.value.filter((item) => item.checked);
+});
+
+const mergedItems = computed(() => {
+  let checked = checkedItems.value;
+
+  if (checkedCollapsed.value) {
+    checked = checked.slice(0, VISIBLE_CHECKED);
+  }
+
+  return [...activeItems.value, ...checked];
+});
 
 const state = reactive<ItemFormState>({
   item: "",
@@ -20,6 +42,8 @@ const addItem = (event: FormSubmitEvent<ItemFormState>) => {
       console.log("✅ Item Added!");
       state.item = "";
       state.amount = "";
+
+      itemInput.value?.inputRef?.focus();
     })
     .catch((err) => console.error("❌ Error adding item:", err));
 };
@@ -83,6 +107,15 @@ onMounted(() => {
     })
     .catch((err) => console.error("❌ SignalR Connection Error:", err));
 });
+
+onUnmounted(() => {
+  if (conn.value) {
+    conn.value
+      .stop()
+      .then(() => console.log("✅ SignalR Disconnected!"))
+      .catch((err) => console.error("❌ Error disconnecting SignalR:", err));
+  }
+});
 </script>
 
 <template>
@@ -93,7 +126,12 @@ onMounted(() => {
     @submit="addItem"
   >
     <UFormField name="item">
-      <UInput v-model="state.item" placeholder="Item" :required="true" />
+      <UInput
+        ref="itemInput"
+        v-model="state.item"
+        placeholder="Item"
+        :required="true"
+      />
     </UFormField>
 
     <UFormField name="amount">
@@ -108,31 +146,27 @@ onMounted(() => {
   </UForm>
   <div class="mt-3">
     <ul v-auto-animate="{ duration: 300, delay: 300 }">
-      <li v-for="item in shoppingList" :key="item.id" class="flex">
-        <div
-          class="px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row items-center shadow"
-        >
-          <span
-            :class="{ 'line-through text-neutral-500': item.checked }"
-            class="hover:cursor-pointer flex flex-row items-center"
-            @click="toggleItem(item)"
-          >
-            <UIcon
-              :name="
-                item.checked ? 'ci:checkbox-check' : 'ci:checkbox-unchecked'
-              "
-              class="size-5 mr-1"
-            />{{ item.item }}
-          </span>
-          <span
-            class="ml-4 text-primary-400"
-            :class="{
-              'text-primary-800': item.checked,
-            }"
-            >{{ item.quantity }}</span
-          >
-        </div>
+      <li v-for="item in mergedItems" :key="item.id" class="flex">
+        <ShoppingListItem :item="item" @toggle="toggleItem" />
       </li>
     </ul>
+    <UButton
+      v-if="checkedItems.length > VISIBLE_CHECKED"
+      class="flex flex-row justify-center items-center gap-1"
+      variant="ghost"
+      @click="
+        () => {
+          checkedCollapsed = !checkedCollapsed;
+        }
+      "
+    >
+      <UIcon
+        :name="checkedCollapsed ? 'ci:chevron-down' : 'ci:chevron-up'"
+        class="size-5 text-primary-400"
+      />
+      <span class="text-neutral-200"
+        >Show {{ checkedCollapsed ? "more" : "less" }}</span
+      >
+    </UButton>
   </div>
 </template>
