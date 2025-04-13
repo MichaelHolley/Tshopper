@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace TshopperService;
 
+[Authorize]
 public sealed class ShoppingListHub : Hub
 {
     private readonly IShoppingListService _shoppingListService;
