@@ -8,8 +8,9 @@ export const useAuthStore = defineStore("auth", {
 
   actions: {
     async authenticate(password: string) {
+      const config = useRuntimeConfig();
       try {
-        const response = await fetch("http://localhost:5157/Auth/login", {
+        const response = await fetch(`${config.public.apiBaseUrl}/Auth/login`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

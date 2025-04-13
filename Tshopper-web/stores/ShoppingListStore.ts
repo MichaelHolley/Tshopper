@@ -12,9 +12,10 @@ export const useShoppingListStore = defineStore("shoppingList", {
   actions: {
     async initializeConnection() {
       const authStore = useAuthStore();
+      const config = useRuntimeConfig();
 
       this.connection = new HubConnectionBuilder()
-        .withUrl(`http://localhost:5157/shoppingList`, {
+        .withUrl(`${config.public.apiBaseUrl}/shoppingList`, {
           accessTokenFactory: () => authStore.token!,
         })
         .withAutomaticReconnect()
