@@ -7,6 +7,8 @@ import type { ItemFormState, ShoppingItem } from "./types";
 
 const VISIBLE_CHECKED = 3;
 
+const authStore = useAuthStore();
+
 const shoppingList = ref<ShoppingItem[]>([]);
 const conn = ref<HubConnection | null>(null);
 const checkedCollapsed = ref(true);
@@ -57,18 +59,14 @@ const validate = (state: Partial<ItemFormState>): FormError[] => {
 const checkItem = (itemId: number) => {
   conn.value
     ?.invoke("CheckItem", itemId)
-    .then((result) => {
-      console.log("✅ Item Checked:", result);
-    })
+    .then(() => {})
     .catch((err) => console.error("❌ Error checking item:", err));
 };
 
 const uncheckItem = (itemId: number) => {
   conn.value
     ?.invoke("UncheckItem", itemId)
-    .then((result) => {
-      console.log("✅ Item Unchecked:", result);
-    })
+    .then(() => {})
     .catch((err) => console.error("❌ Error unchecking item:", err));
 };
 
@@ -82,7 +80,9 @@ const toggleItem = (item: ShoppingItem) => {
 
 onMounted(() => {
   const connection: HubConnection = new HubConnectionBuilder()
-    .withUrl(`http://localhost:5157/shoppingList`)
+    .withUrl(`http://localhost:5157/shoppingList`, {
+      accessTokenFactory: () => authStore.token!,
+    })
     .withAutomaticReconnect()
     .build();
 

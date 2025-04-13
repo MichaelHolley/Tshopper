@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@nuxt/ui",
     "@formkit/auto-animate/nuxt",
+    "@pinia/nuxt",
   ],
   vite: {
     plugins: [tailwindcss()],
