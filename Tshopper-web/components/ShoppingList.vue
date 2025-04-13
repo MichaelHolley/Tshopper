@@ -1,53 +1,42 @@
 <script setup lang="ts">
-import type { HubConnection } from "@microsoft/signalr";
-import { HubConnectionBuilder } from "@microsoft/signalr";
+import { onMounted } from "vue";
 import type { FormError, FormSubmitEvent } from "@nuxt/ui";
-import { onMounted, ref } from "vue";
 import type { ItemFormState, ShoppingItem } from "./types";
 
 const VISIBLE_CHECKED = 3;
 
-const authStore = useAuthStore();
-
-const shoppingList = ref<ShoppingItem[]>([]);
-const conn = ref<HubConnection | null>(null);
+const store = useShoppingListStore();
 const checkedCollapsed = ref(true);
 const itemInput = useTemplateRef("itemInput");
-
-const activeItems = computed(() => {
-  return shoppingList.value.filter((item) => !item.checked);
-});
-
-const checkedItems = computed(() => {
-  return shoppingList.value.filter((item) => item.checked);
-});
-
-const mergedItems = computed(() => {
-  let checked = checkedItems.value;
-
-  if (checkedCollapsed.value) {
-    checked = checked.slice(0, VISIBLE_CHECKED);
-  }
-
-  return [...activeItems.value, ...checked];
-});
 
 const state = reactive<ItemFormState>({
   item: "",
   amount: "",
 });
 
-const addItem = (event: FormSubmitEvent<ItemFormState>) => {
-  conn.value
-    ?.invoke("AddItem", event.data.item, event.data.amount)
-    .then(() => {
-      console.log("✅ Item Added!");
-      state.item = "";
-      state.amount = "";
+const activeItems = computed(() => {
+  return store.items.filter((item) => !item.checked);
+});
 
-      itemInput.value?.inputRef?.focus();
-    })
-    .catch((err) => console.error("❌ Error adding item:", err));
+const checkedItems = computed(() => {
+  return store.items.filter((item) => item.checked);
+});
+
+const mergedItems = computed(() => {
+  let checked = checkedItems.value;
+  if (checkedCollapsed.value) {
+    checked = checked.slice(0, VISIBLE_CHECKED);
+  }
+  return [...activeItems.value, ...checked];
+});
+
+const addItem = async (event: FormSubmitEvent<ItemFormState>) => {
+  const success = await store.addItem(event.data.item, event.data.amount);
+  if (success) {
+    state.item = "";
+    state.amount = "";
+    itemInput.value?.inputRef?.focus();
+  }
 };
 
 const validate = (state: Partial<ItemFormState>): FormError[] => {
@@ -56,65 +45,20 @@ const validate = (state: Partial<ItemFormState>): FormError[] => {
   return errors;
 };
 
-const checkItem = (itemId: number) => {
-  conn.value
-    ?.invoke("CheckItem", itemId)
-    .then(() => {})
-    .catch((err) => console.error("❌ Error checking item:", err));
-};
-
-const uncheckItem = (itemId: number) => {
-  conn.value
-    ?.invoke("UncheckItem", itemId)
-    .then(() => {})
-    .catch((err) => console.error("❌ Error unchecking item:", err));
-};
-
 const toggleItem = (item: ShoppingItem) => {
   if (item.checked) {
-    uncheckItem(item.id);
+    store.uncheckItem(item.id);
   } else {
-    checkItem(item.id);
+    store.checkItem(item.id);
   }
 };
 
 onMounted(() => {
-  const connection: HubConnection = new HubConnectionBuilder()
-    .withUrl(`http://localhost:5157/shoppingList`, {
-      accessTokenFactory: () => authStore.token!,
-    })
-    .withAutomaticReconnect()
-    .build();
-
-  conn.value = connection;
-
-  connection.on("ReceiveUpdate", (items) => {
-    console.log("🆕 New Update:", items);
-    shoppingList.value = items;
-  });
-
-  connection
-    .start()
-    .then(() => {
-      console.log("✅ SignalR Connected!");
-
-      connection
-        .invoke("GetAllItems")
-        .then((items) => {
-          shoppingList.value = items;
-        })
-        .catch((err) => console.error("❌ Error fetching items:", err));
-    })
-    .catch((err) => console.error("❌ SignalR Connection Error:", err));
+  store.initializeConnection();
 });
 
 onUnmounted(() => {
-  if (conn.value) {
-    conn.value
-      .stop()
-      .then(() => console.log("✅ SignalR Disconnected!"))
-      .catch((err) => console.error("❌ Error disconnecting SignalR:", err));
-  }
+  store.disconnect();
 });
 </script>
 

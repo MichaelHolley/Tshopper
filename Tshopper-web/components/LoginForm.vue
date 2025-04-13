@@ -2,29 +2,37 @@
 import type { FormError, FormSubmitEvent } from "@nuxt/ui";
 import { ref } from "vue";
 
-const emit = defineEmits(["login"]);
+interface LoginFormState {
+  password: string;
+}
 
-const state = reactive({
+const authStore = useAuthStore();
+
+const state = reactive<LoginFormState>({
   password: "",
 });
 
 const loading = ref(false);
 const error = ref("");
 
-const validate = (state: Partial<{ password: string }>): FormError[] => {
+const validate = (state: Partial<LoginFormState>): FormError[] => {
   const errors = [];
   if (!state.password) errors.push({ name: "password", message: "Required" });
   return errors;
 };
 
-const handleSubmit = async (event: FormSubmitEvent<{ password: string }>) => {
+const handleSubmit = async (event: FormSubmitEvent<LoginFormState>) => {
   loading.value = true;
   error.value = "";
 
   try {
-    await emit("login", event.data.password);
-  } catch {
-    error.value = "Invalid password";
+    const isAuthenticated = await authStore.authenticate(event.data.password);
+    if (!isAuthenticated) {
+      error.value = "Invalid password";
+    }
+  } catch (e) {
+    error.value = "Authentication failed";
+    console.error("❌ Failed to authenticate:", e);
   } finally {
     loading.value = false;
   }
@@ -39,7 +47,7 @@ const handleSubmit = async (event: FormSubmitEvent<{ password: string }>) => {
       </template>
 
       <UForm :validate="validate" :state="state" @submit="handleSubmit">
-        <UFormGroup label="Password" name="password">
+        <UFormField label="Password" name="password">
           <UInput
             v-model="state.password"
             type="password"
@@ -47,7 +55,7 @@ const handleSubmit = async (event: FormSubmitEvent<{ password: string }>) => {
             :required="true"
             autocomplete="current-password"
           />
-        </UFormGroup>
+        </UFormField>
 
         <div v-if="error" class="text-red-500 text-sm mt-2">
           {{ error }}
