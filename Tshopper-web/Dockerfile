@@ -17,9 +17,9 @@ FROM node:22-alpine
 WORKDIR /app
 COPY --from=build /app/.output /app
 
-ENV NUXT_HOST=0.0.0.0
-ENV NUXT_PORT=6000
+ENV PORT=80
+ENV HOST=0.0.0.0
 
-EXPOSE 6000
+EXPOSE 80
 
 CMD ["node", "/app/server/index.mjs"]
