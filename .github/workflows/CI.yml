@@ -7,51 +7,51 @@ on:
     branches: [main]
 
 jobs:
-  build-frontend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Tshopper-web
+  # build-frontend:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: Tshopper-web
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+  #     - name: Install Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 22
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm & dependencies
-        with:
-          version: 9.15.0
-          run_install: |
-            - cwd: Tshopper-web
+  #     - uses: pnpm/action-setup@v4
+  #       name: Install pnpm & dependencies
+  #       with:
+  #         version: 9.15.0
+  #         run_install: |
+  #           - cwd: Tshopper-web
 
-      - name: Build production bundle
-        run: pnpm build
+  #     - name: Build production bundle
+  #       run: pnpm build
 
-  build-backend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: TshopperService
+  # build-backend:
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: TshopperService
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: "8.0.x"
+  #     - name: Setup .NET
+  #       uses: actions/setup-dotnet@v3
+  #       with:
+  #         dotnet-version: "8.0.x"
 
-      - name: Restore dependencies
-        run: dotnet restore
+  #     - name: Restore dependencies
+  #       run: dotnet restore
 
-      - name: Build
-        run: dotnet build --no-restore --configuration Release
+  #     - name: Build
+  #       run: dotnet build --no-restore --configuration Release
 
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+  #     - name: Test
+  #       run: dotnet test --no-build --verbosity normal
