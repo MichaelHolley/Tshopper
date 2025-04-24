@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: TshopperService/TshopperService
+        working-directory: TshopperService
 
     steps:
       - name: Checkout
