@@ -2,11 +2,13 @@
 import { useAuthStore } from '@/stores/AuthStore'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 interface LoginFormState {
   password: string
 }
 
+const router = useRouter()
 const authStore = useAuthStore()
 
 const state = reactive<LoginFormState>({
@@ -30,6 +32,8 @@ const handleSubmit = async (event: FormSubmitEvent<LoginFormState>) => {
     const isAuthenticated = await authStore.authenticate(event.data.password)
     if (!isAuthenticated) {
       error.value = 'Invalid password'
+    } else {
+      router.push('/')
     }
   } catch (e) {
     error.value = 'Authentication failed'

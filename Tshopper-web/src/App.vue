@@ -1,9 +1,3 @@
-<script setup lang="ts">
-import { useAuthStore } from './stores/AuthStore'
-
-const authStore = useAuthStore()
-</script>
-
 <template>
   <UApp>
     <div class="container mx-auto px-2">
