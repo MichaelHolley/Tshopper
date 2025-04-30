@@ -8,9 +8,7 @@ const authStore = useAuthStore()
   <UApp>
     <div class="container mx-auto px-2">
       <NavBar class="mb-2" />
-      <ShoppingList v-if="authStore.isAuthenticated" />
-      <LoginForm v-else />
-      <NuxtRouteAnnouncer />
+      <RouterView />
     </div>
   </UApp>
 </template>
