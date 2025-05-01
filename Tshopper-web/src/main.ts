@@ -1,10 +1,11 @@
 import './assets/main.css'
 
+import { autoAnimatePlugin } from '@formkit/auto-animate/vue'
 import ui from '@nuxt/ui/vue-plugin'
 import { createPinia } from 'pinia'
 import { createApp } from 'vue'
-import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
+import App from './App.vue'
 import { useAuthStore } from './stores/AuthStore'
 
 const app = createApp(App)
@@ -26,6 +27,7 @@ router.beforeEach((to) => {
 })
 
 app.use(createPinia())
+app.use(autoAnimatePlugin)
 app.use(router)
 app.use(ui)
 

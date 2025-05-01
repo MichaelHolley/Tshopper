@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref, useTemplateRef } from 'vue'
-import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import type { ItemFormState, ShoppingItem } from '../components/types'
+import ShoppingListItem from '@/components/ShoppingListeItem.vue'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
+import type { FormError, FormSubmitEvent } from '@nuxt/ui'
+import { computed, onMounted, onUnmounted, reactive, ref, useTemplateRef } from 'vue'
+import type { ItemFormState, ShoppingItem } from '../components/types'
 
 const VISIBLE_CHECKED = 3
 
