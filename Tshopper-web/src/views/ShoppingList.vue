@@ -3,7 +3,7 @@ import ShoppingListItem from '@/components/ShoppingListeItem.vue'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import { computed, onMounted, onUnmounted, reactive, ref, useTemplateRef } from 'vue'
-import type { ItemFormState, ShoppingItem } from '../components/types'
+import type { ItemFormState, ShoppingItem } from '../types'
 
 const VISIBLE_CHECKED = 3
 
@@ -78,7 +78,7 @@ onUnmounted(() => {
       <UButton type="submit" icon="ci:add-plus" class="float-end"> Add </UButton>
     </div>
   </UForm>
-  <div class="mt-3">
+  <div class="mt-3 max-w-sm">
     <ul v-auto-animate="{ duration: 300, delay: 300 }">
       <li v-for="item in mergedItems" :key="item.id" class="flex">
         <ShoppingListItem :item="item" @toggle="toggleItem" />

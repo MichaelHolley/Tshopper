@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ShoppingItem } from './types'
+import type { ShoppingItem } from '../types'
 
 defineProps<{
   item: ShoppingItem
@@ -11,19 +11,17 @@ defineEmits<{
 </script>
 
 <template>
-  <div class="px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row items-center shadow">
+  <div
+    class="w-full px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row justify-between items-center shadow hover:cursor-pointer"
+    @click="$emit('toggle', item)"
+  >
     <span
-      class="hover:cursor-pointer flex flex-row items-center"
+      class="flex flex-row items-center"
       :class="{ 'line-through text-neutral-500': item.checked }"
-      @click="$emit('toggle', item)"
     >
-      <UIcon
-        :name="item.checked ? 'ci:checkbox-check' : 'ci:checkbox-unchecked'"
-        class="size-5 mr-1"
-      />
       {{ item.item }}
     </span>
-    <span :class="item.checked ? 'text-primary-800' : 'text-primary-400'" class="ml-8">
+    <span :class="item.checked ? 'line-through text-primary-800' : 'text-primary-400'" class="ml-8">
       {{ item.quantity }}
     </span>
   </div>

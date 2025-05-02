@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import type { HubConnection } from '@microsoft/signalr'
 import { HubConnectionBuilder } from '@microsoft/signalr'
 import { useAuthStore } from './AuthStore'
-import type { ShoppingItem } from '@/components/types'
+import type { ShoppingItem } from '@/types'
 
 export const useShoppingListStore = defineStore('shoppingList', {
   state: () => ({
