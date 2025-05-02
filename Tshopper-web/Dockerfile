@@ -16,7 +16,8 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the app
-RUN pnpm build
+# build-only as long as nuxtui type-check is buggy
+RUN pnpm build-only
 
 # Production stage
 FROM nginx:alpine
