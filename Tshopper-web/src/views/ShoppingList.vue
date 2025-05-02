@@ -78,7 +78,7 @@ onUnmounted(() => {
       <UButton type="submit" icon="ci:add-plus" class="float-end"> Add </UButton>
     </div>
   </UForm>
-  <div class="mt-3 max-w-sm">
+  <div class="mt-3">
     <ul v-auto-animate="{ duration: 300, delay: 300 }">
       <li v-for="item in mergedItems" :key="item.id" class="flex">
         <ShoppingListItem :item="item" @toggle="toggleItem" />
