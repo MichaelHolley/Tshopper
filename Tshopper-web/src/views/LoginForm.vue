@@ -1,42 +1,47 @@
 <script setup lang="ts">
-import type { FormError, FormSubmitEvent } from "@nuxt/ui";
-import { ref } from "vue";
+import { useAuthStore } from '@/stores/AuthStore'
+import type { FormError, FormSubmitEvent } from '@nuxt/ui'
+import { reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 interface LoginFormState {
-  password: string;
+  password: string
 }
 
-const authStore = useAuthStore();
+const router = useRouter()
+const authStore = useAuthStore()
 
 const state = reactive<LoginFormState>({
-  password: "",
-});
+  password: '',
+})
 
-const loading = ref(false);
-const error = ref("");
+const loading = ref(false)
+const error = ref('')
 
 const validate = (state: Partial<LoginFormState>): FormError[] => {
-  const errors = [];
-  if (!state.password) errors.push({ name: "password", message: "Required" });
-  return errors;
-};
+  const errors = []
+  if (!state.password) errors.push({ name: 'password', message: 'Required' })
+  return errors
+}
 
 const handleSubmit = async (event: FormSubmitEvent<LoginFormState>) => {
-  loading.value = true;
-  error.value = "";
+  loading.value = true
+  error.value = ''
 
   try {
-    const isAuthenticated = await authStore.authenticate(event.data.password);
+    const isAuthenticated = await authStore.authenticate(event.data.password)
     if (!isAuthenticated) {
-      error.value = "Invalid password";
+      error.value = 'Invalid password'
+    } else {
+      router.push('/')
     }
   } catch (e) {
-    error.value = "Authentication failed";
-    console.error("❌ Failed to authenticate:", e);
+    error.value = 'Authentication failed'
+    console.error('❌ Failed to authenticate:', e)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 </script>
 
 <template>

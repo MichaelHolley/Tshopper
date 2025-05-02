@@ -5,21 +5,26 @@ FROM node:22-alpine as build
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 
 WORKDIR /app
+
+# Copy package files
 COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
+# Copy source code
 COPY . .
-RUN pnpm build
+
+# Build the app
+# build-only as long as nuxtui type-check is buggy
+RUN pnpm build-only
 
 # Production stage
-FROM node:22-alpine
+FROM nginx:alpine
 
-WORKDIR /app
-COPY --from=build /app/.output /app
-
-ENV PORT=80
-ENV HOST=0.0.0.0
+# Copy built files from build stage
+COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
 
-CMD ["node", "/app/server/index.mjs"]
+CMD ["nginx", "-g", "daemon off;"]
