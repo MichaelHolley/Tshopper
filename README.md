@@ -11,7 +11,7 @@ services:
     ports:
       - "80:80"
     environment:
-      - VITE_API_URL=http://backend:80
+      - VITE_API_URL=http://backend:8080
     depends_on:
       - backend
     restart: always
@@ -19,7 +19,7 @@ services:
   backend:
     image: mpholley/tshopper-service:latest
     ports:
-      - "6000:80"
+      - "8080:8080"
     environment:
       - Jwt__Key=MySecretKeyWithEnoughCharacter
       - Password=abc123
