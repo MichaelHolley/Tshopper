@@ -55,7 +55,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<ShoppingListHub>("/shoppingList");
+app.MapHub<ShoppingListHub>("api/ShoppingList");
 
 using (var scope = app.Services.CreateScope())
 {

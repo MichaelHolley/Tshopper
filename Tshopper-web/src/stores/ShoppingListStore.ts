@@ -15,7 +15,7 @@ export const useShoppingListStore = defineStore('shoppingList', {
       const authStore = useAuthStore()
 
       this.connection = new HubConnectionBuilder()
-        .withUrl(`${import.meta.env.VITE_API_URL}/shoppingList`, {
+        .withUrl(`${(window as any)._env_.VITE_API_URL}/ShoppingList`, {
           accessTokenFactory: () => authStore.token!,
         })
         .withAutomaticReconnect()

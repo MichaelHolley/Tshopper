@@ -6,7 +6,7 @@ using System.Text;
 namespace TshopperService
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _configuration;
@@ -16,7 +16,7 @@ namespace TshopperService
             _configuration = configuration;
         }
 
-        [HttpPost("login")]
+        [HttpPost("Login")]
         public IActionResult Login([FromBody] LoginModel login)
         {
             // For demo purposes - replace with real authentication
