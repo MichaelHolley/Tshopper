@@ -1,6 +1,12 @@
 # Tshopper
 
-docker-compose.yml
+## Introduction
+
+This is a simple shopping list application built with .NET, Vue.js, and SignalR.
+
+The application is designed to be deployed as a Docker container, with a frontend and backend service. The frontend is a Vue.js application that communicates with the backend service using SignalR. The backend service is a .NET service that uses Entity Framework to store and retrieve data from a SQLite database.
+
+## docker-compose
 
 ```yml
 version: '3.8'

@@ -9,6 +9,9 @@ WORKDIR /app
 # Copy package files
 COPY package.json pnpm-lock.yaml .npmrc ./
 
+# Copy production env file
+COPY .env.production .env
+
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 

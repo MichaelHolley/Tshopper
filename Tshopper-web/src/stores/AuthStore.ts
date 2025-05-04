@@ -8,7 +8,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async authenticate(password: string) {
       try {
-        const response = await fetch(`/api/Auth/Login`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/Auth/Login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
