@@ -29,5 +29,7 @@ services:
     environment:
       - Jwt__Key=MySecretKeyWithEnoughCharacter
       - Password=abc123
+    volumes:
+      - sqlite-data:/app/data
     restart: always
 ```

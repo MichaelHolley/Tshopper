@@ -21,7 +21,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddDbContext<ShoppingListDbContext>(options => options.UseSqlite("Data Source=shoppinglist.db"));
+builder.Services.AddDbContext<ShoppingListDbContext>(options => 
+    options.UseSqlite("Data Source=/app/data/shoppinglist.db"));
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
