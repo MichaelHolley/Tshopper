@@ -32,4 +32,7 @@ services:
     volumes:
       - sqlite-data:/app/data
     restart: always
+
+volumes:
+  sqlite-data:
 ```
