@@ -22,7 +22,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddDbContext<ShoppingListDbContext>(options => 
-    options.UseSqlite("Data Source=/app/data/shoppinglist.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
