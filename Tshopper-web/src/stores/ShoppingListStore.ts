@@ -1,8 +1,8 @@
-import { defineStore } from 'pinia'
+import type { ShoppingItem } from '@/types'
 import type { HubConnection } from '@microsoft/signalr'
 import { HubConnectionBuilder } from '@microsoft/signalr'
+import { defineStore } from 'pinia'
 import { useAuthStore } from './AuthStore'
-import type { ShoppingItem } from '@/types'
 
 export const useShoppingListStore = defineStore('shoppingList', {
   state: () => ({
@@ -16,7 +16,13 @@ export const useShoppingListStore = defineStore('shoppingList', {
 
       this.connection = new HubConnectionBuilder()
         .withUrl(`${import.meta.env.VITE_API_URL}/ShoppingList`, {
-          accessTokenFactory: () => authStore.token!,
+          accessTokenFactory: () => {
+            if (!authStore.token) {
+              throw new Error('No authentication token available')
+            }
+
+            return authStore.token
+          },
         })
         .withAutomaticReconnect()
         .build()
