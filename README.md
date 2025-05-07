@@ -31,7 +31,7 @@ services:
     ports:
       - "6001:8080"
     environment:
-      - Jwt__Key=MySecretKeyWithEnoughCharacter
+      - Jwt__Key=MySecretKeyWithEnoughCharacters
       - Password=abc123
     volumes:
       - sqlite-data:/app/data
