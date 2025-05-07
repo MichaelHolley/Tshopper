@@ -8,7 +8,9 @@ The application is designed to be deployed as a Docker container, with a fronten
 
 <img src="https://github.com/user-attachments/assets/568f990f-9c89-4659-8c85-3d4c49b9f595" width="320" />
 
-## docker-compose
+## Hosting
+
+### docker-compose
 
 ```yml
 version: '3.8'
