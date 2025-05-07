@@ -6,6 +6,8 @@ This is a simple shopping list application built with .NET, Vue.js, and SignalR.
 
 The application is designed to be deployed as a Docker container, with a frontend and backend service. The frontend is a Vue.js application that communicates with the backend service using SignalR. The backend service is a .NET service that uses Entity Framework to store and retrieve data from a SQLite database.
 
+<img src="https://github.com/user-attachments/assets/568f990f-9c89-4659-8c85-3d4c49b9f595" width="320" />
+
 ## docker-compose
 
 ```yml
