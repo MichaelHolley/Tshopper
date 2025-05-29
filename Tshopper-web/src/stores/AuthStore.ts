@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: null as string | null,
+    token: localStorage.getItem('auth_token') as string | null,
   }),
 
   actions: {
@@ -40,6 +40,32 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       this.setToken(null)
+    },
+
+    async validateToken() {
+      if (!this.token) return false
+
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/Auth/Validate`, {
+          headers: {
+            Authorization: `Bearer ${this.token}`,
+          },
+        })
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            this.logout()
+          }
+          return false
+        }
+
+        return true
+      } catch (error) {
+        console.error('Token validation error:', error)
+        this.logout()
+
+        return false
+      }
     },
   },
 

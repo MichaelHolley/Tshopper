@@ -3,6 +3,7 @@ import type { HubConnection } from '@microsoft/signalr'
 import { HubConnectionBuilder } from '@microsoft/signalr'
 import { defineStore } from 'pinia'
 import { useAuthStore } from './AuthStore'
+import { useRouter } from 'vue-router'
 
 export const useShoppingListStore = defineStore('shoppingList', {
   state: () => ({
@@ -13,6 +14,14 @@ export const useShoppingListStore = defineStore('shoppingList', {
   actions: {
     async initializeConnection() {
       const authStore = useAuthStore()
+      const router = useRouter()
+
+      const validToken = await authStore.validateToken()
+      if (!validToken) {
+        authStore.logout()
+        router.push('/login')
+        return
+      }
 
       this.connection = new HubConnectionBuilder()
         .withUrl(`${import.meta.env.VITE_API_URL}/ShoppingList`, {
