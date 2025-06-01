@@ -25,7 +25,7 @@ const contextMenuItems = [
 <template>
   <UContextMenu :items="contextMenuItems" :ui="{ content: 'w-48' }">
     <div
-      class="w-full px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row justify-between items-center shadow hover:cursor-pointer"
+      class="w-full px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row justify-between items-center hover:cursor-pointer"
       @click="emit('toggle', props.item)"
     >
       <span
