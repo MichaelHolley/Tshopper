@@ -86,6 +86,22 @@ export const useShoppingListStore = defineStore('shoppingList', {
       }
     },
 
+    async deleteItem(itemId: number) {
+      try {
+        await this.connection?.invoke('DeleteItem', itemId)
+      } catch (err) {
+        console.error('❌ Error deleting item:', err)
+      }
+    },
+
+    async deleteAllCheckedItems() {
+      try {
+        await this.connection?.invoke('DeleteAllCheckedItems')
+      } catch (err) {
+        console.error('❌ Error deleting items:', err)
+      }
+    },
+
     async disconnect() {
       if (this.connection) {
         try {

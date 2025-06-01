@@ -8,6 +8,8 @@ public interface IShoppingListService
     Task<ShoppingItem> AddItemAsync(string item, string quantity);
     Task<ShoppingItem?> CheckItemAsync(int id);
     Task<ShoppingItem?> UncheckItemAsync(int id);
+    Task DeleteAllCheckedItemsAsync();
+    Task DeleteItemAsync(int id);
 }
 
 public class ShoppingListService : IShoppingListService
@@ -71,5 +73,22 @@ public class ShoppingListService : IShoppingListService
         await _dbContext.SaveChangesAsync();
 
         return item;
+    }
+
+    public async Task DeleteAllCheckedItemsAsync()
+    {
+        var items = await _dbContext.ShoppingList.Where(i => i.Checked != null).ToListAsync();
+        _dbContext.ShoppingList.RemoveRange(items);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteItemAsync(int id)
+    {
+        var item = await _dbContext.ShoppingList.FindAsync(id);
+        if (item != null)
+        {
+            _dbContext.ShoppingList.Remove(item);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

@@ -55,6 +55,10 @@ const toggleItem = (item: ShoppingItem) => {
   }
 }
 
+const deleteItem = (item: ShoppingItem) => {
+  store.deleteItem(item.id)
+}
+
 onMounted(() => {
   store.initializeConnection()
 })
@@ -81,7 +85,7 @@ onUnmounted(() => {
   <div class="mt-3">
     <ul v-auto-animate="{ duration: 300, delay: 300 }">
       <li v-for="item in mergedItems" :key="item.id" class="flex">
-        <ShoppingListItem :item="item" @toggle="toggleItem" />
+        <ShoppingListItem :item="item" @toggle="toggleItem" @delete="deleteItem" />
       </li>
     </ul>
     <UButton

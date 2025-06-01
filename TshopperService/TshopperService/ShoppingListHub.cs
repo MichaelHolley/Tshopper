@@ -40,4 +40,16 @@ public sealed class ShoppingListHub : Hub
     {
         await Clients.All.SendAsync("ReceiveUpdate", await GetAllItems());
     }
+    
+    public async Task DeleteAllCheckedItems()
+    {
+        await _shoppingListService.DeleteAllCheckedItemsAsync();
+        await ReceiveUpdate();
+    }
+
+    public async Task DeleteItem(int id)
+    {
+        await _shoppingListService.DeleteItemAsync(id);
+        await ReceiveUpdate();
+    }
 }
