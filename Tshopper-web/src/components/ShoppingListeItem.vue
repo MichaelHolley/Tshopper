@@ -29,14 +29,14 @@ const contextMenuItems = [
       @click="emit('toggle', props.item)"
     >
       <span
-        class="flex flex-row items-center"
+        class="flex flex-row items-center select-none"
         :class="{ 'line-through text-neutral-500': item.checked }"
       >
         {{ item.item }}
       </span>
       <span
         :class="item.checked ? 'line-through text-primary-800' : 'text-primary-400'"
-        class="ml-8"
+        class="ml-8 select-none"
       >
         {{ item.quantity }}
       </span>
