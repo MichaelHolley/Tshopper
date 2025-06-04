@@ -85,24 +85,31 @@ onUnmounted(() => {
   <div class="mt-3">
     <ul v-auto-animate="{ duration: 300, delay: 300 }">
       <li v-for="item in mergedItems" :key="item.id" class="flex">
-        <ShoppingListItem :item="item" @toggle="toggleItem" @delete="deleteItem" />
+        <ShoppingListItem
+          :item="item"
+          @toggle="toggleItem"
+          @delete="deleteItem"
+          @delete-all="store.deleteAllCheckedItems"
+        />
       </li>
     </ul>
-    <UButton
-      v-if="checkedItems.length > VISIBLE_CHECKED"
-      class="flex flex-row justify-center items-center gap-1"
-      variant="ghost"
-      @click="
-        () => {
-          checkedCollapsed = !checkedCollapsed
-        }
-      "
-    >
-      <UIcon
-        :name="checkedCollapsed ? 'ci:chevron-down' : 'ci:chevron-up'"
-        class="size-5 text-primary-400"
-      />
-      <span class="text-neutral-200">Show {{ checkedCollapsed ? 'more' : 'less' }}</span>
-    </UButton>
+    <div class="flex flex-row justify-center">
+      <UButton
+        v-if="checkedItems.length > VISIBLE_CHECKED"
+        class="flex flex-row justify-center items-center gap-1"
+        variant="ghost"
+        @click="
+          () => {
+            checkedCollapsed = !checkedCollapsed
+          }
+        "
+      >
+        <UIcon
+          :name="checkedCollapsed ? 'ci:chevron-down' : 'ci:chevron-up'"
+          class="size-5 text-primary-400"
+        />
+        <span class="text-neutral-200">Show {{ checkedCollapsed ? 'more' : 'less' }}</span>
+      </UButton>
+    </div>
   </div>
 </template>

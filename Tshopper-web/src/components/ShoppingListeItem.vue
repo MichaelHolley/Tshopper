@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from '@nuxt/ui'
+import { computed } from 'vue'
 import type { ShoppingItem } from '../types'
 
 const props = defineProps<{
@@ -9,17 +10,32 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'toggle', item: ShoppingItem): void
   (e: 'delete', item: ShoppingItem): void
+  (e: 'deleteAll'): void
 }>()
 
-const contextMenuItems = [
-  {
-    label: 'Delete',
-    icon: 'tabler:trash',
-    onSelect: () => {
-      emit('delete', props.item)
+let contextMenuItems = computed<ContextMenuItem[]>(() => {
+  const items = [
+    {
+      label: 'Delete',
+      icon: 'tabler:trash',
+      onSelect: () => {
+        emit('delete', props.item)
+      },
     },
-  },
-] satisfies ContextMenuItem[]
+  ]
+
+  if (props.item.checked) {
+    items.push({
+      label: 'Delete All',
+      icon: 'tabler:trash',
+      onSelect: () => {
+        emit('deleteAll')
+      },
+    })
+  }
+
+  return items
+})
 </script>
 
 <template>
