@@ -26,7 +26,7 @@ let contextMenuItems = computed<ContextMenuItem[]>(() => {
 
   if (props.item.checked) {
     items.push({
-      label: 'Delete All',
+      label: 'Delete all checked',
       icon: 'tabler:trash',
       onSelect: () => {
         emit('deleteAll')
