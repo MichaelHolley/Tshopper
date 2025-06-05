@@ -123,7 +123,11 @@ onUnmounted(() => {
     </div>
   </div>
 
-  <UModal v-model:open="showDeleteAllDialog" title="Confirm Delete">
+  <UModal
+    v-model:open="showDeleteAllDialog"
+    title="Confirm Delete"
+    description="This action requires confirmation"
+  >
     <template #body>
       <p>Are you sure you want to delete all checked items? This action cannot be undone.</p>
       <div class="flex flex-row justify-end gap-2">
