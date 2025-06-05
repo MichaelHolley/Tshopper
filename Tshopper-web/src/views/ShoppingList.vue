@@ -10,6 +10,7 @@ const VISIBLE_CHECKED = 3
 const store = useShoppingListStore()
 const checkedCollapsed = ref(true)
 const itemInput = useTemplateRef('itemInput')
+const showDeleteAllDialog = ref(false)
 
 const state = reactive<ItemFormState>({
   item: '',
@@ -59,6 +60,15 @@ const deleteItem = (item: ShoppingItem) => {
   store.deleteItem(item.id)
 }
 
+const handleDeleteAll = () => {
+  showDeleteAllDialog.value = true
+}
+
+const confirmDeleteAll = () => {
+  store.deleteAllCheckedItems()
+  showDeleteAllDialog.value = false
+}
+
 onMounted(() => {
   store.initializeConnection()
 })
@@ -89,7 +99,7 @@ onUnmounted(() => {
           :item="item"
           @toggle="toggleItem"
           @delete="deleteItem"
-          @delete-all="store.deleteAllCheckedItems"
+          @delete-all="handleDeleteAll"
         />
       </li>
     </ul>
@@ -112,4 +122,16 @@ onUnmounted(() => {
       </UButton>
     </div>
   </div>
+
+  <UModal v-model:open="showDeleteAllDialog" title="Confirm Delete">
+    <template #body>
+      <p>Are you sure you want to delete all checked items? This action cannot be undone.</p>
+      <div class="flex flex-row justify-end gap-2">
+        <UButton color="neutral" variant="ghost" @click="showDeleteAllDialog = false">
+          Cancel
+        </UButton>
+        <UButton color="error" variant="solid" @click="confirmDeleteAll"> Delete All </UButton>
+      </div>
+    </template>
+  </UModal>
 </template>
