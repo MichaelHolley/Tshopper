@@ -50,6 +50,18 @@ export const useShoppingListStore = defineStore('shoppingList', {
       }
     },
 
+    async reconnect() {
+      if (!this.connection) return
+
+      try {
+        await this.connection.start()
+        console.log('✅ SignalR Reconnected!')
+        await this.getAllItems()
+      } catch (error) {
+        console.error('❌ Reconnection failed:', error)
+      }
+    },
+
     async getAllItems() {
       try {
         const items = await this.connection?.invoke('GetAllItems')
@@ -111,6 +123,14 @@ export const useShoppingListStore = defineStore('shoppingList', {
           console.error('❌ Error disconnecting SignalR:', err)
         }
       }
+    },
+
+    getState() {
+      return this.connection?.state
+    },
+
+    isDisconnected() {
+      return this.connection?.state === 'Disconnected'
     },
   },
 })
