@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TshopperService.Data;
 
 namespace TshopperService;
 

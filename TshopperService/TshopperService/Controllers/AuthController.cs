@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 
-namespace TshopperService
+namespace TshopperService.Controllers
 {
     [ApiController]
     [Route("/api/[controller]")]

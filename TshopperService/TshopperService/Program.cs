@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TshopperService;
+using TshopperService.Hubs;
+using TshopperService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
