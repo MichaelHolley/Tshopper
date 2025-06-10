@@ -14,7 +14,7 @@ public class ShoppingListService : IShoppingListService
 
     public async Task<List<ShoppingItem>> GetAllItemsAsync()
     {
-        return await _dbContext.ShoppingList
+        return await _dbContext.ShoppingItems
             .Where(i => i.Checked == null || i.Checked > DateTime.Now.AddDays(-7))
             .OrderBy(i => i.Checked != null)
             .ThenByDescending(i => i.Checked)
@@ -30,7 +30,7 @@ public class ShoppingListService : IShoppingListService
             Quantity = quantity
         };
 
-        await _dbContext.ShoppingList.AddAsync(newItem);
+        await _dbContext.ShoppingItems.AddAsync(newItem);
         await _dbContext.SaveChangesAsync();
 
         return newItem;
@@ -38,7 +38,7 @@ public class ShoppingListService : IShoppingListService
 
     public async Task<ShoppingItem?> CheckItemAsync(int id)
     {
-        var item = await _dbContext.ShoppingList.FindAsync(id);
+        var item = await _dbContext.ShoppingItems.FindAsync(id);
 
         if (item == null)
         {
@@ -53,7 +53,7 @@ public class ShoppingListService : IShoppingListService
 
     public async Task<ShoppingItem?> UncheckItemAsync(int id)
     {
-        var item = await _dbContext.ShoppingList.FindAsync(id);
+        var item = await _dbContext.ShoppingItems.FindAsync(id);
 
         if (item == null)
         {
@@ -68,17 +68,17 @@ public class ShoppingListService : IShoppingListService
 
     public async Task DeleteAllCheckedItemsAsync()
     {
-        var items = await _dbContext.ShoppingList.Where(i => i.Checked != null).ToListAsync();
-        _dbContext.ShoppingList.RemoveRange(items);
+        var items = await _dbContext.ShoppingItems.Where(i => i.Checked != null).ToListAsync();
+        _dbContext.ShoppingItems.RemoveRange(items);
         await _dbContext.SaveChangesAsync();
     }
 
     public async Task DeleteItemAsync(int id)
     {
-        var item = await _dbContext.ShoppingList.FindAsync(id);
+        var item = await _dbContext.ShoppingItems.FindAsync(id);
         if (item != null)
         {
-            _dbContext.ShoppingList.Remove(item);
+            _dbContext.ShoppingItems.Remove(item);
             await _dbContext.SaveChangesAsync();
         }
     }
