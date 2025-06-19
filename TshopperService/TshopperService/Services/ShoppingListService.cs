@@ -82,5 +82,20 @@ namespace TshopperService.Services
                 await _dbContext.SaveChangesAsync();
             }
         }
+
+        public async Task<ShoppingItem?> UpdateItemAsync(int id, string item, string quantity)
+        {
+            var existingItem = await _dbContext.ShoppingList.FindAsync(id);
+            if (existingItem == null)
+            {
+                return null;
+            }
+            
+            existingItem.Item = item;
+            existingItem.Quantity = quantity;
+            await _dbContext.SaveChangesAsync();
+            
+            return existingItem;
+        }
     }
 }

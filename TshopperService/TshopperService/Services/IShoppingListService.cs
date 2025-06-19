@@ -10,5 +10,6 @@ namespace TshopperService.Services
         Task<ShoppingItem?> UncheckItemAsync(int id);
         Task DeleteAllCheckedItemsAsync();
         Task DeleteItemAsync(int id);
+        Task<ShoppingItem?> UpdateItemAsync(int id, string item, string quantity);
     }
 }

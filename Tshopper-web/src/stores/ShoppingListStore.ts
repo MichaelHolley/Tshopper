@@ -92,9 +92,9 @@ export const useShoppingListStore = defineStore('shoppingList', {
       }
     },
 
-    async addItem(item: string, amount: string) {
+    async addItem(item: string, quantity: string) {
       try {
-        await this.connection?.invoke('AddItem', item, amount)
+        await this.connection?.invoke('AddItem', item, quantity)
         console.log('✅ Item Added!')
         return true
       } catch (err) {
@@ -144,6 +144,17 @@ export const useShoppingListStore = defineStore('shoppingList', {
         } catch (err) {
           console.error('❌ Error disconnecting SignalR:', err)
         }
+      }
+    },
+
+    async updateItem(itemId: number, item: string, quantity: string) {
+      try {
+        await this.connection?.invoke('UpdateItem', itemId, item, quantity)
+        console.log('✅ Item Updated!')
+        return true
+      } catch (err) {
+        console.error('❌ Error updating item:', err)
+        return false
       }
     },
   },
