@@ -11,10 +11,18 @@ const emit = defineEmits<{
   (e: 'toggle', item: ShoppingItem): void
   (e: 'delete', item: ShoppingItem): void
   (e: 'deleteAll'): void
+  (e: 'edit', item: ShoppingItem): void
 }>()
 
 let contextMenuItems = computed<ContextMenuItem[]>(() => {
   const items = [
+    {
+      label: 'Edit',
+      icon: 'tabler:edit',
+      onSelect: () => {
+        emit('edit', props.item)
+      },
+    },
     {
       label: 'Delete',
       icon: 'tabler:trash',

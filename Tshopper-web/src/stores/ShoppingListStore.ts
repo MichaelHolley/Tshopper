@@ -5,11 +5,18 @@ import { defineStore } from 'pinia'
 import { useAuthStore } from './AuthStore'
 import { useRouter } from 'vue-router'
 
+type ConnectionState = 'Disconnected' | 'Connecting' | 'Connected'
+
 export const useShoppingListStore = defineStore('shoppingList', {
   state: () => ({
     items: [] as ShoppingItem[],
     connection: null as HubConnection | null,
+    connectionState: 'Disconnected' as ConnectionState,
   }),
+
+  getters: {
+    isDisconnected: (state) => state.connectionState === 'Disconnected',
+  },
 
   actions: {
     async initializeConnection() {
@@ -36,6 +43,18 @@ export const useShoppingListStore = defineStore('shoppingList', {
         .withAutomaticReconnect()
         .build()
 
+      this.connection.onclose(() => {
+        this.connectionState = 'Disconnected'
+      })
+
+      this.connection.onreconnecting(() => {
+        this.connectionState = 'Connecting'
+      })
+
+      this.connection.onreconnected(() => {
+        this.connectionState = 'Connected'
+      })
+
       this.connection.on('ReceiveUpdate', (items) => {
         console.log('🆕 New Update:', items)
         this.items = items
@@ -43,10 +62,12 @@ export const useShoppingListStore = defineStore('shoppingList', {
 
       try {
         await this.connection.start()
+        this.connectionState = 'Connected'
         console.log('✅ SignalR Connected!')
         await this.getAllItems()
       } catch (err) {
         console.error('❌ SignalR Connection Error:', err)
+        this.connectionState = 'Disconnected'
       }
     },
 
@@ -71,9 +92,9 @@ export const useShoppingListStore = defineStore('shoppingList', {
       }
     },
 
-    async addItem(item: string, amount: string) {
+    async addItem(item: string, quantity: string) {
       try {
-        await this.connection?.invoke('AddItem', item, amount)
+        await this.connection?.invoke('AddItem', item, quantity)
         console.log('✅ Item Added!')
         return true
       } catch (err) {
@@ -118,6 +139,7 @@ export const useShoppingListStore = defineStore('shoppingList', {
       if (this.connection) {
         try {
           await this.connection.stop()
+          this.connectionState = 'Disconnected'
           console.log('✅ SignalR Disconnected!')
         } catch (err) {
           console.error('❌ Error disconnecting SignalR:', err)
@@ -125,12 +147,15 @@ export const useShoppingListStore = defineStore('shoppingList', {
       }
     },
 
-    getState() {
-      return this.connection?.state
-    },
-
-    isDisconnected() {
-      return this.connection?.state === 'Disconnected'
+    async updateItem(itemId: number, item: string, quantity: string) {
+      try {
+        await this.connection?.invoke('UpdateItem', itemId, item, quantity)
+        console.log('✅ Item Updated!')
+        return true
+      } catch (err) {
+        console.error('❌ Error updating item:', err)
+        return false
+      }
     },
   },
 })

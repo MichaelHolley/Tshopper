@@ -11,6 +11,7 @@ const store = useShoppingListStore()
 const checkedCollapsed = ref(true)
 const itemInput = useTemplateRef('itemInput')
 const showDeleteAllDialog = ref(false)
+const editingItem = ref<ShoppingItem | null>(null)
 
 const state = reactive<ItemFormState>({
   item: '',
@@ -33,12 +34,22 @@ const mergedItems = computed(() => {
   return [...activeItems.value, ...checked]
 })
 
-const addItem = async (event: FormSubmitEvent<ItemFormState>) => {
-  const success = await store.addItem(event.data.item, event.data.amount)
-  if (success) {
-    state.item = ''
-    state.amount = ''
-    itemInput.value?.inputRef?.focus()
+const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
+  if (editingItem.value) {
+    const success = await store.updateItem(editingItem.value.id, event.data.item, event.data.amount)
+    if (success) {
+      editingItem.value = null
+      state.item = ''
+      state.amount = ''
+      itemInput.value?.inputRef?.focus()
+    }
+  } else {
+    const success = await store.addItem(event.data.item, event.data.amount)
+    if (success) {
+      state.item = ''
+      state.amount = ''
+      itemInput.value?.inputRef?.focus()
+    }
   }
 }
 
@@ -69,6 +80,19 @@ const confirmDeleteAll = () => {
   showDeleteAllDialog.value = false
 }
 
+const startEditItem = (item: ShoppingItem) => {
+  editingItem.value = item
+  state.item = item.item
+  state.amount = item.quantity
+  itemInput.value?.inputRef?.focus()
+}
+
+const cancelEdit = () => {
+  editingItem.value = null
+  state.item = ''
+  state.amount = ''
+}
+
 onMounted(() => {
   store.initializeConnection()
 })
@@ -79,7 +103,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <UForm :validate="validate" :state="state" class="flex flex-row gap-2" @submit="addItem">
+  <UForm :validate="validate" :state="state" class="flex flex-row gap-2" @submit="addOrUpdateItem">
     <UFormField name="item">
       <UInput ref="itemInput" v-model="state.item" placeholder="Item" :required="true" />
     </UFormField>
@@ -89,7 +113,13 @@ onUnmounted(() => {
     </UFormField>
 
     <div>
-      <UButton type="submit" icon="ci:add-plus" class="float-end"> Add </UButton>
+      <div class="flex flex-row gap-2">
+        <UButton v-if="editingItem" variant="outline" icon="maki:cross" @click="cancelEdit">
+        </UButton>
+        <UButton type="submit" icon="ci:add-plus" class="float-end">
+          {{ editingItem ? 'Update' : 'Add' }}
+        </UButton>
+      </div>
     </div>
   </UForm>
   <div class="mt-3">
@@ -100,6 +130,7 @@ onUnmounted(() => {
           @toggle="toggleItem"
           @delete="deleteItem"
           @delete-all="handleDeleteAll"
+          @edit="startEditItem"
         />
       </li>
     </ul>
