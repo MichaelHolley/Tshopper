@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TshopperService;
 using TshopperService.Hubs;
+using TshopperService.Middleware;
 using TshopperService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,7 +46,10 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddDbContext<ShoppingListDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
@@ -73,6 +77,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors();
+
+app.UseBusinessExceptionHandler();
 
 app.UseAuthentication();
 app.UseAuthorization();

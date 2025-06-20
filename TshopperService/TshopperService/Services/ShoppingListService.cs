@@ -1,101 +1,118 @@
 using Microsoft.EntityFrameworkCore;
 using TshopperService.Data;
+using TshopperService.Exceptions;
 
-namespace TshopperService.Services
+namespace TshopperService.Services;
+
+public class ShoppingListService : IShoppingListService
 {
-    public class ShoppingListService : IShoppingListService
+    private readonly ShoppingListDbContext _dbContext;
+
+    public ShoppingListService(ShoppingListDbContext dbContext)
     {
-        private readonly ShoppingListDbContext _dbContext;
+        _dbContext = dbContext;
+    }
 
-        public ShoppingListService(ShoppingListDbContext dbContext)
+    public async Task<List<ShoppingItem>> GetAllItemsAsync()
+    {
+        return await _dbContext.ShoppingItems
+            .Where(i => i.Checked == null || i.Checked > DateTime.Now.AddDays(-7))
+            .OrderBy(i => i.Checked != null)
+            .ThenByDescending(i => i.Checked)
+            .ThenBy(i => i.Item)
+            .ToListAsync();
+    }
+
+    public async Task<ShoppingItem> AddItemAsync(string item, string quantity)
+    {
+        if (string.IsNullOrWhiteSpace(item))
         {
-            _dbContext = dbContext;
+            throw new BusinessException("Item name cannot be empty", BusinessErrorCodes.INVALID_INPUT);
         }
 
-        public async Task<List<ShoppingItem>> GetAllItemsAsync()
+        if (string.IsNullOrWhiteSpace(quantity))
         {
-            return await _dbContext.ShoppingList
-                .Where(i => i.Checked == null || i.Checked > DateTime.Now.AddDays(-7))
-                .OrderBy(i => i.Checked != null)
-                .ThenByDescending(i => i.Checked)
-                .ThenBy(i => i.Item)
-                .ToListAsync();
+            throw new BusinessException("Quantity cannot be empty", BusinessErrorCodes.INVALID_INPUT);
         }
 
-        public async Task<ShoppingItem> AddItemAsync(string item, string quantity)
+        var newItem = new ShoppingItem
         {
-            var newItem = new ShoppingItem
-            {
-                Item = item,
-                Quantity = quantity
-            };
+            Item = item,
+            Quantity = quantity
+        };
 
-            await _dbContext.ShoppingList.AddAsync(newItem);
-            await _dbContext.SaveChangesAsync();
+        await _dbContext.ShoppingItems.AddAsync(newItem);
+        await _dbContext.SaveChangesAsync();
 
-            return newItem;
+        return newItem;
+    }
+
+    public async Task<ShoppingItem> CheckItemAsync(int id)
+    {
+        var item = await _dbContext.ShoppingItems.FindAsync(id);
+
+        if (item == null)
+        {
+            throw new BusinessException($"Shopping item with ID {id} not found", BusinessErrorCodes.NOT_FOUND);
         }
 
-        public async Task<ShoppingItem?> CheckItemAsync(int id)
+        item.Checked = DateTime.Now;
+        await _dbContext.SaveChangesAsync();
+
+        return item;
+    }
+
+    public async Task<ShoppingItem> UncheckItemAsync(int id)
+    {
+        var item = await _dbContext.ShoppingItems.FindAsync(id);
+
+        if (item == null)
         {
-            var item = await _dbContext.ShoppingList.FindAsync(id);
-
-            if (item == null)
-            {
-                return null;
-            }
-
-            item.Checked = DateTime.Now;
-            await _dbContext.SaveChangesAsync();
-
-            return item;
+            throw new BusinessException($"Shopping item with ID {id} not found", BusinessErrorCodes.NOT_FOUND);
         }
 
-        public async Task<ShoppingItem?> UncheckItemAsync(int id)
+        item.Checked = null;
+        await _dbContext.SaveChangesAsync();
+
+        return item;
+    }
+
+    public async Task DeleteAllCheckedItemsAsync()
+    {
+        var items = await _dbContext.ShoppingItems.Where(i => i.Checked != null).ToListAsync();
+        if (!items.Any())
         {
-            var item = await _dbContext.ShoppingList.FindAsync(id);
-
-            if (item == null)
-            {
-                return null;
-            }
-
-            item.Checked = null;
-            await _dbContext.SaveChangesAsync();
-
-            return item;
+            throw new BusinessException("No checked items found to delete", BusinessErrorCodes.NOT_FOUND);
         }
 
-        public async Task DeleteAllCheckedItemsAsync()
+        _dbContext.ShoppingItems.RemoveRange(items);
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task DeleteItemAsync(int id)
+    {
+        var item = await _dbContext.ShoppingItems.FindAsync(id);
+        if (item == null)
         {
-            var items = await _dbContext.ShoppingList.Where(i => i.Checked != null).ToListAsync();
-            _dbContext.ShoppingList.RemoveRange(items);
-            await _dbContext.SaveChangesAsync();
+            throw new BusinessException($"Shopping item with ID {id} not found", BusinessErrorCodes.NOT_FOUND);
         }
 
-        public async Task DeleteItemAsync(int id)
+        _dbContext.ShoppingItems.Remove(item);
+        await _dbContext.SaveChangesAsync();
+    }
+    
+    public async Task<ShoppingItem?> UpdateItemAsync(int id, string item, string quantity)
+    {
+        var existingItem = await _dbContext.ShoppingItems.FindAsync(id);
+        if (existingItem == null)
         {
-            var item = await _dbContext.ShoppingList.FindAsync(id);
-            if (item != null)
-            {
-                _dbContext.ShoppingList.Remove(item);
-                await _dbContext.SaveChangesAsync();
-            }
+            return null;
         }
-
-        public async Task<ShoppingItem?> UpdateItemAsync(int id, string item, string quantity)
-        {
-            var existingItem = await _dbContext.ShoppingList.FindAsync(id);
-            if (existingItem == null)
-            {
-                return null;
-            }
             
-            existingItem.Item = item;
-            existingItem.Quantity = quantity;
-            await _dbContext.SaveChangesAsync();
+        existingItem.Item = item;
+        existingItem.Quantity = quantity;
+        await _dbContext.SaveChangesAsync();
             
-            return existingItem;
-        }
+        return existingItem;
     }
 }
