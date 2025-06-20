@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TshopperService;
 using TshopperService.Hubs;
+using TshopperService.Middleware;
 using TshopperService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
