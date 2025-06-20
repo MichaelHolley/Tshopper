@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using TshopperService.Data;
+using TshopperService.Services;
 
 namespace TshopperService.Controllers;
 
@@ -10,63 +10,60 @@ namespace TshopperService.Controllers;
 [Route("/api/[controller]")]
 public class CategoryController : ControllerBase
 {
-    private readonly ShoppingListDbContext _dbContext;
+    private readonly ICategoryService _categoryService;
 
-    public CategoryController(ShoppingListDbContext dbContext)
+    public CategoryController(ICategoryService categoryService)
     {
-        _dbContext = dbContext;
+        _categoryService = categoryService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetCategories()
     {
-        var result = await _dbContext.ItemCategories.Select(i => i.Category).ToListAsync();
-        return Ok(result);
+        var categories = await _categoryService.GetAllCategoriesAsync();
+        return Ok(categories);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetCategory(int id)
     {
-        var category = await _dbContext.Categories.FindAsync(id);
-
-        if (category == null) return NotFound();
-
+        var category = await _categoryService.GetCategoryByIdAsync(id);
         return Ok(category);
     }
 
     [HttpPost]
     public async Task<IActionResult> AddCategory([FromBody] Category category)
     {
-        var newCategory = await _dbContext.Categories.AddAsync(new Category() { Name = category.Name });
-        await _dbContext.SaveChangesAsync();
+        if (category == null)
+        {
+            return BadRequest("Category cannot be null");
+        }
 
+        var newCategory = await _categoryService.AddCategoryAsync(category.Name);
         return Ok(newCategory);
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateCategory(int id, [FromBody] Category category)
     {
-        if (id != category.Id) return BadRequest("Category IDs must match");
+        if (category == null)
+        {
+            return BadRequest("Category cannot be null");
+        }
 
-        var existingCategory = await _dbContext.Categories.FindAsync(id);
+        if (id != category.Id)
+        {
+            return BadRequest("Category IDs must match");
+        }
 
-        if (existingCategory == null) return NotFound();
-
-        existingCategory.Name = category.Name;
-        await _dbContext.SaveChangesAsync();
-
-        return Ok(existingCategory);
+        var updatedCategory = await _categoryService.UpdateCategoryAsync(id, category.Name);
+        return Ok(updatedCategory);
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCategory(int id)
     {
-        var category = await _dbContext.Categories.FindAsync(id);
-        if (category == null) return NotFound();
-
-        _dbContext.Categories.Remove(category);
-        await _dbContext.SaveChangesAsync();
-
+        await _categoryService.DeleteCategoryAsync(id);
         return Ok();
     }
 }

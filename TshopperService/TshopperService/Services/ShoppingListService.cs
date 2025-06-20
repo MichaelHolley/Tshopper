@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TshopperService.Data;
+using TshopperService.Exceptions;
 
 namespace TshopperService.Services;
 
@@ -24,6 +25,16 @@ public class ShoppingListService : IShoppingListService
 
     public async Task<ShoppingItem> AddItemAsync(string item, string quantity)
     {
+        if (string.IsNullOrWhiteSpace(item))
+        {
+            throw new BusinessException("Item name cannot be empty", BusinessErrorCodes.INVALID_INPUT);
+        }
+
+        if (string.IsNullOrWhiteSpace(quantity))
+        {
+            throw new BusinessException("Quantity cannot be empty", BusinessErrorCodes.INVALID_INPUT);
+        }
+
         var newItem = new ShoppingItem
         {
             Item = item,
@@ -36,13 +47,13 @@ public class ShoppingListService : IShoppingListService
         return newItem;
     }
 
-    public async Task<ShoppingItem?> CheckItemAsync(int id)
+    public async Task<ShoppingItem> CheckItemAsync(int id)
     {
         var item = await _dbContext.ShoppingItems.FindAsync(id);
 
         if (item == null)
         {
-            return null;
+            throw new BusinessException($"Shopping item with ID {id} not found", BusinessErrorCodes.NOT_FOUND);
         }
 
         item.Checked = DateTime.Now;
@@ -51,13 +62,13 @@ public class ShoppingListService : IShoppingListService
         return item;
     }
 
-    public async Task<ShoppingItem?> UncheckItemAsync(int id)
+    public async Task<ShoppingItem> UncheckItemAsync(int id)
     {
         var item = await _dbContext.ShoppingItems.FindAsync(id);
 
         if (item == null)
         {
-            return null;
+            throw new BusinessException($"Shopping item with ID {id} not found", BusinessErrorCodes.NOT_FOUND);
         }
 
         item.Checked = null;
@@ -69,6 +80,11 @@ public class ShoppingListService : IShoppingListService
     public async Task DeleteAllCheckedItemsAsync()
     {
         var items = await _dbContext.ShoppingItems.Where(i => i.Checked != null).ToListAsync();
+        if (!items.Any())
+        {
+            throw new BusinessException("No checked items found to delete", BusinessErrorCodes.NOT_FOUND);
+        }
+
         _dbContext.ShoppingItems.RemoveRange(items);
         await _dbContext.SaveChangesAsync();
     }
@@ -76,11 +92,13 @@ public class ShoppingListService : IShoppingListService
     public async Task DeleteItemAsync(int id)
     {
         var item = await _dbContext.ShoppingItems.FindAsync(id);
-        if (item != null)
+        if (item == null)
         {
-            _dbContext.ShoppingItems.Remove(item);
-            await _dbContext.SaveChangesAsync();
+            throw new BusinessException($"Shopping item with ID {id} not found", BusinessErrorCodes.NOT_FOUND);
         }
+
+        _dbContext.ShoppingItems.Remove(item);
+        await _dbContext.SaveChangesAsync();
     }
     
     public async Task<ShoppingItem?> UpdateItemAsync(int id, string item, string quantity)

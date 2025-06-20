@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using TshopperService.Data;
+using TshopperService.Exceptions;
 using TshopperService.Services;
 
 namespace TshopperService.Hubs;
@@ -22,20 +23,41 @@ public sealed class ShoppingListHub : Hub
 
     public async Task AddItem(string item, string quantity)
     {
-        await _shoppingListService.AddItemAsync(item, quantity);
-        await ReceiveUpdate();
+        try
+        {
+            await _shoppingListService.AddItemAsync(item, quantity);
+            await ReceiveUpdate();
+        }
+        catch (BusinessException ex)
+        {
+            throw new HubException($"{ex.Code}: {ex.Message}");
+        }
     }
 
     public async Task CheckItem(int id)
     {
-        await _shoppingListService.CheckItemAsync(id);
-        await ReceiveUpdate();
+        try
+        {
+            await _shoppingListService.CheckItemAsync(id);
+            await ReceiveUpdate();
+        }
+        catch (BusinessException ex)
+        {
+            throw new HubException($"{ex.Code}: {ex.Message}");
+        }
     }
 
     public async Task UncheckItem(int id)
     {
-        await _shoppingListService.UncheckItemAsync(id);
-        await ReceiveUpdate();
+        try
+        {
+            await _shoppingListService.UncheckItemAsync(id);
+            await ReceiveUpdate();
+        }
+        catch (BusinessException ex)
+        {
+            throw new HubException($"{ex.Code}: {ex.Message}");
+        }
     }
 
     private async Task ReceiveUpdate()
@@ -45,8 +67,15 @@ public sealed class ShoppingListHub : Hub
 
     public async Task DeleteAllCheckedItems()
     {
-        await _shoppingListService.DeleteAllCheckedItemsAsync();
-        await ReceiveUpdate();
+        try
+        {
+            await _shoppingListService.DeleteAllCheckedItemsAsync();
+            await ReceiveUpdate();
+        }
+        catch (BusinessException ex)
+        {
+            throw new HubException($"{ex.Code}: {ex.Message}");
+        }
     }
 
     public async Task UpdateItem(int id, string item, string quantity)
@@ -57,7 +86,14 @@ public sealed class ShoppingListHub : Hub
 
     public async Task DeleteItem(int id)
     {
-        await _shoppingListService.DeleteItemAsync(id);
-        await ReceiveUpdate();
+        try
+        {
+            await _shoppingListService.DeleteItemAsync(id);
+            await ReceiveUpdate();
+        }
+        catch (BusinessException ex)
+        {
+            throw new HubException($"{ex.Code}: {ex.Message}");
+        }
     }
 }
