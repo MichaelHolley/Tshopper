@@ -30,11 +30,6 @@ public class ShoppingListService : IShoppingListService
             throw new BusinessException("Item name cannot be empty", BusinessErrorCodes.INVALID_INPUT);
         }
 
-        if (string.IsNullOrWhiteSpace(quantity))
-        {
-            throw new BusinessException("Quantity cannot be empty", BusinessErrorCodes.INVALID_INPUT);
-        }
-
         var newItem = new ShoppingItem
         {
             Item = item,
@@ -82,7 +77,7 @@ public class ShoppingListService : IShoppingListService
         var items = await _dbContext.ShoppingItems.Where(i => i.Checked != null).ToListAsync();
         if (!items.Any())
         {
-            throw new BusinessException("No checked items found to delete", BusinessErrorCodes.NOT_FOUND);
+            return;
         }
 
         _dbContext.ShoppingItems.RemoveRange(items);
