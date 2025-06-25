@@ -27,8 +27,11 @@ jobs:
           run_install: |
             - cwd: Tshopper-web
 
+      - name: Type check
+        run: pnpm type-check
+
       - name: Build production bundle
-        run: pnpm build-only #as long as nuxt-ui has type-check error
+        run: pnpm build
 
   build-backend:
     runs-on: ubuntu-latest
