@@ -19,7 +19,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Build the app
-RUN pnpm build-only
+RUN pnpm build
 
 # Production stage
 FROM nginx:alpine

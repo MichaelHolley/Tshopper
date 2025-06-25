@@ -33,7 +33,7 @@ jobs:
         run: pnpm type-check
 
       - name: Build production bundle
-        run: pnpm build
+        run: pnpm build-only
 
   build-backend:
     runs-on: ubuntu-latest

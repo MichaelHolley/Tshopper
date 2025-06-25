@@ -41,14 +41,12 @@ const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
       editingItem.value = null
       state.item = ''
       state.amount = ''
-      itemInput.value?.inputRef?.focus()
     }
   } else {
     const success = await store.addItem(event.data.item, event.data.amount)
     if (success) {
       state.item = ''
       state.amount = ''
-      itemInput.value?.inputRef?.focus()
     }
   }
 }
@@ -84,7 +82,6 @@ const startEditItem = (item: ShoppingItem) => {
   editingItem.value = item
   state.item = item.item
   state.amount = item.quantity
-  itemInput.value?.inputRef?.focus()
 }
 
 const cancelEdit = () => {
