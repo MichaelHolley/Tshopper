@@ -12,8 +12,9 @@ const app = createApp(App)
 
 const router = createRouter({
   routes: [
-    { path: '/login', component: () => import('./views/LoginForm.vue') },
-    { path: '/', component: () => import('./views/ShoppingList.vue') },
+    { path: '/login', component: () => import('./views/LoginView.vue') },
+    { path: '/', component: () => import('./views/ShoppingListView.vue') },
+    { path: '/categories', component: () => import('./views/CategoriesView.vue') },
   ],
   history: createWebHistory(),
 })
