@@ -2,14 +2,13 @@
 import ShoppingListItem from '@/components/ShoppingListeItem.vue'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import { computed, onMounted, onUnmounted, reactive, ref, useTemplateRef } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import type { ItemFormState, ShoppingItem } from '../types'
 
 const VISIBLE_CHECKED = 3
 
 const store = useShoppingListStore()
 const checkedCollapsed = ref(true)
-const itemInput = useTemplateRef('itemInput')
 const showDeleteAllDialog = ref(false)
 const editingItem = ref<ShoppingItem | null>(null)
 
@@ -89,20 +88,12 @@ const cancelEdit = () => {
   state.item = ''
   state.amount = ''
 }
-
-onMounted(() => {
-  store.initializeConnection()
-})
-
-onUnmounted(() => {
-  store.disconnect()
-})
 </script>
 
 <template>
   <UForm :validate="validate" :state="state" class="flex flex-row gap-2" @submit="addOrUpdateItem">
     <UFormField name="item">
-      <UInput ref="itemInput" v-model="state.item" placeholder="Item" :required="true" />
+      <UInput v-model="state.item" placeholder="Item" :required="true" />
     </UFormField>
 
     <UFormField name="amount">

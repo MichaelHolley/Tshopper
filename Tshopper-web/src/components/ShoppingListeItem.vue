@@ -14,7 +14,7 @@ const emit = defineEmits<{
   (e: 'edit', item: ShoppingItem): void
 }>()
 
-let contextMenuItems = computed<ContextMenuItem[]>(() => {
+const contextMenuItems = computed<ContextMenuItem[]>(() => {
   const items = [
     {
       label: 'Edit',

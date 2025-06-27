@@ -1,13 +1,52 @@
 <script setup lang="ts">
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import type { TabsItem } from '@nuxt/ui'
+import { computed, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const store = useShoppingListStore()
 const route = useRoute()
+const router = useRouter()
 
 const checked = computed(() => store.items.filter((item) => item.checked).length)
 const showInfo = computed(() => store.items?.length > 0)
+
+onMounted(() => {
+  store.initializeConnection()
+})
+
+onUnmounted(() => {
+  store.disconnect()
+})
+
+const navItems = [
+  {
+    label: 'Shopping List',
+    value: '/',
+    description: 'Manage your shopping list',
+    icon: 'tabler:shopping-cart',
+    slot: 'shoppinglist' as const,
+  },
+  {
+    label: 'Categories',
+    value: '/categories',
+    description: 'Manage your categories',
+    icon: 'tabler:category',
+    slot: 'categories' as const,
+    disabled: true,
+  },
+] satisfies TabsItem[]
+
+const activeTab = computed({
+  get() {
+    return (route.path as string) || '/'
+  },
+  set(tab) {
+    router.push({
+      path: `${tab}`,
+    })
+  },
+})
 </script>
 
 <template>
@@ -25,4 +64,12 @@ const showInfo = computed(() => store.items?.length > 0)
       <span class="text-sm text-neutral-500">{{ checked }}/{{ store.items.length }}</span>
     </div>
   </div>
+  <UTabs
+    v-model="activeTab"
+    variant="link"
+    :items="navItems"
+    class="gap-4 w-full"
+    :ui="{ trigger: 'grow' }"
+  >
+  </UTabs>
 </template>
