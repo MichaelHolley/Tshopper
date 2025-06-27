@@ -20,8 +20,8 @@ const fetchCategories = async () => {
   error.value = ''
   try {
     categories.value = await categoryStore.fetchCategories()
-  } catch (e: any) {
-    error.value = e.message
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e)
   } finally {
     loading.value = false
   }
@@ -40,8 +40,8 @@ const addOrUpdateCategory = async (event: FormSubmitEvent<{ name: string }>) => 
     }
     state.name = ''
     await fetchCategories()
-  } catch (e: any) {
-    error.value = e.message
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e)
   } finally {
     loading.value = false
   }
@@ -63,8 +63,8 @@ const deleteCategory = async (cat: Category) => {
   try {
     await categoryStore.deleteCategory(cat.id)
     await fetchCategories()
-  } catch (e: any) {
-    error.value = e.message
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : String(e)
   } finally {
     loading.value = false
   }
