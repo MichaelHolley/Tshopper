@@ -1,9 +1,9 @@
 <template>
   <div>
-    <h1>Categories View</h1>
+    <h2 class="text-xl font-semibold mb-2">Categories</h2>
+    <ManageCategories />
+  </div>
+  <div class="mt-4">
+    <h2 class="text-xl font-semibold mb-2">Category Rules</h2>
   </div>
 </template>
-
-<script setup lang="ts"></script>
-
-<style scoped></style>
