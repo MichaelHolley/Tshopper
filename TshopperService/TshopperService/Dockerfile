@@ -17,4 +17,12 @@ RUN dotnet publish "TshopperService.csproj" -c $BUILD_CONFIGURATION -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "TshopperService.dll"]
+
+# Install dotnet-ef
+RUN dotnet tool install --global dotnet-ef --version 8.0.6
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+COPY TshopperService/entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
