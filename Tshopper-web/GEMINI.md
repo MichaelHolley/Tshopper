@@ -33,6 +33,8 @@ The project follows a standard Vue 3 structure:
 - `src/views/`: Contains the application's views or pages.
 - `public/`: Contains static assets that are not processed by Vite.
 
+The app is connected to a ASP.NET Backend Service using API controllers, but also a SignalR Connection.
+
 ## Dependencies
 
 The project uses the following key dependencies:
