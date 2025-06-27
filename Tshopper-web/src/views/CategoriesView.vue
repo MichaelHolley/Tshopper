@@ -28,15 +28,15 @@ const fetchCategories = async () => {
 }
 
 const addOrUpdateCategory = async (event: FormSubmitEvent<{ name: string }>) => {
-  if (!state.name) return
+  if (!event.data.name) return
   loading.value = true
   error.value = ''
   try {
     if (editingCategory.value) {
-      await categoryStore.updateCategory(editingCategory.value.id, state.name)
+      await categoryStore.updateCategory(editingCategory.value.id, event.data.name)
       editingCategory.value = null
     } else {
-      await categoryStore.addCategory(state.name)
+      await categoryStore.addCategory(event.data.name)
     }
     state.name = ''
     await fetchCategories()
