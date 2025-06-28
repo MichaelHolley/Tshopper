@@ -90,11 +90,13 @@ onMounted(fetchCategories)
       <UInput v-model="state.name" placeholder="Category name" :required="true" />
     </UFormField>
 
-    <div class="flex flex-row gap-2">
-      <UButton v-if="editingCategory" variant="outline" icon="maki:cross" @click="cancelEdit" />
-      <UButton type="submit" icon="ci:add-plus">
-        {{ editingCategory ? 'Update' : 'Add' }}
-      </UButton>
+    <div>
+      <div class="flex flex-row gap-2">
+        <UButton v-if="editingCategory" variant="outline" icon="maki:cross" @click="cancelEdit" />
+        <UButton type="submit" icon="ci:add-plus">
+          {{ editingCategory ? 'Update' : 'Add' }}
+        </UButton>
+      </div>
     </div>
   </UForm>
   <div v-if="error" class="text-red-500 text-sm mt-2">{{ error }}</div>
