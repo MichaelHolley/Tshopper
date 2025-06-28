@@ -116,7 +116,7 @@ app.MapHub<ShoppingListHub>("api/ShoppingList");
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ShoppingListDbContext>();
-    db.Database.EnsureCreated();
+    db.Database.Migrate();
 }
 
 app.Run();
