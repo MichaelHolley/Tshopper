@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ShoppingListItem from '@/components/ShoppingListeItem.vue'
+import ShoppingListItem from '@/components/ShoppingListItem.vue'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import { computed, reactive, ref } from 'vue'

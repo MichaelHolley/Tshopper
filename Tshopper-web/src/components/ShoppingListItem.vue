@@ -17,6 +17,10 @@ const emit = defineEmits<{
 const contextMenuItems = computed<ContextMenuItem[]>(() => {
   const items = [
     {
+      label: 'Category',
+      icon: 'tabler:category',
+    },
+    {
       label: 'Edit',
       icon: 'tabler:edit',
       onSelect: () => {
