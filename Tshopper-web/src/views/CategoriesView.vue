@@ -11,25 +11,20 @@ interface Category {
 const categories = ref<Category[]>([])
 const editingCategory = ref<Category | null>(null)
 const state = reactive<{ name: string }>({ name: '' })
-const loading = ref(false)
 const error = ref('')
 const categoryStore = useCategoryStore()
 
 const fetchCategories = async () => {
-  loading.value = true
   error.value = ''
   try {
     categories.value = await categoryStore.fetchCategories()
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
-  } finally {
-    loading.value = false
   }
 }
 
 const addOrUpdateCategory = async (event: FormSubmitEvent<{ name: string }>) => {
   if (!event.data.name) return
-  loading.value = true
   error.value = ''
   try {
     if (editingCategory.value) {
@@ -42,8 +37,6 @@ const addOrUpdateCategory = async (event: FormSubmitEvent<{ name: string }>) => 
     await fetchCategories()
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
-  } finally {
-    loading.value = false
   }
 }
 
@@ -58,15 +51,12 @@ const cancelEdit = () => {
 }
 
 const deleteCategory = async (cat: Category) => {
-  loading.value = true
   error.value = ''
   try {
     await categoryStore.deleteCategory(cat.id)
     await fetchCategories()
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
-  } finally {
-    loading.value = false
   }
 }
 
