@@ -76,8 +76,8 @@ onMounted(fetchCategories)
     class="flex flex-row gap-2"
     @submit="addOrUpdateCategory"
   >
-    <UFormField name="name">
-      <UInput v-model="state.name" placeholder="Category name" :required="true" />
+    <UFormField name="name" class="grow">
+      <UInput v-model="state.name" placeholder="Category name" :required="true" class="w-full" />
     </UFormField>
 
     <div>
