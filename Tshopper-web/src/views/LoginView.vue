@@ -45,31 +45,28 @@ const handleSubmit = async (event: FormSubmitEvent<LoginFormState>) => {
 </script>
 
 <template>
-  <div class="max-w-md mx-auto mt-8">
-    <UCard>
-      <template #header>
-        <h2 class="text-xl font-semibold">Login</h2>
-      </template>
+  <div class="mt-8">
+    <h2 class="text-xl font-semibold mb-4">Login</h2>
 
-      <UForm :validate="validate" :state="state" @submit="handleSubmit">
-        <UFormField label="Password" name="password">
-          <UInput
-            v-model="state.password"
-            type="password"
-            placeholder="Enter password"
-            :required="true"
-            autocomplete="current-password"
-          />
-        </UFormField>
+    <UForm :validate="validate" :state="state" @submit="handleSubmit">
+      <UFormField label="Password" name="password" class="grow">
+        <UInput
+          v-model="state.password"
+          type="password"
+          placeholder="Enter password"
+          :required="true"
+          autocomplete="current-password"
+          class="w-full"
+        />
+      </UFormField>
 
-        <div v-if="error" class="text-red-500 text-sm mt-2">
-          {{ error }}
-        </div>
+      <div v-if="error" class="text-red-500 text-sm mt-2">
+        {{ error }}
+      </div>
 
-        <div class="mt-4">
-          <UButton type="submit" block :loading="loading">Login</UButton>
-        </div>
-      </UForm>
-    </UCard>
+      <div class="mt-4">
+        <UButton type="submit" block :loading="loading">Login</UButton>
+      </div>
+    </UForm>
   </div>
 </template>
