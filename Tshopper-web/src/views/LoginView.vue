@@ -47,7 +47,6 @@ const handleSubmit = async (event: FormSubmitEvent<LoginFormState>) => {
 <template>
   <div class="mt-8">
     <h2 class="text-xl font-semibold mb-4">Login</h2>
-
     <UForm :validate="validate" :state="state" @submit="handleSubmit">
       <UFormField label="Password" name="password" class="grow">
         <UInput
