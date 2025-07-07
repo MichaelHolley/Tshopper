@@ -62,7 +62,9 @@ const validate = (state: Partial<ItemFormState>): FormError[] => {
   return errors
 }
 
-const toggleItem = (item: ShoppingItem) => {
+const toggleItem = (itemId: number) => {
+  const item = shoppingListStore.items.find((i) => i.id === itemId)
+  if (!item) return
   if (item.checked) {
     shoppingListStore.uncheckItem(item.id)
   } else {
@@ -70,8 +72,8 @@ const toggleItem = (item: ShoppingItem) => {
   }
 }
 
-const deleteItem = (item: ShoppingItem) => {
-  shoppingListStore.deleteItem(item.id)
+const deleteItem = (itemId: number) => {
+  shoppingListStore.deleteItem(itemId)
 }
 
 const handleDeleteAll = () => {

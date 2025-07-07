@@ -9,8 +9,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'toggle', item: ShoppingItem): void
-  (e: 'delete', item: ShoppingItem): void
+  (e: 'toggle', itemId: number): void
+  (e: 'delete', itemId: number): void
   (e: 'deleteAll'): void
   (e: 'edit', item: ShoppingItem): void
   (e: 'toggleCategory', itemId: number, categoryId: number): void
@@ -45,7 +45,7 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
         label: 'Delete',
         icon: 'tabler:trash',
         onSelect: () => {
-          emit('delete', props.item)
+          emit('delete', props.item.id)
         },
       },
     ],
@@ -69,7 +69,7 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
   <UContextMenu :items="contextMenuItems" :ui="{ content: 'w-48' }">
     <div
       class="w-full px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row justify-between items-center hover:cursor-pointer"
-      @click="emit('toggle', props.item)"
+      @click="emit('toggle', props.item.id)"
     >
       <span
         class="flex flex-row items-center select-none"
