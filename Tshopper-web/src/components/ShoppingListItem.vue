@@ -31,6 +31,7 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
             },
           })),
         ],
+        disabled: true,
       },
       {
         label: 'Edit',
