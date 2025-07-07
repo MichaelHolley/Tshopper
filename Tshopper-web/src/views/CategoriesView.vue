@@ -1,23 +1,22 @@
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import { useCategoryStore } from '@/stores/CategoryStore'
+import type { FormError, FormSubmitEvent } from '@nuxt/ui'
+import { onMounted, reactive, ref } from 'vue'
 
 interface Category {
   id: number
   name: string
 }
 
-const categories = ref<Category[]>([])
 const editingCategory = ref<Category | null>(null)
 const state = reactive<{ name: string }>({ name: '' })
 const error = ref('')
 const categoryStore = useCategoryStore()
 
-const fetchCategories = async () => {
+const updateCategories = async () => {
   error.value = ''
   try {
-    categories.value = await categoryStore.fetchCategories()
+    await categoryStore.getCategories()
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   }
@@ -34,7 +33,7 @@ const addOrUpdateCategory = async (event: FormSubmitEvent<{ name: string }>) => 
       await categoryStore.addCategory(event.data.name)
     }
     state.name = ''
-    await fetchCategories()
+    await updateCategories()
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   }
@@ -54,7 +53,7 @@ const deleteCategory = async (cat: Category) => {
   error.value = ''
   try {
     await categoryStore.deleteCategory(cat.id)
-    await fetchCategories()
+    await updateCategories()
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
   }
@@ -66,7 +65,7 @@ const validate = (state: Partial<{ name: string }>): FormError[] => {
   return errors
 }
 
-onMounted(fetchCategories)
+onMounted(updateCategories)
 </script>
 
 <template>
@@ -92,7 +91,7 @@ onMounted(fetchCategories)
   <div v-if="error" class="text-red-500 text-sm mt-2">{{ error }}</div>
   <ul class="mt-4">
     <li
-      v-for="cat in categories"
+      v-for="cat in categoryStore.categories"
       :key="cat.id"
       class="flex flex-row justify-between items-center py-1"
     >

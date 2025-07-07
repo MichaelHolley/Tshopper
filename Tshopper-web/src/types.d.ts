@@ -9,3 +9,8 @@ export interface ItemFormState {
   item: string
   amount: string
 }
+
+export interface Category {
+  id: number
+  name: string
+}

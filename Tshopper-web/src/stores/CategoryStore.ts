@@ -1,15 +1,21 @@
 import { defineStore } from 'pinia'
+import type { Category } from '../types'
 import { useAuthStore } from './AuthStore'
 
 export const useCategoryStore = defineStore('category', {
+  state: () => ({
+    categories: [] as Category[],
+  }),
   actions: {
-    async fetchCategories() {
+    async getCategories() {
       const authStore = useAuthStore()
       const response = await fetch(`${import.meta.env.VITE_API_URL}/Category`, {
         headers: { Authorization: `Bearer ${authStore.token}` },
       })
       if (!response.ok) throw new Error('Failed to fetch categories')
-      return await response.json()
+      const data = await response.json()
+      this.categories = data
+      return data
     },
     async addCategory(name: string) {
       const authStore = useAuthStore()
