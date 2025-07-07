@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ShoppingListItem from '@/components/ShoppingListItem.vue'
+import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import { computed, reactive, ref } from 'vue'
@@ -7,7 +8,8 @@ import type { ItemFormState, ShoppingItem } from '../types'
 
 const VISIBLE_CHECKED = 3
 
-const store = useShoppingListStore()
+const shoppingListStore = useShoppingListStore()
+const categoryStore = useCategoryStore()
 const checkedCollapsed = ref(true)
 const showDeleteAllDialog = ref(false)
 const editingItem = ref<ShoppingItem | null>(null)
@@ -18,11 +20,11 @@ const state = reactive<ItemFormState>({
 })
 
 const activeItems = computed(() => {
-  return store.items.filter((item) => !item.checked)
+  return shoppingListStore.items.filter((item) => !item.checked)
 })
 
 const checkedItems = computed(() => {
-  return store.items.filter((item) => item.checked)
+  return shoppingListStore.items.filter((item) => item.checked)
 })
 
 const mergedItems = computed(() => {
@@ -35,14 +37,18 @@ const mergedItems = computed(() => {
 
 const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
   if (editingItem.value) {
-    const success = await store.updateItem(editingItem.value.id, event.data.item, event.data.amount)
+    const success = await shoppingListStore.updateItem(
+      editingItem.value.id,
+      event.data.item,
+      event.data.amount,
+    )
     if (success) {
       editingItem.value = null
       state.item = ''
       state.amount = ''
     }
   } else {
-    const success = await store.addItem(event.data.item, event.data.amount)
+    const success = await shoppingListStore.addItem(event.data.item, event.data.amount)
     if (success) {
       state.item = ''
       state.amount = ''
@@ -58,14 +64,14 @@ const validate = (state: Partial<ItemFormState>): FormError[] => {
 
 const toggleItem = (item: ShoppingItem) => {
   if (item.checked) {
-    store.uncheckItem(item.id)
+    shoppingListStore.uncheckItem(item.id)
   } else {
-    store.checkItem(item.id)
+    shoppingListStore.checkItem(item.id)
   }
 }
 
 const deleteItem = (item: ShoppingItem) => {
-  store.deleteItem(item.id)
+  shoppingListStore.deleteItem(item.id)
 }
 
 const handleDeleteAll = () => {
@@ -73,7 +79,7 @@ const handleDeleteAll = () => {
 }
 
 const confirmDeleteAll = () => {
-  store.deleteAllCheckedItems()
+  shoppingListStore.deleteAllCheckedItems()
   showDeleteAllDialog.value = false
 }
 
@@ -87,6 +93,10 @@ const cancelEdit = () => {
   editingItem.value = null
   state.item = ''
   state.amount = ''
+}
+
+const toggleCategory = (itemId: number, categoryId: number) => {
+  console.log('toggleCategory', itemId, categoryId)
 }
 </script>
 
@@ -119,6 +129,8 @@ const cancelEdit = () => {
           @delete="deleteItem"
           @delete-all="handleDeleteAll"
           @edit="startEditItem"
+          @toggle-category="toggleCategory"
+          :categories="categoryStore.categories"
         />
       </li>
     </ul>

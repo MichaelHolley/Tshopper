@@ -1,20 +1,23 @@
 <script setup lang="ts">
+import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 
-const store = useShoppingListStore()
+const shoppingListStore = useShoppingListStore()
+const categoryStore = useCategoryStore()
 const route = useRoute()
 
-const checked = computed(() => store.items.filter((item) => item.checked).length)
-const showInfo = computed(() => store.items?.length > 0)
+const checked = computed(() => shoppingListStore.items.filter((item) => item.checked).length)
+const showInfo = computed(() => shoppingListStore.items?.length > 0)
 
 onMounted(() => {
-  store.initializeConnection()
+  shoppingListStore.initializeConnection()
+  categoryStore.getCategories()
 })
 
 onUnmounted(() => {
-  store.disconnect()
+  shoppingListStore.disconnect()
 })
 </script>
 
@@ -22,15 +25,17 @@ onUnmounted(() => {
   <div class="flex justify-between items-center gap-2 py-1">
     <div><h1 class="text-2xl font-bold text-primary-400">Tshopper</h1></div>
     <div
-      v-if="store.isDisconnected"
+      v-if="shoppingListStore.isDisconnected"
       v-show="route.path != '/login'"
-      @click="store.reconnect()"
+      @click="shoppingListStore.reconnect()"
       class="cursor-pointer"
     >
       <span class="text-sm text-neutral-500">Reconnect</span>
     </div>
     <div v-if="showInfo">
-      <span class="text-sm text-neutral-500">{{ checked }}/{{ store.items.length }}</span>
+      <span class="text-sm text-neutral-500"
+        >{{ checked }}/{{ shoppingListStore.items.length }}</span
+      >
     </div>
   </div>
 </template>

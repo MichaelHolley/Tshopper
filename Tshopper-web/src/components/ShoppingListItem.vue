@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from '@nuxt/ui'
 import { computed } from 'vue'
-import type { Cateogy, ShoppingItem } from '../types'
+import type { Category, ShoppingItem } from '../types'
 
 const props = defineProps<{
   item: ShoppingItem
-  categories: Cateogy[]
+  categories: Category[]
 }>()
 
 const emit = defineEmits<{
@@ -13,6 +13,7 @@ const emit = defineEmits<{
   (e: 'delete', item: ShoppingItem): void
   (e: 'deleteAll'): void
   (e: 'edit', item: ShoppingItem): void
+  (e: 'toggleCategory', itemId: number, categoryId: number): void
 }>()
 
 const contextMenuItems = computed<ContextMenuItem[]>(() => {
@@ -25,9 +26,9 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
           props.categories.map((category) => ({
             label: category.name,
             icon: 'tabler:category',
-            // onSelect: () => {
-            //   emit('toggle', { ...props.item, categoryId: category.id })
-            // },
+            onSelect: () => {
+              emit('toggleCategory', props.item.id, category.id)
+            },
           })),
         ],
       },

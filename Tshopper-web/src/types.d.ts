@@ -10,7 +10,7 @@ export interface ItemFormState {
   amount: string
 }
 
-export interface Cateogy {
+export interface Category {
   id: number
   name: string
 }
