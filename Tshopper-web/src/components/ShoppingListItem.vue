@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from '@nuxt/ui'
 import { computed } from 'vue'
-import type { ShoppingItem } from '../types'
+import type { Cateogy, ShoppingItem } from '../types'
 
 const props = defineProps<{
   item: ShoppingItem
+  categories: Cateogy[]
 }>()
 
 const emit = defineEmits<{
@@ -16,28 +17,41 @@ const emit = defineEmits<{
 
 const contextMenuItems = computed<ContextMenuItem[]>(() => {
   const items = [
-    {
-      label: 'Category',
-      icon: 'tabler:category',
-    },
-    {
-      label: 'Edit',
-      icon: 'tabler:edit',
-      onSelect: () => {
-        emit('edit', props.item)
+    [
+      {
+        label: 'Category',
+        icon: 'tabler:category',
+        children: [
+          props.categories.map((category) => ({
+            label: category.name,
+            icon: 'tabler:category',
+            // onSelect: () => {
+            //   emit('toggle', { ...props.item, categoryId: category.id })
+            // },
+          })),
+        ],
       },
-    },
-    {
-      label: 'Delete',
-      icon: 'tabler:trash',
-      onSelect: () => {
-        emit('delete', props.item)
+      {
+        label: 'Edit',
+        icon: 'tabler:edit',
+        onSelect: () => {
+          emit('edit', props.item)
+        },
       },
-    },
+    ],
+    [
+      {
+        label: 'Delete',
+        icon: 'tabler:trash',
+        onSelect: () => {
+          emit('delete', props.item)
+        },
+      },
+    ],
   ]
 
   if (props.item.checked) {
-    items.push({
+    items[1].push({
       label: 'Delete all checked',
       icon: 'tabler:trash',
       onSelect: () => {
