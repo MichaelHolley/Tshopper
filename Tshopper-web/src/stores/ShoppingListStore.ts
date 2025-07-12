@@ -77,6 +77,7 @@ export const useShoppingListStore = defineStore('shoppingList', {
       try {
         await this.connection.start()
         console.log('✅ SignalR Reconnected!')
+        this.connectionState = 'Connected'
         await this.getAllItems()
       } catch (error) {
         console.error('❌ Reconnection failed:', error)
