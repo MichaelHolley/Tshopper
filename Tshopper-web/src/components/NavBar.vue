@@ -1,24 +1,13 @@
 <script setup lang="ts">
-import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const shoppingListStore = useShoppingListStore()
-const categoryStore = useCategoryStore()
 const route = useRoute()
 
 const checked = computed(() => shoppingListStore.items.filter((item) => item.checked).length)
 const showInfo = computed(() => shoppingListStore.items?.length > 0)
-
-onMounted(() => {
-  shoppingListStore.initializeConnection()
-  categoryStore.getCategories()
-})
-
-onUnmounted(() => {
-  shoppingListStore.disconnect()
-})
 </script>
 
 <template>
