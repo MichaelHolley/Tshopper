@@ -20,7 +20,6 @@ public class AuthController : ControllerBase
     [HttpPost("Login")]
     public IActionResult Login([FromBody] LoginModel login)
     {
-        // For demo purposes - replace with real authentication
         if (login.Password == _configuration["Password"])
         {
             var token = GenerateJwtToken();
