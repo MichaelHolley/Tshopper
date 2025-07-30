@@ -20,7 +20,7 @@ const navItems = [
     description: 'Manage your categories',
     icon: 'tabler:category',
     slot: 'categories' as const,
-    disabled: false,
+    disabled: true,
   },
 ] satisfies TabsItem[]
 
