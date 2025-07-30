@@ -110,4 +110,10 @@ public class ShoppingListService : IShoppingListService
             
         return existingItem;
     }
+
+    public async Task AddItems(List<ShoppingItem> items)
+    {
+        _dbContext.ShoppingItems.AddRange(items);
+        _dbContext.SaveChangesAsync();
+    }
 }

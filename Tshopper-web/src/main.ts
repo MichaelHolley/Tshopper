@@ -15,6 +15,7 @@ const router = createRouter({
     { path: '/login', component: () => import('./views/LoginView.vue') },
     { path: '/', component: () => import('./views/ShoppingListView.vue') },
     // { path: '/categories', component: () => import('./views/CategoriesView.vue') },
+    { path: '/data', component: () => import('./views/DataTransferView.vue') },
   ],
   history: createWebHistory(),
 })

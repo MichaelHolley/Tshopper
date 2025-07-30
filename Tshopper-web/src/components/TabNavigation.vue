@@ -14,13 +14,20 @@ const navItems = [
     icon: 'tabler:shopping-cart',
     slot: 'shoppinglist' as const,
   },
+  // {
+  //   label: 'Categories',
+  //   value: '/categories',
+  //   description: 'Manage your categories',
+  //   icon: 'tabler:category',
+  //   slot: 'categories' as const,
+  //   disabled: true,
+  // },
   {
-    label: 'Categories',
-    value: '/categories',
-    description: 'Manage your categories',
-    icon: 'tabler:category',
-    slot: 'categories' as const,
-    disabled: true,
+    label: 'Data Transfer',
+    value: '/data',
+    description: 'Export & Import your data',
+    icon: 'tabler:file-arrow-right',
+    slot: 'data' as const,
   },
 ] satisfies TabsItem[]
 

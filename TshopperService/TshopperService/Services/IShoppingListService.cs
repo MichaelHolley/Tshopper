@@ -11,4 +11,5 @@ public interface IShoppingListService
     Task DeleteAllCheckedItemsAsync();
     Task DeleteItemAsync(int id);
     Task<ShoppingItem?> UpdateItemAsync(int id, string item, string quantity);
+    Task AddItems(List<ShoppingItem> items);
 }
