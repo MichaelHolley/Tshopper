@@ -8,14 +8,23 @@ const route = useRoute()
 
 const checked = computed(() => shoppingListStore.items.filter((item) => item.checked).length)
 const showInfo = computed(() => shoppingListStore.items?.length > 0)
+
+const routeLogin = computed(() => route.path === '/login')
 </script>
 
 <template>
   <div class="flex justify-between items-center gap-2 py-1">
-    <div><h1 class="text-2xl font-bold text-primary-400">Tshopper</h1></div>
+    <div>
+      <h1
+        class="text-2xl font-bold text-primary-400"
+        :class="{ '!text-error-500': shoppingListStore.isDisconnected && !routeLogin }"
+      >
+        Tshopper
+      </h1>
+    </div>
     <div
       v-if="shoppingListStore.isDisconnected"
-      v-show="route.path != '/login'"
+      v-show="!routeLogin"
       @click="shoppingListStore.reconnect()"
       class="cursor-pointer"
     >

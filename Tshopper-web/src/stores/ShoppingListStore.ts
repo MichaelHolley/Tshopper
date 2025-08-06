@@ -61,6 +61,7 @@ export const useShoppingListStore = defineStore('shoppingList', {
       })
 
       try {
+        this.connectionState = 'Connecting'
         await this.connection.start()
         this.connectionState = 'Connected'
         console.log('✅ SignalR Connected!')
@@ -81,6 +82,18 @@ export const useShoppingListStore = defineStore('shoppingList', {
         await this.getAllItems()
       } catch (error) {
         console.error('❌ Reconnection failed:', error)
+      }
+    },
+
+    async disconnect() {
+      if (this.connection) {
+        try {
+          await this.connection.stop()
+          this.connectionState = 'Disconnected'
+          console.log('✅ SignalR Disconnected!')
+        } catch (err) {
+          console.error('❌ Error disconnecting SignalR:', err)
+        }
       }
     },
 
@@ -133,18 +146,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
         await this.connection?.invoke('DeleteAllCheckedItems')
       } catch (err) {
         console.error('❌ Error deleting items:', err)
-      }
-    },
-
-    async disconnect() {
-      if (this.connection) {
-        try {
-          await this.connection.stop()
-          this.connectionState = 'Disconnected'
-          console.log('✅ SignalR Disconnected!')
-        } catch (err) {
-          console.error('❌ Error disconnecting SignalR:', err)
-        }
       }
     },
 

@@ -3,7 +3,7 @@ import ShoppingListItem from '@/components/ShoppingListItem.vue'
 import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import type { ItemFormState, ShoppingItem } from '../types'
 
 const VISIBLE_CHECKED = 3
@@ -17,15 +17,6 @@ const editingItem = ref<ShoppingItem | null>(null)
 const state = reactive<ItemFormState>({
   item: '',
   amount: '',
-})
-
-onMounted(() => {
-  shoppingListStore.initializeConnection()
-  categoryStore.getCategories()
-})
-
-onUnmounted(() => {
-  shoppingListStore.disconnect()
 })
 
 const activeItems = computed(() => {

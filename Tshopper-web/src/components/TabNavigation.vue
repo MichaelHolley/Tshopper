@@ -1,10 +1,15 @@
 <script lang="ts" setup>
+import { useCategoryStore } from '@/stores/CategoryStore'
+import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { TabsItem } from '@nuxt/ui'
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+
+const shoppingListStore = useShoppingListStore()
+const categoryStore = useCategoryStore()
 
 const navItems = [
   {
@@ -40,6 +45,15 @@ const activeTab = computed({
       path: `${tab}`,
     })
   },
+})
+
+onMounted(() => {
+  shoppingListStore.initializeConnection()
+  categoryStore.getCategories()
+})
+
+onUnmounted(() => {
+  shoppingListStore.disconnect()
 })
 </script>
 
