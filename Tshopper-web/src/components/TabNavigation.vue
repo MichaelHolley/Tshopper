@@ -47,12 +47,22 @@ const activeTab = computed({
   },
 })
 
+const handleVisibilityChange = () => {
+  if (shoppingListStore.connectionState === 'Disconnected') {
+    alert('Not connected to Backend-Service')
+  }
+}
+
 onMounted(() => {
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+
   shoppingListStore.initializeConnection()
   categoryStore.getCategories()
 })
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+
   shoppingListStore.disconnect()
 })
 </script>
