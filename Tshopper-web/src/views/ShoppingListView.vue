@@ -39,8 +39,8 @@ const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
   if (editingItem.value) {
     const success = await shoppingListStore.updateItem(
       editingItem.value.id,
-      event.data.item,
-      event.data.amount,
+      event.data.item.trim(),
+      event.data.amount.trim(),
     )
     if (success) {
       editingItem.value = null

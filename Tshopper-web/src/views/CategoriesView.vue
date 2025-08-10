@@ -27,7 +27,7 @@ const addOrUpdateCategory = async (event: FormSubmitEvent<{ name: string }>) => 
   error.value = ''
   try {
     if (editingCategory.value) {
-      await categoryStore.updateCategory(editingCategory.value.id, event.data.name)
+      await categoryStore.updateCategory(editingCategory.value.id, event.data.name.trim())
       editingCategory.value = null
     } else {
       await categoryStore.addCategory(event.data.name)
