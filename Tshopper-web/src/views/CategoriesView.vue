@@ -25,11 +25,17 @@ const updateCategories = async () => {
 const addOrUpdateCategory = async (event: FormSubmitEvent<{ name: string }>) => {
   if (!event.data.name) return
   error.value = ''
+
   try {
     if (editingCategory.value) {
       await categoryStore.updateCategory(editingCategory.value.id, event.data.name.trim())
       editingCategory.value = null
     } else {
+      if (categoryStore.categories.some((cat) => cat.name === event.data.name.trim())) {
+        error.value = 'Category name already exists'
+        return
+      }
+
       await categoryStore.addCategory(event.data.name)
     }
     state.name = ''
@@ -40,11 +46,13 @@ const addOrUpdateCategory = async (event: FormSubmitEvent<{ name: string }>) => 
 }
 
 const startEditCategory = (cat: Category) => {
+  error.value = ''
   editingCategory.value = cat
   state.name = cat.name
 }
 
 const cancelEdit = () => {
+  error.value = ''
   editingCategory.value = null
   state.name = ''
 }
@@ -76,7 +84,7 @@ onMounted(updateCategories)
     @submit="addOrUpdateCategory"
   >
     <UFormField name="name" class="grow">
-      <UInput v-model="state.name" placeholder="Category name" :required="true" class="w-full" />
+      <UInput v-model="state.name" placeholder="Category name" required class="w-full" />
     </UFormField>
 
     <div>
