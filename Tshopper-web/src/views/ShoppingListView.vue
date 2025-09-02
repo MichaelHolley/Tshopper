@@ -3,7 +3,7 @@ import ShoppingListItem from '@/components/ShoppingListItem.vue'
 import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import { computed, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref, watch } from 'vue'
 import type { ItemFormState, ShoppingItem } from '../types'
 
 const VISIBLE_CHECKED = 3
@@ -18,6 +18,24 @@ const state = reactive<ItemFormState>({
   item: '',
   amount: '',
 })
+
+onMounted(() => {
+  const storedState = localStorage.getItem('itemFormState')
+  if (storedState) {
+    const parsedState = JSON.parse(storedState)
+    state.item = parsedState.item
+    state.amount = parsedState.amount
+  }
+})
+
+watch(
+  state,
+  (newState) => {
+    if (editingItem.value) return
+    localStorage.setItem('itemFormState', JSON.stringify(newState))
+  },
+  { deep: true },
+)
 
 const activeItems = computed(() => {
   return shoppingListStore.items.filter((item) => !item.checked)
