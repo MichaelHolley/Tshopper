@@ -19,14 +19,13 @@ const navItems = [
     icon: 'tabler:shopping-cart',
     slot: 'shoppinglist' as const,
   },
-  // {
-  //   label: 'Categories',
-  //   value: '/categories',
-  //   description: 'Manage your categories',
-  //   icon: 'tabler:category',
-  //   slot: 'categories' as const,
-  //   disabled: true,
-  // },
+  {
+    label: 'Categories',
+    value: '/categories',
+    description: 'Manage your categories',
+    icon: 'tabler:category',
+    slot: 'categories' as const,
+  },
   {
     label: 'Data Transfer',
     value: '/data',

@@ -42,6 +42,7 @@ public class ItemCategoryController : ControllerBase
 
         var newItemCategory = await _itemCategoryService.AddItemCategoryAsync(itemCategoryDto.ItemName,
             itemCategoryDto.CategoryId, itemCategoryDto.IncludeItemName);
+        
         return Ok(newItemCategory);
     }
 
@@ -55,6 +56,7 @@ public class ItemCategoryController : ControllerBase
 
         var updatedItemCategory = await _itemCategoryService.UpdateItemCategoryAsync(id, itemCategoryDto.ItemName,
             itemCategoryDto.CategoryId, itemCategoryDto.IncludeItemName);
+        
         return Ok(updatedItemCategory);
     }
 
