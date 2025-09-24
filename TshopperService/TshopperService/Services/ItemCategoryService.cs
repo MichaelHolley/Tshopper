@@ -32,48 +32,33 @@ public class ItemCategoryService : IItemCategoryService
         return itemCategory;
     }
 
-    public async Task<ItemCategory> AddItemCategoryAsync(string itemName, int categoryId, bool includeItemName)
+    public async Task<ItemCategory> ToggleItemCategoryAsync(string itemName, int categoryId, bool includeItemName = false)
     {
-        var category = await _context.Categories.FindAsync(categoryId);
-        if (category == null)
-        {
-            throw new BusinessException($"Category with ID {categoryId} not found.");
-        }
+        var itemCategory = await _context.ItemCategories
+            .FirstOrDefaultAsync(ic => ic.ItemName == itemName && ic.CategoryId == categoryId);
 
-        var itemCategory = new ItemCategory
-        {
-            ItemName = itemName,
-            CategoryId = categoryId,
-            Category = category,
-            IncludeItemName = includeItemName
-        };
-        
-        _context.ItemCategories.Add(itemCategory);
-        await _context.SaveChangesAsync();
-        return itemCategory;
-    }
-
-    public async Task<ItemCategory> UpdateItemCategoryAsync(int id, string itemName, int categoryId,
-        bool includeItemName)
-    {
-        var itemCategory = await _context.ItemCategories.FindAsync(id);
         if (itemCategory == null)
         {
-            throw new BusinessException($"ItemCategory with ID {id} not found.");
+            var category = await _context.Categories.FindAsync(categoryId);
+            if (category == null)
+            {
+                throw new BusinessException($"Category with ID {categoryId} not found.");
+            }
+
+            var newItemCategory = new ItemCategory
+            {
+                ItemName = itemName,
+                CategoryId = categoryId,
+                Category = category,
+                IncludeItemName = includeItemName
+            };
+
+            _context.ItemCategories.Add(newItemCategory);
+            await _context.SaveChangesAsync();
+            return newItemCategory;
         }
 
-        var category = await _context.Categories.FindAsync(categoryId);
-        if (category == null)
-        {
-            throw new BusinessException($"Category with ID {categoryId} not found.");
-        }
-
-        itemCategory.ItemName = itemName;
-        itemCategory.CategoryId = categoryId;
-        itemCategory.Category = category;
-        itemCategory.IncludeItemName = includeItemName;
-
-        _context.ItemCategories.Update(itemCategory);
+        _context.ItemCategories.Remove(itemCategory);
         await _context.SaveChangesAsync();
         return itemCategory;
     }

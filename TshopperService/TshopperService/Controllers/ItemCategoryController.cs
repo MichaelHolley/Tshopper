@@ -32,31 +32,17 @@ public class ItemCategoryController : ControllerBase
         return Ok(itemCategory);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> AddItemCategory([FromBody] AddItemCategoryDto itemCategoryDto)
-    {
-        if (itemCategoryDto == null)
-        {
-            return BadRequest("ItemCategory cannot be null");
-        }
-
-        var newItemCategory = await _itemCategoryService.AddItemCategoryAsync(itemCategoryDto.ItemName,
-            itemCategoryDto.CategoryId, itemCategoryDto.IncludeItemName);
-        
-        return Ok(newItemCategory);
-    }
-
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateItemCategory(int id, [FromBody] UpdateItemCategoryDto itemCategoryDto)
+    public async Task<IActionResult> UpdateItemCategory([FromBody] UpdateItemCategoryDto itemCategoryDto)
     {
         if (itemCategoryDto == null)
         {
             return BadRequest("ItemCategory cannot be null");
         }
 
-        var updatedItemCategory = await _itemCategoryService.UpdateItemCategoryAsync(id, itemCategoryDto.ItemName,
-            itemCategoryDto.CategoryId, itemCategoryDto.IncludeItemName);
-        
+        var updatedItemCategory =
+            await _itemCategoryService.ToggleItemCategoryAsync(itemCategoryDto.ItemName, itemCategoryDto.CategoryId);
+
         return Ok(updatedItemCategory);
     }
 
