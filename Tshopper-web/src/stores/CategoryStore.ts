@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia'
-import type { Category } from '../types'
+import type { Category, ItemCategory } from '../types'
 import { useAuthStore } from './AuthStore'
 
 export const useCategoryStore = defineStore('category', {
   state: () => ({
     categories: [] as Category[],
+    itemCategories: [] as ItemCategory[],
   }),
   actions: {
     async getCategories() {
@@ -48,6 +49,39 @@ export const useCategoryStore = defineStore('category', {
         headers: { Authorization: `Bearer ${authStore.token}` },
       })
       if (!response.ok) throw new Error('Failed to delete category')
+    },
+
+    async getItemCategories() {
+      const authStore = useAuthStore()
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/ItemCategory`, {
+        headers: { Authorization: `Bearer ${authStore.token}` },
+      })
+      if (!response.ok) throw new Error('Failed to fetch item categories')
+      const data = await response.json()
+      this.itemCategories = data
+      return data
+    },
+
+    async updateItemCategory(itemName: string, categoryId: number) {
+      const authStore = useAuthStore()
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/ItemCategory`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${authStore.token}`,
+        },
+        body: JSON.stringify({ itemName, categoryId }),
+      })
+      if (!response.ok) throw new Error('Failed to update item category')
+    },
+
+    async deleteItemCategory(id: number) {
+      const authStore = useAuthStore()
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/ItemCategory/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${authStore.token}` },
+      })
+      if (!response.ok) throw new Error('Failed to delete item category')
     },
   },
 })

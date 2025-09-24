@@ -14,3 +14,11 @@ export interface Category {
   id: number
   name: string
 }
+
+export interface ItemCategory {
+  id: number
+  itemName: string
+  includeItemName: boolean
+  categoryId: number
+  category: Category
+}
