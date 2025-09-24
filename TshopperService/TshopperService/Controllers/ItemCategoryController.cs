@@ -32,7 +32,7 @@ public class ItemCategoryController : ControllerBase
         return Ok(itemCategory);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut]
     public async Task<IActionResult> UpdateItemCategory([FromBody] UpdateItemCategoryDto itemCategoryDto)
     {
         if (itemCategoryDto == null)
