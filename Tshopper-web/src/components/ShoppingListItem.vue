@@ -69,20 +69,21 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
 <template>
   <UContextMenu :items="contextMenuItems" :ui="{ content: 'w-48' }">
     <div
-      class="w-full px-2 py-1 hover:bg-slate-950 rounded-sm flex flex-row justify-between items-center hover:cursor-pointer"
+      class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
       @click="emit('toggle', props.item.id)"
     >
+      <span
+        :class="item.checked ? 'line-through text-primary-800' : 'text-primary-400'"
+        class="select-none"
+        v-if="!!item.quantity"
+      >
+        {{ item.quantity }}
+      </span>
       <span
         class="flex flex-row items-center select-none"
         :class="{ 'line-through text-neutral-500': item.checked }"
       >
         {{ item.item }}
-      </span>
-      <span
-        :class="item.checked ? 'line-through text-primary-800' : 'text-primary-400'"
-        class="ml-8 select-none"
-      >
-        {{ item.quantity }}
       </span>
     </div>
   </UContextMenu>
