@@ -4,6 +4,7 @@ import { HubConnectionBuilder } from '@microsoft/signalr'
 import { defineStore } from 'pinia'
 import { useAuthStore } from './AuthStore'
 import { useRouter } from 'vue-router'
+import { addLog } from '@/utils/action-logger'
 
 type ConnectionState = 'Disconnected' | 'Connecting' | 'Connected'
 
@@ -27,6 +28,7 @@ export const useShoppingListStore = defineStore('shoppingList', {
       if (!validToken) {
         authStore.logout()
         router.push('/login')
+        addLog('initializeConnection', 'Connection failed: Invalid token', 'error')
         return
       }
 
@@ -45,14 +47,17 @@ export const useShoppingListStore = defineStore('shoppingList', {
 
       this.connection.onclose(() => {
         this.connectionState = 'Disconnected'
+        addLog('connection', 'Connection closed', 'info')
       })
 
       this.connection.onreconnecting(() => {
         this.connectionState = 'Connecting'
+        addLog('connection', 'Reconnecting...', 'info')
       })
 
       this.connection.onreconnected(() => {
         this.connectionState = 'Connected'
+        addLog('connection', 'Reconnected successfully', 'success')
       })
 
       this.connection.on('ReceiveUpdate', (items) => {
@@ -65,10 +70,12 @@ export const useShoppingListStore = defineStore('shoppingList', {
         await this.connection.start()
         this.connectionState = 'Connected'
         console.log('✅ SignalR Connected!')
+        addLog('initializeConnection', 'Connection initialized successfully', 'success')
         await this.getAllItems()
       } catch (err) {
         console.error('❌ SignalR Connection Error:', err)
         this.connectionState = 'Disconnected'
+        addLog('initializeConnection', `Connection error: ${err}`, 'error')
       }
     },
 
@@ -79,9 +86,11 @@ export const useShoppingListStore = defineStore('shoppingList', {
         await this.connection.start()
         console.log('✅ SignalR Reconnected!')
         this.connectionState = 'Connected'
+        addLog('reconnect', 'Manually reconnected successfully', 'success')
         await this.getAllItems()
       } catch (error) {
         console.error('❌ Reconnection failed:', error)
+        addLog('reconnect', `Reconnection failed: ${error}`, 'error')
       }
     },
 
@@ -91,8 +100,10 @@ export const useShoppingListStore = defineStore('shoppingList', {
           await this.connection.stop()
           this.connectionState = 'Disconnected'
           console.log('✅ SignalR Disconnected!')
+          addLog('disconnect', 'Disconnected successfully', 'success')
         } catch (err) {
           console.error('❌ Error disconnecting SignalR:', err)
+          addLog('disconnect', `Disconnect error: ${err}`, 'error')
         }
       }
     },
@@ -101,18 +112,19 @@ export const useShoppingListStore = defineStore('shoppingList', {
       try {
         const items = await this.connection?.invoke('GetAllItems')
         this.items = items
+        addLog('getAllItems', `Fetched ${items?.length || 0} items`, 'success')
       } catch (err) {
-        console.error('❌ Error fetching items:', err)
+        addLog('getAllItems', `Error fetching items: ${err}`, 'error')
       }
     },
 
     async addItem(item: string, quantity: string) {
       try {
         await this.connection?.invoke('AddItem', item, quantity)
-        console.log('✅ Item Added!')
+        addLog('addItem', `Added: ${item} (qty: ${quantity})`, 'success')
         return true
       } catch (err) {
-        console.error('❌ Error adding item:', err)
+        addLog('addItem', `Error adding ${item}: ${err}`, 'error')
         return false
       }
     },
@@ -120,42 +132,46 @@ export const useShoppingListStore = defineStore('shoppingList', {
     async checkItem(itemId: number) {
       try {
         await this.connection?.invoke('CheckItem', itemId)
+        addLog('checkItem', `Checked item #${itemId}`, 'success')
       } catch (err) {
-        console.error('❌ Error checking item:', err)
+        addLog('checkItem', `Error checking item #${itemId}: ${err}`, 'error')
       }
     },
 
     async uncheckItem(itemId: number) {
       try {
         await this.connection?.invoke('UncheckItem', itemId)
+        addLog('uncheckItem', `Unchecked item #${itemId}`, 'success')
       } catch (err) {
-        console.error('❌ Error unchecking item:', err)
+        addLog('uncheckItem', `Error unchecking item #${itemId}: ${err}`, 'error')
       }
     },
 
     async deleteItem(itemId: number) {
       try {
         await this.connection?.invoke('DeleteItem', itemId)
+        addLog('deleteItem', `Deleted item #${itemId}`, 'success')
       } catch (err) {
-        console.error('❌ Error deleting item:', err)
+        addLog('deleteItem', `Error deleting item #${itemId}: ${err}`, 'error')
       }
     },
 
     async deleteAllCheckedItems() {
       try {
         await this.connection?.invoke('DeleteAllCheckedItems')
+        addLog('deleteAllCheckedItems', 'Deleted all checked items', 'success')
       } catch (err) {
-        console.error('❌ Error deleting items:', err)
+        addLog('deleteAllCheckedItems', `Error deleting checked items: ${err}`, 'error')
       }
     },
 
     async updateItem(itemId: number, item: string, quantity: string) {
       try {
         await this.connection?.invoke('UpdateItem', itemId, item, quantity)
-        console.log('✅ Item Updated!')
+        addLog('updateItem', `Updated item #${itemId}: ${item} (qty: ${quantity})`, 'success')
         return true
       } catch (err) {
-        console.error('❌ Error updating item:', err)
+        addLog('updateItem', `Error updating item #${itemId}: ${err}`, 'error')
         return false
       }
     },

@@ -34,6 +34,13 @@ const navItems = [
     icon: 'tabler:file-arrow-right',
     slot: 'data' as const,
   },
+  {
+    label: 'Log',
+    value: '/log',
+    description: 'View your activity log',
+    icon: 'tabler:logs',
+    slot: 'log' as const,
+  },
 ] satisfies TabsItem[]
 
 const activeTab = computed({
