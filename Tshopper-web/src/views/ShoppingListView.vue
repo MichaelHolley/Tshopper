@@ -206,14 +206,7 @@ const visibleCheckedItems = computed(() => {
     <!-- Sort Mode: Separate draggable unchecked and non-draggable checked -->
     <template v-else>
       <div>
-        <!-- Empty state -->
-        <div v-if="activeItems.length === 0" class="text-center text-neutral-500 py-8">
-          No items to sort
-        </div>
-
-        <!-- Unchecked items - DRAGGABLE -->
         <draggable
-          v-else
           v-model="draggableActiveItems"
           @end="handleDragEnd"
           :animation="200"
@@ -237,22 +230,6 @@ const visibleCheckedItems = computed(() => {
             </li>
           </template>
         </draggable>
-
-        <!-- Checked items - NOT DRAGGABLE -->
-        <ul v-if="checkedItems.length > 0" class="mt-4">
-          <li v-for="item in visibleCheckedItems" :key="item.id" class="flex">
-            <ShoppingListItem
-              :item="item"
-              :sort-mode="true"
-              @toggle="toggleItem"
-              @delete="deleteItem"
-              @delete-all="handleDeleteAll"
-              @edit="startEditItem"
-              @toggle-category="toggleCategory"
-              :categories="categoryStore.categories"
-            />
-          </li>
-        </ul>
       </div>
     </template>
 
