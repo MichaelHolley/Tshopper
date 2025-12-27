@@ -12,6 +12,7 @@ export const useShoppingListStore = defineStore('shoppingList', {
     items: [] as ShoppingItem[],
     connection: null as HubConnection | null,
     connectionState: 'Disconnected' as ConnectionState,
+    sortMode: false,
   }),
 
   getters: {
@@ -169,6 +170,21 @@ export const useShoppingListStore = defineStore('shoppingList', {
         console.error('❌ Error updating item:', err)
         return false
       }
+    },
+
+    async reorderItems(orderedItemIds: number[]): Promise<boolean> {
+      try {
+        await this.connection?.invoke('ReorderItems', orderedItemIds)
+        console.log('✅ Items Reordered!')
+        return true
+      } catch (err) {
+        console.error('❌ Error reordering items:', err)
+        return false
+      }
+    },
+
+    toggleSortMode() {
+      this.sortMode = !this.sortMode
     },
   },
 })

@@ -3,6 +3,7 @@ export interface ShoppingItem {
   item: string
   quantity: string
   checked?: Date
+  sortOrder: number
 }
 
 export interface ItemFormState {
