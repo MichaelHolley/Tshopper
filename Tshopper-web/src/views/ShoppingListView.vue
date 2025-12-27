@@ -136,13 +136,6 @@ const handleDragEnd = async () => {
   const orderedIds = activeItems.value.map((item) => item.id)
   await shoppingListStore.reorderItems(orderedIds)
 }
-
-const visibleCheckedItems = computed(() => {
-  if (checkedCollapsed.value) {
-    return checkedItems.value.slice(0, VISIBLE_CHECKED)
-  }
-  return checkedItems.value
-})
 </script>
 
 <template>

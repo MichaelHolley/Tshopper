@@ -69,9 +69,14 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
 
 <template>
   <UContextMenu :items="contextMenuItems" :ui="{ content: 'w-48' }" :disabled="sortMode">
-    <div
+    <button
       class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
-      @click="emit('toggle', props.item.id)"
+      @click="
+        () => {
+          if (sortMode) return
+          emit('toggle', props.item.id)
+        }
+      "
     >
       <span
         :class="item.checked ? 'line-through text-primary-800' : 'text-primary-400'"
@@ -86,6 +91,6 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
       >
         {{ item.item }}
       </span>
-    </div>
+    </button>
   </UContextMenu>
 </template>
