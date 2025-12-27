@@ -13,5 +13,4 @@ public interface IShoppingListService
     Task<ShoppingItem?> UpdateItemAsync(int id, string item, string quantity);
     Task AddItems(List<ShoppingItem> items);
     Task ReorderItemsAsync(List<int> itemIds);
-    Task ResetSortOrderAsync();
 }

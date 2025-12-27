@@ -163,19 +163,4 @@ public class ShoppingListService : IShoppingListService
 
         await _dbContext.SaveChangesAsync();
     }
-
-    public async Task ResetSortOrderAsync()
-    {
-        var uncheckedItems = await _dbContext.ShoppingItems
-            .Where(i => i.Checked == null)
-            .OrderBy(i => i.Item)
-            .ToListAsync();
-
-        for (int i = 0; i < uncheckedItems.Count; i++)
-        {
-            uncheckedItems[i].SortOrder = i + 1;
-        }
-
-        await _dbContext.SaveChangesAsync();
-    }
 }
