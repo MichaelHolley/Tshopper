@@ -7,7 +7,7 @@ export interface ShoppingItem {
 
 export interface ItemFormState {
   item: string
-  amount: string
+  quantity: string
 }
 
 export interface Category {

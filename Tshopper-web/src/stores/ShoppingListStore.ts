@@ -133,6 +133,17 @@ export const useShoppingListStore = defineStore('shoppingList', {
       }
     },
 
+    async toggleItem(itemId: number) {
+      const item = this.items.find((i) => i.id === itemId)
+      if (!item) return
+
+      if (item.checked) {
+        await this.uncheckItem(itemId)
+      } else {
+        await this.checkItem(itemId)
+      }
+    },
+
     async deleteItem(itemId: number) {
       try {
         await this.connection?.invoke('DeleteItem', itemId)

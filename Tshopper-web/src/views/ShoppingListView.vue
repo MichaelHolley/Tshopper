@@ -16,15 +16,20 @@ const editingItem = ref<ShoppingItem | null>(null)
 
 const state = reactive<ItemFormState>({
   item: '',
-  amount: '',
+  quantity: '',
 })
 
 onMounted(() => {
   const storedState = localStorage.getItem('itemFormState')
   if (storedState) {
-    const parsedState = JSON.parse(storedState)
-    state.item = parsedState.item
-    state.amount = parsedState.amount
+    try {
+      const parsedState = JSON.parse(storedState)
+      state.item = parsedState.item || ''
+      state.quantity = parsedState.quantity || ''
+    } catch (error) {
+      console.error('Failed to parse stored form state:', error)
+      localStorage.removeItem('itemFormState')
+    }
   }
 })
 
@@ -42,7 +47,7 @@ const activeItems = computed(() => {
 })
 
 const checkedItems = computed(() => {
-  return shoppingListStore.items.filter((item) => item.checked)
+  return shoppingListStore.items.filter((item) => !!item.checked)
 })
 
 const mergedItems = computed(() => {
@@ -58,17 +63,17 @@ const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
     const success = await shoppingListStore.updateItem(
       editingItem.value.id,
       event.data.item.trim(),
-      event.data.amount.trim(),
+      event.data.quantity.trim(),
     )
 
-    if (success) cancelEdit()
+    if (success) resetForm()
   } else {
     const success = await shoppingListStore.addItem(
       event.data.item.trim(),
-      event.data.amount.trim(),
+      event.data.quantity.trim(),
     )
 
-    if (success) cancelEdit()
+    if (success) resetForm()
   }
 }
 
@@ -79,13 +84,7 @@ const validate = (state: Partial<ItemFormState>): FormError[] => {
 }
 
 const toggleItem = (itemId: number) => {
-  const item = shoppingListStore.items.find((i) => i.id === itemId)
-  if (!item) return
-  if (item.checked) {
-    shoppingListStore.uncheckItem(item.id)
-  } else {
-    shoppingListStore.checkItem(item.id)
-  }
+  shoppingListStore.toggleItem(itemId)
 }
 
 const deleteItem = (itemId: number) => {
@@ -104,17 +103,21 @@ const confirmDeleteAll = () => {
 const startEditItem = (item: ShoppingItem) => {
   editingItem.value = item
   state.item = item.item
-  state.amount = item.quantity
+  state.quantity = item.quantity
 }
 
-const cancelEdit = () => {
+const resetForm = () => {
   editingItem.value = null
   state.item = ''
-  state.amount = ''
+  state.quantity = ''
 }
 
 const toggleCategory = (itemId: number, categoryId: number) => {
   console.log('toggleCategory', itemId, categoryId)
+}
+
+const toggleCheckedCollapsed = () => {
+  checkedCollapsed.value = !checkedCollapsed.value
 }
 </script>
 
@@ -124,13 +127,13 @@ const toggleCategory = (itemId: number, categoryId: number) => {
       <UInput v-model="state.item" placeholder="Item" :required="true" />
     </UFormField>
 
-    <UFormField name="amount">
-      <UInput v-model="state.amount" placeholder="Amount" />
+    <UFormField name="quantity">
+      <UInput v-model="state.quantity" placeholder="Quantity" />
     </UFormField>
 
     <div>
       <div class="flex flex-row gap-2">
-        <UButton v-if="editingItem" variant="outline" icon="maki:cross" @click="cancelEdit">
+        <UButton v-if="editingItem" variant="outline" icon="maki:cross" @click="resetForm">
         </UButton>
         <UButton type="submit" icon="ci:add-plus" class="float-end">
           {{ editingItem ? 'Update' : 'Add' }}
@@ -157,11 +160,7 @@ const toggleCategory = (itemId: number, categoryId: number) => {
         v-if="checkedItems.length > VISIBLE_CHECKED"
         class="flex flex-row justify-center items-center gap-1"
         variant="ghost"
-        @click="
-          () => {
-            checkedCollapsed = !checkedCollapsed
-          }
-        "
+        @click="toggleCheckedCollapsed"
       >
         <UIcon
           :name="checkedCollapsed ? 'ci:chevron-down' : 'ci:chevron-up'"
