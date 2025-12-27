@@ -83,12 +83,7 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
   <UContextMenu v-else :items="contextMenuItems" :ui="{ content: 'w-48' }" :disabled="sortMode">
     <button
       class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
-      @click="
-        () => {
-          if (sortMode) return
-          emit('toggle', props.item.id)
-        }
-      "
+      @click="emit('toggle', props.item.id)"
     >
       <span
         v-if="!!item.quantity"
