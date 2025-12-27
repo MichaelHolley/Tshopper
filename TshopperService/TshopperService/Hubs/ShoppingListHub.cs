@@ -96,4 +96,17 @@ public sealed class ShoppingListHub : Hub
             throw new HubException($"{ex.Code}: {ex.Message}");
         }
     }
+
+    public async Task ReorderItems(List<int> itemIds)
+    {
+        try
+        {
+            await _shoppingListService.ReorderItemsAsync(itemIds);
+            await ReceiveUpdate();
+        }
+        catch (BusinessException ex)
+        {
+            throw new HubException($"{ex.Code}: {ex.Message}");
+        }
+    }
 }

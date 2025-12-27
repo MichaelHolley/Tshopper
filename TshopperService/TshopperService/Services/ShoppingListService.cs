@@ -18,8 +18,8 @@ public class ShoppingListService : IShoppingListService
         return await _dbContext.ShoppingItems
             .Where(i => i.Checked == null || i.Checked > DateTime.Now.AddDays(-7))
             .OrderBy(i => i.Checked != null)
+            .ThenBy(i => i.SortOrder)
             .ThenByDescending(i => i.Checked)
-            .ThenBy(i => i.Item)
             .ToListAsync();
     }
 
@@ -30,10 +30,16 @@ public class ShoppingListService : IShoppingListService
             throw new BusinessException("Item name cannot be empty", BusinessErrorCodes.INVALID_INPUT);
         }
 
+        // Get max SortOrder from unchecked items
+        var maxSortOrder = await _dbContext.ShoppingItems
+            .Where(i => i.Checked == null)
+            .MaxAsync(i => (int?)i.SortOrder) ?? 0;
+
         var newItem = new ShoppingItem
         {
             Item = item,
-            Quantity = quantity
+            Quantity = quantity,
+            SortOrder = maxSortOrder + 1
         };
 
         await _dbContext.ShoppingItems.AddAsync(newItem);
@@ -67,6 +73,14 @@ public class ShoppingListService : IShoppingListService
         }
 
         item.Checked = null;
+
+        // Set SortOrder to max + 1 to add to bottom of unchecked list
+        var maxSortOrder = await _dbContext.ShoppingItems
+            .Where(i => i.Checked == null && i.Id != id)
+            .MaxAsync(i => (int?)i.SortOrder) ?? 0;
+
+        item.SortOrder = maxSortOrder + 1;
+
         await _dbContext.SaveChangesAsync();
 
         return item;
@@ -114,6 +128,39 @@ public class ShoppingListService : IShoppingListService
     public async Task AddItems(List<ShoppingItem> items)
     {
         _dbContext.ShoppingItems.AddRange(items);
-        _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task ReorderItemsAsync(List<int> itemIds)
+    {
+        if (itemIds == null || !itemIds.Any())
+        {
+            throw new BusinessException("Item IDs list cannot be empty", BusinessErrorCodes.INVALID_INPUT);
+        }
+
+        var items = await _dbContext.ShoppingItems
+            .Where(i => itemIds.Contains(i.Id))
+            .ToListAsync();
+
+        if (items.Count != itemIds.Count)
+        {
+            throw new BusinessException("One or more items not found", BusinessErrorCodes.NOT_FOUND);
+        }
+
+        // Check that all items are unchecked
+        var checkedItems = items.Where(i => i.Checked != null).ToList();
+        if (checkedItems.Any())
+        {
+            throw new BusinessException("Cannot reorder checked items", BusinessErrorCodes.INVALID_INPUT);
+        }
+
+        // Update SortOrder based on position in the list
+        for (int i = 0; i < itemIds.Count; i++)
+        {
+            var item = items.First(x => x.Id == itemIds[i]);
+            item.SortOrder = i + 1;
+        }
+
+        await _dbContext.SaveChangesAsync();
     }
 }
