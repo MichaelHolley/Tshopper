@@ -6,6 +6,7 @@ import type { Category, ShoppingItem } from '../types'
 const props = defineProps<{
   item: ShoppingItem
   categories: Category[]
+  sortMode?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -67,7 +68,7 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
 </script>
 
 <template>
-  <UContextMenu :items="contextMenuItems" :ui="{ content: 'w-48' }">
+  <UContextMenu :items="contextMenuItems" :ui="{ content: 'w-48' }" :disabled="sortMode">
     <div
       class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
       @click="emit('toggle', props.item.id)"

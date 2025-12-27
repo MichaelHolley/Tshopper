@@ -5,6 +5,7 @@ import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import type { ItemFormState, ShoppingItem } from '../types'
+import draggable from 'vuedraggable'
 
 const VISIBLE_CHECKED = 3
 
@@ -48,6 +49,13 @@ const activeItems = computed(() => {
 
 const checkedItems = computed(() => {
   return shoppingListStore.items.filter((item) => !!item.checked)
+})
+
+const draggableActiveItems = computed({
+  get: () => activeItems.value,
+  set: () => {
+    // This is handled by handleDragEnd, no need to set here
+  },
 })
 
 const mergedItems = computed(() => {
@@ -119,6 +127,22 @@ const toggleCategory = (itemId: number, categoryId: number) => {
 const toggleCheckedCollapsed = () => {
   checkedCollapsed.value = !checkedCollapsed.value
 }
+
+const toggleSortMode = () => {
+  shoppingListStore.toggleSortMode()
+}
+
+const handleDragEnd = async () => {
+  const orderedIds = activeItems.value.map((item) => item.id)
+  await shoppingListStore.reorderItems(orderedIds)
+}
+
+const visibleCheckedItems = computed(() => {
+  if (checkedCollapsed.value) {
+    return checkedItems.value.slice(0, VISIBLE_CHECKED)
+  }
+  return checkedItems.value
+})
 </script>
 
 <template>
@@ -141,20 +165,97 @@ const toggleCheckedCollapsed = () => {
       </div>
     </div>
   </UForm>
+
+  <!-- Sort Mode Toggle Button -->
+  <div class="mt-3 flex flex-row justify-between items-center">
+    <UButton
+      :variant="shoppingListStore.sortMode ? 'solid' : 'outline'"
+      :color="shoppingListStore.sortMode ? 'primary' : 'neutral'"
+      icon="tabler:arrows-sort"
+      @click="toggleSortMode"
+      :disabled="shoppingListStore.isDisconnected"
+    >
+      Sort-Mode
+    </UButton>
+
+    <!-- Sort Mode Active Badge -->
+    <div v-if="shoppingListStore.sortMode" class="text-sm text-primary-400">
+      Long-press and drag to reorder
+    </div>
+  </div>
+
   <div class="mt-3">
-    <ul v-auto-animate="{ duration: 300, delay: 300 }">
-      <li v-for="item in mergedItems" :key="item.id" class="flex">
-        <ShoppingListItem
-          :item="item"
-          @toggle="toggleItem"
-          @delete="deleteItem"
-          @delete-all="handleDeleteAll"
-          @edit="startEditItem"
-          @toggle-category="toggleCategory"
-          :categories="categoryStore.categories"
-        />
-      </li>
-    </ul>
+    <!-- Normal Mode: Single merged list with auto-animate -->
+    <template v-if="!shoppingListStore.sortMode">
+      <ul v-auto-animate="{ duration: 300, delay: 300 }">
+        <li v-for="item in mergedItems" :key="item.id" class="flex">
+          <ShoppingListItem
+            :item="item"
+            :sortMode="false"
+            @toggle="toggleItem"
+            @delete="deleteItem"
+            @delete-all="handleDeleteAll"
+            @edit="startEditItem"
+            @toggle-category="toggleCategory"
+            :categories="categoryStore.categories"
+          />
+        </li>
+      </ul>
+    </template>
+
+    <!-- Sort Mode: Separate draggable unchecked and non-draggable checked -->
+    <template v-else>
+      <div>
+        <!-- Empty state -->
+        <div v-if="activeItems.length === 0" class="text-center text-neutral-500 py-8">
+          No items to sort
+        </div>
+
+        <!-- Unchecked items - DRAGGABLE -->
+        <draggable
+          v-else
+          v-model="draggableActiveItems"
+          @end="handleDragEnd"
+          :animation="200"
+          item-key="id"
+          ghost-class="opacity-50"
+          tag="ul"
+          class="sortable-list"
+        >
+          <template #item="{ element }">
+            <li :key="element.id" class="flex">
+              <ShoppingListItem
+                :item="element"
+                :sort-mode="true"
+                @toggle="toggleItem"
+                @delete="deleteItem"
+                @delete-all="handleDeleteAll"
+                @edit="startEditItem"
+                @toggle-category="toggleCategory"
+                :categories="categoryStore.categories"
+              />
+            </li>
+          </template>
+        </draggable>
+
+        <!-- Checked items - NOT DRAGGABLE -->
+        <ul v-if="checkedItems.length > 0" class="mt-4">
+          <li v-for="item in visibleCheckedItems" :key="item.id" class="flex">
+            <ShoppingListItem
+              :item="item"
+              :sort-mode="true"
+              @toggle="toggleItem"
+              @delete="deleteItem"
+              @delete-all="handleDeleteAll"
+              @edit="startEditItem"
+              @toggle-category="toggleCategory"
+              :categories="categoryStore.categories"
+            />
+          </li>
+        </ul>
+      </div>
+    </template>
+
     <div class="flex flex-row justify-center">
       <UButton
         v-if="checkedItems.length > VISIBLE_CHECKED"
