@@ -208,9 +208,7 @@ const handleDragEnd = async () => {
         ghost-class="opacity-50"
       >
         <template #item="{ element }">
-          <div>
-            <ShoppingListItem :item="element" :sortMode="true" :categories="[]" />
-          </div>
+          <ShoppingListItem :item="element" :sortMode="true" :categories="[]" />
         </template>
       </draggable>
     </template>

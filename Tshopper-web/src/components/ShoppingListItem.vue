@@ -68,7 +68,19 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
 </script>
 
 <template>
-  <UContextMenu :items="contextMenuItems" :ui="{ content: 'w-48' }" :disabled="sortMode">
+  <div
+    v-if="sortMode"
+    class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
+  >
+    <span v-if="!!item.quantity" class="text-primary-400 select-none">
+      {{ item.quantity }}
+    </span>
+    <span class="flex flex-row items-center select-none">
+      {{ item.item }}
+    </span>
+  </div>
+
+  <UContextMenu v-else :items="contextMenuItems" :ui="{ content: 'w-48' }" :disabled="sortMode">
     <button
       class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
       @click="
@@ -79,9 +91,9 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
       "
     >
       <span
+        v-if="!!item.quantity"
         :class="item.checked ? 'line-through text-primary-800' : 'text-primary-400'"
         class="select-none"
-        v-if="!!item.quantity"
       >
         {{ item.quantity }}
       </span>
