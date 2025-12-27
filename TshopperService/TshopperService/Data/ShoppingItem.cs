@@ -6,4 +6,5 @@ public class ShoppingItem
     public string Item { get; set; } = string.Empty;
     public string Quantity { get; set; } = string.Empty;
     public DateTime? Checked { get; set; }
+    public int SortOrder { get; set; }
 }
