@@ -14,6 +14,7 @@ const categoryStore = useCategoryStore()
 const checkedCollapsed = ref(true)
 const showDeleteAllDialog = ref(false)
 const editingItem = ref<ShoppingItem | null>(null)
+const draggableItems = ref<ShoppingItem[]>([])
 
 const state = reactive<ItemFormState>({
   item: '',
@@ -34,28 +35,12 @@ onMounted(() => {
   }
 })
 
-watch(
-  state,
-  (newState) => {
-    if (editingItem.value) return
-    localStorage.setItem('itemFormState', JSON.stringify(newState))
-  },
-  { deep: true },
-)
-
 const activeItems = computed(() => {
   return shoppingListStore.items.filter((item) => !item.checked)
 })
 
 const checkedItems = computed(() => {
   return shoppingListStore.items.filter((item) => !!item.checked)
-})
-
-const draggableActiveItems = computed({
-  get: () => activeItems.value,
-  set: () => {
-    // This is handled by handleDragEnd, no need to set here
-  },
 })
 
 const mergedItems = computed(() => {
@@ -65,6 +50,23 @@ const mergedItems = computed(() => {
   }
   return [...activeItems.value, ...checked]
 })
+
+watch(
+  state,
+  (newState) => {
+    if (editingItem.value) return
+    localStorage.setItem('itemFormState', JSON.stringify(newState))
+  },
+  { deep: true },
+)
+
+watch(
+  activeItems,
+  (newItems) => {
+    draggableItems.value = [...newItems]
+  },
+  { immediate: true },
+)
 
 const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
   if (editingItem.value) {
@@ -133,7 +135,7 @@ const toggleSortMode = () => {
 }
 
 const handleDragEnd = async () => {
-  const orderedIds = activeItems.value.map((item) => item.id)
+  const orderedIds = draggableItems.value.map((item) => item.id)
   await shoppingListStore.reorderItems(orderedIds)
 }
 </script>
@@ -198,32 +200,30 @@ const handleDragEnd = async () => {
 
     <!-- Sort Mode: Separate draggable unchecked and non-draggable checked -->
     <template v-else>
-      <div>
-        <draggable
-          v-model="draggableActiveItems"
-          @end="handleDragEnd"
-          :animation="200"
-          item-key="id"
-          ghost-class="opacity-50"
-          tag="ul"
-          class="sortable-list"
-        >
-          <template #item="{ element }">
-            <li :key="element.id" class="flex">
-              <ShoppingListItem
-                :item="element"
-                :sort-mode="true"
-                @toggle="toggleItem"
-                @delete="deleteItem"
-                @delete-all="handleDeleteAll"
-                @edit="startEditItem"
-                @toggle-category="toggleCategory"
-                :categories="categoryStore.categories"
-              />
-            </li>
-          </template>
-        </draggable>
-      </div>
+      <draggable
+        :list="draggableItems"
+        @end="handleDragEnd"
+        :animation="200"
+        item-key="id"
+        ghost-class="opacity-50"
+        tag="ul"
+        class="sortable-list"
+      >
+        <template #item="{ element }">
+          <div :key="element.id">
+            <ShoppingListItem
+              :item="element"
+              :sort-mode="true"
+              @toggle="toggleItem"
+              @delete="deleteItem"
+              @delete-all="handleDeleteAll"
+              @edit="startEditItem"
+              @toggle-category="toggleCategory"
+              :categories="categoryStore.categories"
+            />
+          </div>
+        </template>
+      </draggable>
     </template>
 
     <div class="flex flex-row justify-center">
