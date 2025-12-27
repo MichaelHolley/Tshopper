@@ -203,24 +203,13 @@ const handleDragEnd = async () => {
       <draggable
         :list="draggableItems"
         @end="handleDragEnd"
-        :animation="200"
         item-key="id"
+        :animation="200"
         ghost-class="opacity-50"
-        tag="ul"
-        class="sortable-list"
       >
         <template #item="{ element }">
-          <div :key="element.id">
-            <ShoppingListItem
-              :item="element"
-              :sort-mode="true"
-              @toggle="toggleItem"
-              @delete="deleteItem"
-              @delete-all="handleDeleteAll"
-              @edit="startEditItem"
-              @toggle-category="toggleCategory"
-              :categories="categoryStore.categories"
-            />
+          <div>
+            <ShoppingListItem :item="element" :sortMode="true" :categories="[]" />
           </div>
         </template>
       </draggable>
