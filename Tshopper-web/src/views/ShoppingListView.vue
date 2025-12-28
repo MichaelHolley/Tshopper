@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import ShoppingListItem from '@/components/ShoppingListItem.vue'
+import ShoppingListForm from '@/components/ShoppingListForm.vue'
 import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
-import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import type { FormSubmitEvent } from '@nuxt/ui'
+import { computed, ref, watch } from 'vue'
 import type { ItemFormState, ShoppingItem } from '../types'
 import draggable from 'vuedraggable'
 
@@ -15,25 +16,6 @@ const checkedCollapsed = ref(true)
 const showDeleteAllDialog = ref(false)
 const editingItem = ref<ShoppingItem | null>(null)
 const draggableItems = ref<ShoppingItem[]>([])
-
-const state = reactive<ItemFormState>({
-  item: '',
-  quantity: '',
-})
-
-onMounted(() => {
-  const storedState = localStorage.getItem('itemFormState')
-  if (storedState) {
-    try {
-      const parsedState = JSON.parse(storedState)
-      state.item = parsedState.item || ''
-      state.quantity = parsedState.quantity || ''
-    } catch (error) {
-      console.error('Failed to parse stored form state:', error)
-      localStorage.removeItem('itemFormState')
-    }
-  }
-})
 
 const activeItems = computed(() => {
   return shoppingListStore.items.filter((item) => !item.checked)
@@ -52,15 +34,6 @@ const mergedItems = computed(() => {
 })
 
 watch(
-  state,
-  (newState) => {
-    if (editingItem.value) return
-    localStorage.setItem('itemFormState', JSON.stringify(newState))
-  },
-  { deep: true },
-)
-
-watch(
   activeItems,
   (newItems) => {
     draggableItems.value = [...newItems]
@@ -76,21 +49,10 @@ const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
       event.data.quantity.trim(),
     )
 
-    if (success) resetForm()
+    if (success) editingItem.value = null
   } else {
-    const success = await shoppingListStore.addItem(
-      event.data.item.trim(),
-      event.data.quantity.trim(),
-    )
-
-    if (success) resetForm()
+    await shoppingListStore.addItem(event.data.item.trim(), event.data.quantity.trim())
   }
-}
-
-const validate = (state: Partial<ItemFormState>): FormError[] => {
-  const errors = []
-  if (!state.item) errors.push({ name: 'item', message: 'Required' })
-  return errors
 }
 
 const toggleItem = (itemId: number) => {
@@ -112,14 +74,10 @@ const confirmDeleteAll = () => {
 
 const startEditItem = (item: ShoppingItem) => {
   editingItem.value = item
-  state.item = item.item
-  state.quantity = item.quantity
 }
 
-const resetForm = () => {
+const cancelEdit = () => {
   editingItem.value = null
-  state.item = ''
-  state.quantity = ''
 }
 
 const toggleCategory = (itemId: number, categoryId: number) => {
@@ -141,25 +99,7 @@ const handleDragEnd = async () => {
 </script>
 
 <template>
-  <UForm :validate="validate" :state="state" class="flex flex-row gap-2" @submit="addOrUpdateItem">
-    <UFormField name="item">
-      <UInput v-model="state.item" placeholder="Item" :required="true" />
-    </UFormField>
-
-    <UFormField name="quantity">
-      <UInput v-model="state.quantity" placeholder="Quantity" />
-    </UFormField>
-
-    <div>
-      <div class="flex flex-row gap-2">
-        <UButton v-if="editingItem" variant="outline" icon="maki:cross" @click="resetForm">
-        </UButton>
-        <UButton type="submit" icon="ci:add-plus" class="float-end">
-          {{ editingItem ? 'Update' : 'Add' }}
-        </UButton>
-      </div>
-    </div>
-  </UForm>
+  <ShoppingListForm :editingItem="editingItem" @submit="addOrUpdateItem" @cancel="cancelEdit" />
 
   <!-- Sort Mode Toggle Button -->
   <div class="mt-3 flex flex-row justify-between items-center">

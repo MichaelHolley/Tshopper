@@ -9,7 +9,7 @@ const isLogin = computed(() => route.path == '/login')
 
 <template>
   <UApp>
-    <div class="container mx-auto max-w-md h-svh flex flex-col px-2">
+    <div class="container mx-auto max-w-lg h-svh flex flex-col px-2">
       <NavBar class="mb-2 mt-1" />
       <div class="grow overflow-y-auto">
         <RouterView />
