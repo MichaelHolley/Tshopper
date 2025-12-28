@@ -16,6 +16,7 @@ const router = createRouter({
     { path: '/', component: () => import('./views/ShoppingListView.vue') },
     // { path: '/categories', component: () => import('./views/CategoriesView.vue') },
     { path: '/data', component: () => import('./views/DataTransferView.vue') },
+    { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
   history: createWebHistory(),
 })
