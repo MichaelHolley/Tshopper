@@ -72,10 +72,10 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
     v-if="sortMode"
     class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
   >
-    <span v-if="!!item.quantity" class="text-primary-400 select-none">
+    <span v-if="!!item.quantity" class="text-primary">
       {{ item.quantity }}
     </span>
-    <span class="flex flex-row items-center select-none">
+    <span class="flex flex-row items-center">
       {{ item.item }}
     </span>
   </div>
@@ -87,13 +87,12 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
     >
       <span
         v-if="!!item.quantity"
-        :class="item.checked ? 'line-through text-primary-800' : 'text-primary-400'"
-        class="select-none"
+        :class="item.checked ? 'line-through text-primary-800' : 'text-primary'"
       >
         {{ item.quantity }}
       </span>
       <span
-        class="flex flex-row items-center select-none"
+        class="flex flex-row items-center"
         :class="{ 'line-through text-neutral-500': item.checked }"
       >
         {{ item.item }}

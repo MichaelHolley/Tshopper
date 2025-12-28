@@ -114,7 +114,7 @@ const handleDragEnd = async () => {
     </UButton>
 
     <!-- Sort Mode Active Badge -->
-    <div v-if="shoppingListStore.sortMode" class="text-sm text-primary-400">
+    <div v-if="shoppingListStore.sortMode" class="text-sm text-primary">
       Long-press and drag to reorder
     </div>
   </div>
@@ -162,7 +162,7 @@ const handleDragEnd = async () => {
       >
         <UIcon
           :name="checkedCollapsed ? 'ci:chevron-down' : 'ci:chevron-up'"
-          class="size-5 text-primary-400"
+          class="size-5 text-primary"
         />
         <span class="text-neutral-200">Show {{ checkedCollapsed ? 'more' : 'less' }}</span>
       </UButton>
