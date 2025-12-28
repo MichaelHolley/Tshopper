@@ -90,7 +90,7 @@ onMounted(updateCategories)
     <div>
       <div class="flex flex-row gap-2">
         <UButton v-if="editingCategory" variant="outline" icon="maki:cross" @click="cancelEdit" />
-        <UButton type="submit" icon="ci:add-plus">
+        <UButton type="submit" :icon="editingCategory ? 'ci:arrow-reload-02' : 'ci:add-plus'">
           {{ editingCategory ? 'Update' : 'Add' }}
         </UButton>
       </div>

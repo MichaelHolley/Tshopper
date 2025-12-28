@@ -79,8 +79,8 @@ const handleCancel = () => {
 
 <template>
   <UForm :validate="validate" :state="state" class="flex flex-row gap-2" @submit="handleSubmit">
-    <UFormField name="item">
-      <UInput v-model="state.item" placeholder="Item" :required="true" />
+    <UFormField name="item" class="grow">
+      <UInput v-model="state.item" placeholder="Item" :required="true" class="w-full" />
     </UFormField>
     <UFormField name="quantity">
       <UInput v-model="state.quantity" placeholder="Quantity" />
@@ -89,7 +89,11 @@ const handleCancel = () => {
       <div class="flex flex-row gap-2">
         <UButton v-if="editingItem" variant="outline" icon="maki:cross" @click="handleCancel">
         </UButton>
-        <UButton type="submit" icon="ci:add-plus" class="float-end">
+        <UButton
+          type="submit"
+          :icon="editingItem ? 'ci:arrow-reload-02' : 'ci:add-plus'"
+          class="float-end"
+        >
           {{ editingItem ? 'Update' : 'Add' }}
         </UButton>
       </div>
