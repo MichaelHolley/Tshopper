@@ -17,7 +17,7 @@ const routeLogin = computed(() => route.path === '/login')
     <div>
       <h1
         class="text-2xl font-bold text-primary-400"
-        :class="{ '!text-error-500': shoppingListStore.isDisconnected && !routeLogin }"
+        :class="{ 'text-error-500!': shoppingListStore.isDisconnected && !routeLogin }"
       >
         Tshopper
       </h1>
