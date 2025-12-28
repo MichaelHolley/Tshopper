@@ -20,8 +20,6 @@ services:
     image: mpholley/tshopper-web:latest
     ports:
       - "6000:80"
-    environment:
-      - VITE_API_URL=http://backend:8080
     depends_on:
       - backend
     restart: always
