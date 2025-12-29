@@ -70,8 +70,12 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
 <template>
   <div
     v-if="sortMode"
-    class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
+    class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center"
   >
+    <UIcon
+      name="ci:drag-vertical"
+      class="drag-handle size-5 text-neutral-500 hover:text-primary cursor-grab active:cursor-grabbing touch-none"
+    />
     <span v-if="!!item.quantity" class="text-primary">
       {{ item.quantity }}
     </span>

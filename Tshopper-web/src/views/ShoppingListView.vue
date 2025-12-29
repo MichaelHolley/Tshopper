@@ -115,9 +115,7 @@ const handleDragEnd = async () => {
     </UButton>
 
     <!-- Sort Mode Active Badge -->
-    <div v-if="sortMode" class="text-sm text-primary">
-      Long-press and drag to reorder
-    </div>
+    <div v-if="sortMode" class="text-sm text-primary">Long-press and drag to reorder</div>
   </div>
 
   <div class="mt-3">
@@ -147,6 +145,12 @@ const handleDragEnd = async () => {
         item-key="id"
         :animation="200"
         ghost-class="opacity-50"
+        handle=".drag-handle"
+        :delay="150"
+        :delayOnTouchOnly="true"
+        :touchStartThreshold="5"
+        :forceFallback="false"
+        :fallbackTolerance="3"
       >
         <template #item="{ element }">
           <ShoppingListItem :item="element" :sortMode="true" :categories="[]" />
