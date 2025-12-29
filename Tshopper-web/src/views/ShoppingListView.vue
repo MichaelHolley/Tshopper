@@ -16,6 +16,7 @@ const checkedCollapsed = ref(true)
 const showDeleteAllDialog = ref(false)
 const editingItem = ref<ShoppingItem | null>(null)
 const draggableItems = ref<ShoppingItem[]>([])
+const sortMode = ref(false)
 
 const activeItems = computed(() => {
   return shoppingListStore.items.filter((item) => !item.checked)
@@ -89,7 +90,7 @@ const toggleCheckedCollapsed = () => {
 }
 
 const toggleSortMode = () => {
-  shoppingListStore.toggleSortMode()
+  sortMode.value = !sortMode.value
 }
 
 const handleDragEnd = async () => {
@@ -104,8 +105,8 @@ const handleDragEnd = async () => {
   <!-- Sort Mode Toggle Button -->
   <div class="mt-3 flex flex-row justify-between items-center">
     <UButton
-      :variant="shoppingListStore.sortMode ? 'solid' : 'outline'"
-      :color="shoppingListStore.sortMode ? 'primary' : 'neutral'"
+      :variant="sortMode ? 'solid' : 'outline'"
+      :color="sortMode ? 'primary' : 'neutral'"
       icon="tabler:arrows-sort"
       @click="toggleSortMode"
       :disabled="shoppingListStore.isDisconnected"
@@ -114,14 +115,14 @@ const handleDragEnd = async () => {
     </UButton>
 
     <!-- Sort Mode Active Badge -->
-    <div v-if="shoppingListStore.sortMode" class="text-sm text-primary">
+    <div v-if="sortMode" class="text-sm text-primary">
       Long-press and drag to reorder
     </div>
   </div>
 
   <div class="mt-3">
     <!-- Normal Mode: Single merged list with auto-animate -->
-    <template v-if="!shoppingListStore.sortMode">
+    <template v-if="!sortMode">
       <ul v-auto-animate="{ duration: 300, delay: 300 }">
         <li v-for="item in mergedItems" :key="item.id" class="flex">
           <ShoppingListItem
@@ -155,7 +156,7 @@ const handleDragEnd = async () => {
 
     <div class="flex flex-row justify-center">
       <UButton
-        v-if="checkedItems.length > VISIBLE_CHECKED"
+        v-if="checkedItems.length > VISIBLE_CHECKED && sortMode === false"
         class="flex flex-row justify-center items-center gap-1"
         variant="ghost"
         @click="toggleCheckedCollapsed"

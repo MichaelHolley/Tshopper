@@ -12,7 +12,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
     items: [] as ShoppingItem[],
     connection: null as HubConnection | null,
     connectionState: 'Disconnected' as ConnectionState,
-    sortMode: false,
   }),
 
   getters: {
@@ -181,10 +180,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
         console.error('❌ Error reordering items:', err)
         return false
       }
-    },
-
-    toggleSortMode() {
-      this.sortMode = !this.sortMode
     },
   },
 })
