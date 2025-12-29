@@ -22,14 +22,16 @@ const routeLogin = computed(() => route.path === '/login')
         Tshopper
       </h1>
     </div>
-    <div
+    <UButton
       v-if="shoppingListStore.isDisconnected"
-      v-show="!routeLogin"
+      variant="outline"
+      icon="ci:wifi-problem"
+      size="sm"
+      color="neutral"
       @click="shoppingListStore.reconnect()"
-      class="cursor-pointer"
     >
-      <span class="text-sm text-neutral-500">Reconnect</span>
-    </div>
+      Reconnect
+    </UButton>
     <div v-if="showInfo">
       <span class="text-sm text-neutral-500"
         >{{ checked }}/{{ shoppingListStore.items.length }}</span
