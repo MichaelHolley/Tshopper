@@ -8,7 +8,7 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'submit', event: FormSubmitEvent<ItemFormState>): void
+  (e: 'submit', event: FormSubmitEvent<ItemFormState>, onSuccess: () => void): void
   (e: 'cancel'): void
 }
 
@@ -63,13 +63,19 @@ const validate = (state: Partial<ItemFormState>): FormError[] => {
 }
 
 const handleSubmit = (event: FormSubmitEvent<ItemFormState>) => {
-  emit('submit', event)
-  // Clear form after submission
-  if (!props.editingItem) {
-    state.item = ''
-    state.quantity = ''
-    localStorage.removeItem('itemFormState')
+  const onSuccess = () => {
+    if (!props.editingItem) {
+      clearForm()
+    }
   }
+
+  emit('submit', event, onSuccess)
+}
+
+const clearForm = () => {
+  state.item = ''
+  state.quantity = ''
+  localStorage.removeItem('itemFormState')
 }
 
 const handleCancel = () => {

@@ -42,7 +42,10 @@ watch(
   { immediate: true },
 )
 
-const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
+const addOrUpdateItem = async (
+  event: FormSubmitEvent<ItemFormState>,
+  onSuccess: () => void,
+) => {
   if (editingItem.value) {
     const success = await shoppingListStore.updateItem(
       editingItem.value.id,
@@ -50,9 +53,19 @@ const addOrUpdateItem = async (event: FormSubmitEvent<ItemFormState>) => {
       event.data.quantity.trim(),
     )
 
-    if (success) editingItem.value = null
+    if (success) {
+      editingItem.value = null
+      onSuccess()
+    }
   } else {
-    await shoppingListStore.addItem(event.data.item.trim(), event.data.quantity.trim())
+    const success = await shoppingListStore.addItem(
+      event.data.item.trim(),
+      event.data.quantity.trim(),
+    )
+
+    if (success) {
+      onSuccess()
+    }
   }
 }
 
