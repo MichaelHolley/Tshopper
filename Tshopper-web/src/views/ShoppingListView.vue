@@ -119,7 +119,7 @@ const handleDragEnd = async () => {
       :color="sortMode ? 'primary' : 'neutral'"
       icon="tabler:arrows-sort"
       @click="toggleSortMode"
-      :disabled="shoppingListStore.isDisconnected"
+      :disabled="!shoppingListStore.isConnected"
     >
       Sort-Mode
     </UButton>

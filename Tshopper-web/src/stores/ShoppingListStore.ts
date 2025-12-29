@@ -1,21 +1,18 @@
 import type { ShoppingItem } from '@/types'
 import type { HubConnection } from '@microsoft/signalr'
-import { HubConnectionBuilder } from '@microsoft/signalr'
+import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr'
 import { defineStore } from 'pinia'
 import { useAuthStore } from './AuthStore'
 import { useRouter } from 'vue-router'
-
-type ConnectionState = 'Disconnected' | 'Connecting' | 'Connected'
 
 export const useShoppingListStore = defineStore('shoppingList', {
   state: () => ({
     items: [] as ShoppingItem[],
     connection: null as HubConnection | null,
-    connectionState: 'Disconnected' as ConnectionState,
   }),
 
   getters: {
-    isDisconnected: (state) => state.connectionState === 'Disconnected',
+    isConnected: (state) => state.connection?.state === HubConnectionState.Connected,
   },
 
   actions: {
@@ -43,32 +40,17 @@ export const useShoppingListStore = defineStore('shoppingList', {
         .withAutomaticReconnect()
         .build()
 
-      this.connection.onclose(() => {
-        this.connectionState = 'Disconnected'
-      })
-
-      this.connection.onreconnecting(() => {
-        this.connectionState = 'Connecting'
-      })
-
-      this.connection.onreconnected(() => {
-        this.connectionState = 'Connected'
-      })
-
       this.connection.on('ReceiveUpdate', (items) => {
         console.log('🆕 New Update:', items)
         this.items = items
       })
 
       try {
-        this.connectionState = 'Connecting'
         await this.connection.start()
-        this.connectionState = 'Connected'
         console.log('✅ SignalR Connected!')
         await this.getAllItems()
       } catch (err) {
         console.error('❌ SignalR Connection Error:', err)
-        this.connectionState = 'Disconnected'
       }
     },
 
@@ -78,7 +60,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
       try {
         await this.connection.start()
         console.log('✅ SignalR Reconnected!')
-        this.connectionState = 'Connected'
         await this.getAllItems()
       } catch (error) {
         console.error('❌ Reconnection failed:', error)
@@ -89,7 +70,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
       if (this.connection) {
         try {
           await this.connection.stop()
-          this.connectionState = 'Disconnected'
           console.log('✅ SignalR Disconnected!')
         } catch (err) {
           console.error('❌ Error disconnecting SignalR:', err)
