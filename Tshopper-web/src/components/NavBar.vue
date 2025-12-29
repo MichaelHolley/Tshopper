@@ -17,13 +17,21 @@ const routeLogin = computed(() => route.path === '/login')
     <div>
       <h1
         class="text-2xl font-bold text-primary"
-        :class="{ 'text-error-500!': !shoppingListStore.isConnected && !routeLogin }"
+        :class="{
+          'text-error-500!': !shoppingListStore.isConnected && !routeLogin,
+          'animate-pulse': shoppingListStore.isConnecting,
+        }"
       >
         Tshopper
       </h1>
     </div>
+    <div v-if="!shoppingListStore.isConnected && shoppingListStore.isConnecting && !routeLogin">
+      <UButton variant="outline" icon="ci:wifi-off" size="sm" color="neutral" disabled>
+        Connecting...
+      </UButton>
+    </div>
     <UButton
-      v-if="!shoppingListStore.isConnected && !routeLogin"
+      v-if="!shoppingListStore.isConnected && !shoppingListStore.isConnecting && !routeLogin"
       variant="outline"
       icon="ci:wifi-problem"
       size="sm"

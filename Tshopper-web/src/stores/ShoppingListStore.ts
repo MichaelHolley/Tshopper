@@ -9,10 +9,15 @@ export const useShoppingListStore = defineStore('shoppingList', {
   state: () => ({
     items: [] as ShoppingItem[],
     connection: null as HubConnection | null,
+    connectionState: HubConnectionState.Connecting,
+    statePollingInterval: null as number | null,
   }),
 
   getters: {
-    isConnected: (state) => state.connection?.state === HubConnectionState.Connected,
+    isConnected: (state) => state.connectionState === HubConnectionState.Connected,
+    isConnecting: (state) =>
+      state.connectionState === HubConnectionState.Connecting ||
+      state.connectionState === HubConnectionState.Reconnecting,
   },
 
   actions: {
@@ -45,6 +50,14 @@ export const useShoppingListStore = defineStore('shoppingList', {
         this.items = items
       })
 
+      if (this.statePollingInterval !== null) {
+        clearInterval(this.statePollingInterval)
+      }
+
+      this.statePollingInterval = window.setInterval(() => {
+        this.connectionState = this.connection?.state || HubConnectionState.Disconnected
+      }, 250)
+
       try {
         await this.connection.start()
         console.log('✅ SignalR Connected!')
@@ -67,6 +80,11 @@ export const useShoppingListStore = defineStore('shoppingList', {
     },
 
     async disconnect() {
+      if (this.statePollingInterval !== null) {
+        clearInterval(this.statePollingInterval)
+        this.statePollingInterval = null
+      }
+
       if (this.connection) {
         try {
           await this.connection.stop()
