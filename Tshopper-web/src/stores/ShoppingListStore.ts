@@ -46,7 +46,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
         .build()
 
       this.connection.on('ReceiveUpdate', (items) => {
-        console.log('🆕 New Update:', items)
         this.items = items
       })
 
