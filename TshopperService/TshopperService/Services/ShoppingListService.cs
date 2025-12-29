@@ -15,12 +15,23 @@ public class ShoppingListService : IShoppingListService
 
     public async Task<List<ShoppingItem>> GetAllItemsAsync()
     {
-        return await _dbContext.ShoppingItems
+        var items = await _dbContext.ShoppingItems
             .Where(i => i.Checked == null || i.Checked > DateTime.Now.AddDays(-7))
-            .OrderBy(i => i.Checked != null)
-            .ThenBy(i => i.SortOrder)
-            .ThenByDescending(i => i.Checked)
             .ToListAsync();
+
+        // Sort unchecked items by SortOrder, checked items by Checked date (newest first)
+        var uncheckedItems = items
+            .Where(i => i.Checked == null)
+            .OrderBy(i => i.SortOrder)
+            .ToList();
+
+        var checkedItems = items
+            .Where(i => i.Checked != null)
+            .OrderByDescending(i => i.Checked)
+            .ToList();
+
+        // Combine: unchecked items first, then checked items
+        return uncheckedItems.Concat(checkedItems).ToList();
     }
 
     public async Task<ShoppingItem> AddItemAsync(string item, string quantity)
