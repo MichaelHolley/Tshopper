@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useAuthStore } from '@/stores/AuthStore'
 import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { TabsItem } from '@nuxt/ui'
@@ -10,6 +11,7 @@ const router = useRouter()
 
 const shoppingListStore = useShoppingListStore()
 const categoryStore = useCategoryStore()
+const authStore = useAuthStore()
 
 const navItems = [
   {
@@ -48,6 +50,9 @@ const activeTab = computed({
 })
 
 onMounted(() => {
+  if (!authStore.isAuthenticated) return
+
+  console.info('🚀 Authenticated - initializing stores')
   shoppingListStore.initializeConnection()
   categoryStore.getCategories()
 })

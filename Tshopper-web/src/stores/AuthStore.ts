@@ -61,7 +61,7 @@ export const useAuthStore = defineStore('auth', {
 
         return true
       } catch (error) {
-        console.error('Token validation error:', error)
+        console.error('❌ Token validation error:', error)
         this.logout()
 
         return false

@@ -23,7 +23,7 @@ const routeLogin = computed(() => route.path === '/login')
       </h1>
     </div>
     <UButton
-      v-if="!shoppingListStore.isConnected"
+      v-if="!shoppingListStore.isConnected && !routeLogin"
       variant="outline"
       icon="ci:wifi-problem"
       size="sm"
@@ -33,9 +33,9 @@ const routeLogin = computed(() => route.path === '/login')
       Reconnect
     </UButton>
     <div v-if="showInfo">
-      <span class="text-sm text-neutral-500"
-        >{{ checked }}/{{ shoppingListStore.items.length }}</span
-      >
+      <span class="text-sm text-neutral-500">
+        {{ checked }}/{{ shoppingListStore.items.length }}
+      </span>
     </div>
   </div>
 </template>

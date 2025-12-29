@@ -89,7 +89,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
     async addItem(item: string, quantity: string) {
       try {
         await this.connection?.invoke('AddItem', item, quantity)
-        console.log('✅ Item Added!')
         return true
       } catch (err) {
         console.error('❌ Error adding item:', err)
@@ -143,7 +142,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
     async updateItem(itemId: number, item: string, quantity: string) {
       try {
         await this.connection?.invoke('UpdateItem', itemId, item, quantity)
-        console.log('✅ Item Updated!')
         return true
       } catch (err) {
         console.error('❌ Error updating item:', err)
@@ -154,7 +152,6 @@ export const useShoppingListStore = defineStore('shoppingList', {
     async reorderItems(orderedItemIds: number[]): Promise<boolean> {
       try {
         await this.connection?.invoke('ReorderItems', orderedItemIds)
-        console.log('✅ Items Reordered!')
         return true
       } catch (err) {
         console.error('❌ Error reordering items:', err)
