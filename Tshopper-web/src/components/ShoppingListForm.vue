@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import { onMounted, reactive, watch } from 'vue'
 import type { ItemFormState, ShoppingItem } from '@/types'
+import type { FormError, FormSubmitEvent } from '@nuxt/ui'
+import { onMounted, reactive, useTemplateRef, watch } from 'vue'
 
 interface Props {
   editingItem: ShoppingItem | null
@@ -14,6 +14,9 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+const itemForm = useTemplateRef('itemForm')
+const itemInput = useTemplateRef('itemInput')
 
 const state = reactive<ItemFormState>({
   item: '',
@@ -66,6 +69,7 @@ const handleSubmit = (event: FormSubmitEvent<ItemFormState>) => {
   const onSuccess = () => {
     if (!props.editingItem) {
       clearForm()
+      itemInput.value?.inputRef?.focus()
     }
   }
 
@@ -76,6 +80,7 @@ const clearForm = () => {
   state.item = ''
   state.quantity = ''
   localStorage.removeItem('itemFormState')
+  itemForm.value?.setErrors([])
 }
 
 const handleCancel = () => {
@@ -84,9 +89,21 @@ const handleCancel = () => {
 </script>
 
 <template>
-  <UForm :validate="validate" :state="state" class="flex flex-row gap-2" @submit="handleSubmit">
+  <UForm
+    :validate="validate"
+    :state="state"
+    class="flex flex-row gap-2"
+    @submit="handleSubmit"
+    ref="itemForm"
+  >
     <UFormField name="item" class="grow">
-      <UInput v-model="state.item" placeholder="Item" :required="true" class="w-full" />
+      <UInput
+        v-model="state.item"
+        placeholder="Item"
+        :required="true"
+        class="w-full"
+        ref="itemInput"
+      />
     </UFormField>
     <UFormField name="quantity">
       <UInput v-model="state.quantity" placeholder="Quantity" />
