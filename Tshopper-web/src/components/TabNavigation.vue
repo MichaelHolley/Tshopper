@@ -1,17 +1,10 @@
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/AuthStore'
-import { useCategoryStore } from '@/stores/CategoryStore'
-import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import type { TabsItem } from '@nuxt/ui'
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
-
-const shoppingListStore = useShoppingListStore()
-const categoryStore = useCategoryStore()
-const authStore = useAuthStore()
 
 const navItems = [
   {
@@ -47,18 +40,6 @@ const activeTab = computed({
       path: `${tab}`,
     })
   },
-})
-
-onMounted(() => {
-  if (!authStore.isAuthenticated) return
-
-  console.info('🚀 Authenticated - initializing stores')
-  shoppingListStore.initializeConnection()
-  categoryStore.getCategories()
-})
-
-onUnmounted(() => {
-  shoppingListStore.disconnect()
 })
 </script>
 

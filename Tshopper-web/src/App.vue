@@ -1,8 +1,34 @@
 <script lang="ts" setup>
-import { computed } from 'vue'
+import { computed, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from './stores/AuthStore'
+import { useCategoryStore } from './stores/CategoryStore'
+import { useShoppingListStore } from './stores/ShoppingListStore'
 
 const route = useRoute()
+
+const shoppingListStore = useShoppingListStore()
+const categoryStore = useCategoryStore()
+const authStore = useAuthStore()
+
+// Initialize stores when user authenticates
+watch(
+  () => authStore.isAuthenticated,
+  (isAuthenticated) => {
+    if (isAuthenticated) {
+      console.info('🚀 User authenticated - initializing stores')
+      shoppingListStore.initializeConnection()
+      categoryStore.getCategories()
+    } else {
+      shoppingListStore.disconnect()
+    }
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  shoppingListStore.disconnect()
+})
 
 const isLogin = computed(() => route.path == '/login')
 </script>
