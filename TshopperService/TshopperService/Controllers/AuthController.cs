@@ -68,11 +68,13 @@ public class AuthController : ControllerBase
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
+        var expirationDays = _configuration.GetValue<int>("Jwt:ExpirationDays", 7);
+
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: null,
-            expires: DateTime.Now.AddHours(72),
+            expires: DateTime.Now.AddDays(expirationDays),
             signingCredentials: credentials
         );
 
