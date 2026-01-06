@@ -18,8 +18,8 @@ RUN pnpm install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build the app
-RUN pnpm build
+# Build the app (generate type declarations first, then type-check)
+RUN pnpm build-only && pnpm type-check
 
 # Production stage
 FROM nginx:alpine
