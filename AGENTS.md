@@ -5,6 +5,7 @@ This document provides guidelines for AI coding agents working in the Tshopper r
 ## Project Overview
 
 Tshopper is a real-time shopping list application with:
+
 - **Frontend**: Vue 3 + TypeScript + Vite (Tshopper-web/)
 - **Backend**: .NET 8 ASP.NET Core with SignalR (TshopperService/)
 - **Database**: SQLite with Entity Framework Core
@@ -58,21 +59,26 @@ dotnet ef database update --project TshopperService
 ### Frontend (TypeScript/Vue)
 
 #### Formatting & Linting
+
 - **Prettier**: Semi-colons disabled, single quotes, 100 char line width
 - **ESLint**: Vue 3 essential rules + TypeScript recommended config
 - **Auto-fix**: Always run `pnpm lint` before committing
 
 #### TypeScript
+
 - **Strict Mode**: `useUnknownInCatchVariables: true` in tsconfig
 - **Type Imports**: Use `import type` for type-only imports
+
   ```typescript
   import type { ShoppingItem, Category } from '@/types'
   import { HubConnectionBuilder } from '@microsoft/signalr'
   ```
+
 - **No `any`**: Always provide explicit types, prefer `unknown` in catch blocks
 - **Vue Props/Emits**: Use TypeScript syntax with `defineProps<>()` and `defineEmits<>()`
 
 #### Imports Order
+
 1. Vue core imports
 2. Type imports (`import type`)
 3. Third-party libraries (e.g., SignalR, Pinia)
@@ -80,6 +86,7 @@ dotnet ef database update --project TshopperService
 5. Local types/utilities
 
 Example:
+
 ```typescript
 import { computed } from 'vue'
 import type { ShoppingItem } from '@/types'
@@ -89,6 +96,7 @@ import { useAuthStore } from './AuthStore'
 ```
 
 #### Naming Conventions
+
 - **Variables/Functions**: camelCase (`shoppingItems`, `addItem`)
 - **Types/Interfaces**: PascalCase (`ShoppingItem`, `Category`)
 - **Constants**: SCREAMING_SNAKE_CASE or camelCase for local constants
@@ -96,6 +104,7 @@ import { useAuthStore } from './AuthStore'
 - **Stores**: PascalCase with "Store" suffix (`useShoppingListStore`)
 
 #### Vue Components
+
 - **Script Setup**: Always use `<script setup lang="ts">`
 - **Props**: Destructure with `defineProps<{ ... }>()`
 - **Emits**: Define with explicit types using `defineEmits<{ ... }>()`
@@ -103,17 +112,21 @@ import { useAuthStore } from './AuthStore'
 - **Template**: Use Tailwind CSS classes, avoid inline styles
 
 #### Error Handling
+
 - **Console Logging**: Use emoji prefixes for visibility (✅, ❌, 🆕)
+
   ```typescript
   console.log('✅ Item Added!')
   console.error('❌ Error adding item:', err)
   ```
+
 - **Try-Catch**: Always wrap async SignalR calls in try-catch
 - **Return Status**: Return boolean for success/failure in store actions
 
 #### State Management
+
 - **Pinia**: Use for global state (auth, shopping list, categories)
-- **Store Pattern**: 
+- **Store Pattern**:
   - `state()`: Define reactive state
   - `getters`: Computed derived state
   - `actions`: Async methods for API/SignalR calls
@@ -122,11 +135,13 @@ import { useAuthStore } from './AuthStore'
 ### Backend (C#/.NET)
 
 #### C# Conventions
+
 - **Nullable**: Enabled (`<Nullable>enable</Nullable>`)
 - **Implicit Usings**: Enabled for common namespaces
-- **Target Framework**: .NET 8.0
+- **Target Framework**: .NET 10.0
 
 #### Naming Conventions
+
 - **Classes/Interfaces**: PascalCase (`ShoppingListService`, `IShoppingListService`)
 - **Methods**: PascalCase (`GetAllItemsAsync`, `AddItemAsync`)
 - **Private Fields**: `_camelCase` with underscore prefix (`_dbContext`)
@@ -134,12 +149,14 @@ import { useAuthStore } from './AuthStore'
 - **Async Methods**: Suffix with `Async`
 
 #### Imports Organization
+
 - System namespaces first
 - Microsoft namespaces
 - Third-party packages
 - Local project namespaces (alphabetical)
 
 Example:
+
 ```csharp
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -148,36 +165,43 @@ using TshopperService.Exceptions;
 ```
 
 #### Controllers
+
 - **Route**: `[Route("/api/[controller]")]`
 - **Attributes**: `[HttpGet]`, `[HttpPost]`, `[Authorize]` as needed
 - **Return Types**: `IActionResult`, `Ok()`, `Unauthorized()`, `NotFound()`
 - **Dependency Injection**: Constructor injection for services
 
 #### Services
+
 - **Interface**: Always create an interface (`IShoppingListService`)
 - **Async**: All database operations should be async with `Task<T>`
 - **DbContext**: Inject via constructor, use `_dbContext` naming
 
 #### Error Handling
+
 - **Custom Exceptions**: Use `BusinessException` for business logic errors
 - **Error Codes**: Use `BusinessErrorCodes` enum for categorization
 - **Middleware**: `BusinessExceptionMiddleware` handles exceptions globally
 - **Validation**: Validate input early, throw `BusinessException` for invalid data
+
   ```csharp
   if (string.IsNullOrWhiteSpace(item))
   {
       throw new BusinessException("Item name cannot be empty", BusinessErrorCodes.INVALID_INPUT);
   }
   ```
+
 - **Null Checks**: Always check for null after `FindAsync()` before operations
 
 #### Entity Framework
+
 - **Include Relations**: Use `.Include()` for related data
 - **Queries**: Use LINQ with async methods (`.ToListAsync()`, `.FirstOrDefaultAsync()`)
 - **Ordering**: Chain `.OrderBy()`, `.ThenBy()` for complex sorting
 - **Save Changes**: Always `await _dbContext.SaveChangesAsync()`
 
 #### SignalR Hubs
+
 - **Base Class**: Inherit from `Hub`
 - **Methods**: Public async methods invokable from clients
 - **Broadcasting**: Use `Clients.All.SendAsync()` for updates
@@ -210,7 +234,7 @@ Tshopper/
 
 - **Async/Await**: Use async/await for all I/O operations
 - **Path Alias**: Use `@/` for absolute imports in frontend (maps to `src/`)
-- **Environment Variables**: 
+- **Environment Variables**:
   - Frontend: `import.meta.env.VITE_API_URL`
   - Backend: `IConfiguration` injection
 - **Authentication**: JWT tokens with 72-hour expiry
@@ -220,6 +244,7 @@ Tshopper/
 ## Testing (Future)
 
 When adding tests:
+
 - **Frontend**: Vitest + Vue Test Utils
 - **Backend**: xUnit + Moq for service tests
 - **Run**: `pnpm test` (frontend), `dotnet test` (backend)

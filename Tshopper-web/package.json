@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@formkit/auto-animate": "^0.8.4",
-    "@microsoft/signalr": "^8.0.17",
+    "@microsoft/signalr": "^10.0.0",
     "@nuxt/ui": "^3.3.7",
     "pinia": "^3.0.4",
     "vue": "^3.5.25",
