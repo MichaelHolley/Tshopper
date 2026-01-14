@@ -18,7 +18,13 @@ const emit = defineEmits<{
 }>()
 
 const contextMenuItems = computed<ContextMenuItem[]>(() => {
-  const items = [
+  const items: ContextMenuItem[] = [
+    [
+      {
+        label: `${props.item.item}`,
+        type: 'label',
+      },
+    ],
     [
       {
         label: 'Category',
@@ -54,7 +60,7 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
   ]
 
   if (props.item.checked) {
-    items[1].push({
+    items[2].push({
       label: 'Delete all checked',
       icon: 'tabler:trash',
       onSelect: () => {
