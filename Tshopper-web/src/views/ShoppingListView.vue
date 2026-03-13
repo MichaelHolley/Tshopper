@@ -123,9 +123,6 @@ const handleDragEnd = async () => {
     >
       Sort-Mode
     </UButton>
-
-    <!-- Sort Mode Active Badge -->
-    <div v-if="sortMode" class="text-sm text-primary">Long-press and drag to reorder</div>
   </div>
 
   <div class="mt-3">
