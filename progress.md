@@ -61,3 +61,14 @@
   - Added "Manage Stores" button in the drawer footer (above Logout) with `tabler:building-store` icon
   - Placed `<ManageStoresModal>` outside the drawer panel (sibling in template) so its z-index stacks correctly above the drawer
 - Frontend `vue-tsc` type-check and `vite build` production build pass with 0 errors
+
+### Task 8: Update ShoppingListView.vue and ShoppingListForm.vue to use the active store
+- Updated `Tshopper-web/src/views/ShoppingListView.vue`:
+  - Imported `useStoreStore` and instantiated `storeStore`
+  - Added an **empty state** panel (shown when `items.length === 0`): displays the active store's color swatch (or a shopping cart icon for "All items"), the store name, and a prompt to add items using the form above
+  - Replaced the flat `v-if`/`v-else` template structure with a three-branch guard: empty state → normal list (with auto-animate) → sort mode (draggable); the old layout had no empty branch
+  - Updated the **delete-all confirmation dialog** to include the active store name (e.g. "Are you sure you want to delete all checked items from Costco?") when a specific store is active
+- Updated `Tshopper-web/src/components/ShoppingListForm.vue`:
+  - Imported `useStoreStore` and instantiated `storeStore`
+  - Added an **active store context badge** shown above the form when `storeStore.activeStore` is non-null: a small colored dot matching the store's `color` + the text "Adding to [Store Name]"; nothing is shown when browsing "All items" (no active store)
+- Frontend `vue-tsc` type-check and `vite build` production build pass with 0 errors
