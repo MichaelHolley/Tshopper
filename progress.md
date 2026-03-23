@@ -12,3 +12,9 @@
 - Created `TshopperService/TshopperService/Controllers/StoreController.cs` with `[Authorize]` REST endpoints: `GET /api/Store`, `GET /api/Store/{id}`, `POST /api/Store`, `PUT /api/Store/{id}`, `DELETE /api/Store/{id}`
 - Registered `IStoreService` / `StoreService` as a scoped service in `Program.cs`
 - Build passes with 0 errors
+
+### Task 3: Update ShoppingListService and ShoppingListHub to scope operations to storeId (nullable)
+- Updated `IShoppingListService` to add `int? storeId` parameter to `GetAllItemsAsync`, `AddItemAsync`, `DeleteAllCheckedItemsAsync`, and `ReorderItemsAsync`
+- Updated `ShoppingListService` to filter all queries by `StoreId == storeId` (EF Core handles NULL equality correctly); `AddItemAsync` now sets `StoreId` on the new item; `UncheckItemAsync` scopes its `maxSortOrder` query to the item's own store
+- Updated `ShoppingListHub` to accept and forward `storeId` on `GetAllItems`, `AddItem`, `DeleteAllCheckedItems`, `DeleteItem`, and `ReorderItems`; `CheckItem` and `UncheckItem` derive `storeId` from the returned item; `ReceiveUpdate` now broadcasts `(storeId, items)` so clients can refresh only the affected store
+- Build passes with 0 errors
