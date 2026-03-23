@@ -111,6 +111,24 @@ import { useAuthStore } from './AuthStore'
 - **Computed**: Use `computed()` for derived state
 - **Template**: Use Tailwind CSS classes, avoid inline styles
 
+#### Nuxt UI
+
+This project uses [Nuxt UI](https://ui.nuxt.com) as the component library, configured for use in a Vue (non-Nuxt) app via `@nuxt/ui/vue-plugin`. Key points:
+
+- **Plugin registration**: The Nuxt UI Vue plugin must be registered in `main.ts`:
+  ```typescript
+  import ui from '@nuxt/ui/vue-plugin'
+  app.use(ui)
+  ```
+- **CSS import**: Include Nuxt UI's styles in your main CSS entry:
+  ```css
+  @import "@nuxt/ui";
+  ```
+- **Component usage**: Use Nuxt UI components (e.g., `<UButton>`, `<UInput>`, `<UModal>`) directly in templates — no per-component imports required.
+- **Theming**: Customize via the `app.config.ts` (or equivalent config object passed to the plugin) using Nuxt UI's token system.
+- **Icons**: Nuxt UI relies on `@iconify/vue`; use the `icon` prop with Iconify icon names (e.g., `icon="i-heroicons-plus"`).
+- **Avoid duplication**: Do not manually implement UI primitives (buttons, inputs, modals, etc.) that Nuxt UI already provides.
+
 #### Error Handling
 
 - **Console Logging**: Use emoji prefixes for visibility (✅, ❌, 🆕)
