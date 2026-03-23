@@ -3,6 +3,7 @@ import type { HubConnection } from '@microsoft/signalr'
 import { HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr'
 import { defineStore } from 'pinia'
 import { useAuthStore } from './AuthStore'
+import { useStoreStore } from './StoreStore'
 import { useRouter } from 'vue-router'
 
 export const useShoppingListStore = defineStore('shoppingList', {
@@ -45,8 +46,11 @@ export const useShoppingListStore = defineStore('shoppingList', {
         .withAutomaticReconnect()
         .build()
 
-      this.connection.on('ReceiveUpdate', (items) => {
-        this.items = items
+      this.connection.on('ReceiveUpdate', (storeId: number | null, items: ShoppingItem[]) => {
+        const storeStore = useStoreStore()
+        if (storeId === storeStore.activeStoreId) {
+          this.items = items
+        }
       })
 
       if (this.statePollingInterval !== null) {
@@ -95,8 +99,9 @@ export const useShoppingListStore = defineStore('shoppingList', {
     },
 
     async getAllItems() {
+      const storeStore = useStoreStore()
       try {
-        const items = await this.connection?.invoke('GetAllItems')
+        const items = await this.connection?.invoke('GetAllItems', storeStore.activeStoreId)
         this.items = items
       } catch (err) {
         console.error('❌ Error fetching items:', err)
@@ -104,8 +109,9 @@ export const useShoppingListStore = defineStore('shoppingList', {
     },
 
     async addItem(item: string, quantity: string) {
+      const storeStore = useStoreStore()
       try {
-        await this.connection?.invoke('AddItem', item, quantity)
+        await this.connection?.invoke('AddItem', item, quantity, storeStore.activeStoreId)
         return true
       } catch (err) {
         console.error('❌ Error adding item:', err)
@@ -141,16 +147,18 @@ export const useShoppingListStore = defineStore('shoppingList', {
     },
 
     async deleteItem(itemId: number) {
+      const storeStore = useStoreStore()
       try {
-        await this.connection?.invoke('DeleteItem', itemId)
+        await this.connection?.invoke('DeleteItem', itemId, storeStore.activeStoreId)
       } catch (err) {
         console.error('❌ Error deleting item:', err)
       }
     },
 
     async deleteAllCheckedItems() {
+      const storeStore = useStoreStore()
       try {
-        await this.connection?.invoke('DeleteAllCheckedItems')
+        await this.connection?.invoke('DeleteAllCheckedItems', storeStore.activeStoreId)
       } catch (err) {
         console.error('❌ Error deleting items:', err)
       }
@@ -167,13 +175,21 @@ export const useShoppingListStore = defineStore('shoppingList', {
     },
 
     async reorderItems(orderedItemIds: number[]): Promise<boolean> {
+      const storeStore = useStoreStore()
       try {
-        await this.connection?.invoke('ReorderItems', orderedItemIds)
+        await this.connection?.invoke('ReorderItems', orderedItemIds, storeStore.activeStoreId)
         return true
       } catch (err) {
         console.error('❌ Error reordering items:', err)
         return false
       }
+    },
+
+    async setActiveStore(id: number | null) {
+      const storeStore = useStoreStore()
+      storeStore.setActiveStore(id)
+      this.items = []
+      await this.getAllItems()
     },
   },
 })

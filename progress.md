@@ -28,3 +28,14 @@
   - Actions: `getStores`, `addStore`, `updateStore`, `deleteStore` (full REST CRUD against `/api/Store`), `setActiveStore`
   - `deleteStore` clears `activeStoreId` if the active store is deleted; local list is kept sorted by name after add/update
 - Frontend type-check (`vue-tsc`) and production build pass with 0 errors
+
+### Task 5: Update ShoppingListStore.ts to scope operations to activeStoreId
+- Imported `useStoreStore` into `ShoppingListStore.ts`
+- Updated `ReceiveUpdate` SignalR listener to accept `(storeId, items)` signature; items are only written to state when `storeId` matches `activeStoreId` (ignores broadcasts for other stores)
+- Updated `getAllItems` to invoke `GetAllItems(activeStoreId)` on the hub
+- Updated `addItem` to invoke `AddItem(item, quantity, activeStoreId)`
+- Updated `deleteItem` to invoke `DeleteItem(itemId, activeStoreId)`
+- Updated `deleteAllCheckedItems` to invoke `DeleteAllCheckedItems(activeStoreId)`
+- Updated `reorderItems` to invoke `ReorderItems(orderedItemIds, activeStoreId)`
+- Added `setActiveStore(id)` action that delegates to `StoreStore.setActiveStore`, clears `items`, and reloads items for the new store
+- Frontend type-check and production build pass with 0 errors
