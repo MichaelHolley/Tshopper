@@ -1,17 +1,21 @@
 <script lang="ts" setup>
-import { computed, onUnmounted, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from './stores/AuthStore'
 import { useCategoryStore } from './stores/CategoryStore'
 import { useShoppingListStore } from './stores/ShoppingListStore'
+import { useStoreStore } from './stores/StoreStore'
+import SideDrawer from './components/SideDrawer.vue'
 
 const route = useRoute()
 
 const shoppingListStore = useShoppingListStore()
 const categoryStore = useCategoryStore()
 const authStore = useAuthStore()
+const storeStore = useStoreStore()
 
-// Initialize stores when user authenticates
+const drawerOpen = ref(false)
+
 watch(
   () => authStore.isAuthenticated,
   (isAuthenticated) => {
@@ -19,8 +23,10 @@ watch(
       console.info('🚀 User authenticated - initializing stores')
       shoppingListStore.initializeConnection()
       categoryStore.getCategories()
+      storeStore.getStores()
     } else {
       shoppingListStore.disconnect()
+      drawerOpen.value = false
     }
   },
   { immediate: true },
@@ -35,12 +41,12 @@ const isLogin = computed(() => route.path == '/login')
 
 <template>
   <UApp>
+    <SideDrawer :open="drawerOpen && !isLogin" @close="drawerOpen = false" />
     <div class="container mx-auto max-w-lg h-svh flex flex-col px-2">
-      <NavBar class="mb-2 mt-1" />
+      <NavBar class="mb-2 mt-1" @open-drawer="drawerOpen = true" />
       <div class="grow overflow-y-auto">
         <RouterView />
       </div>
-      <TabNavigation v-if="!isLogin" />
     </div>
   </UApp>
 </template>

@@ -39,3 +39,11 @@
 - Updated `reorderItems` to invoke `ReorderItems(orderedItemIds, activeStoreId)`
 - Added `setActiveStore(id)` action that delegates to `StoreStore.setActiveStore`, clears `items`, and reloads items for the new store
 - Frontend type-check and production build pass with 0 errors
+
+### Task 6: Rework navigation — SideDrawer, StoreNav, updated NavBar and App
+- Created `Tshopper-web/src/components/StoreNav.vue`: renders an "All items" entry (sets `activeStoreId` to `null`) plus one button per store (colored dot + name); a divider then a "Data Transfer" nav link; selecting any option calls `ShoppingListStore.setActiveStore`, navigates to `/`, and closes the drawer
+- Created `Tshopper-web/src/components/SideDrawer.vue`: fixed slide-in panel (Tailwind CSS transition) with animated backdrop overlay; header shows "Tshopper" title and close button; body contains `<StoreNav>`; footer has a logout button that disconnects SignalR and redirects to `/login`; `open` prop + `close` emit
+- Updated `Tshopper-web/src/components/NavBar.vue`: added hamburger `UButton` (emits `open-drawer`) hidden on login screen; title now shows active store name (or "All items") instead of static "Tshopper"; connection status and item count remain on the right
+- Updated `Tshopper-web/src/App.vue`: imports `SideDrawer`, adds `drawerOpen` ref; passes `open` to `SideDrawer` and listens for `close`; added `storeStore.getStores()` call on authentication; removed `<TabNavigation>` from template; `NavBar` emits `open-drawer` to set `drawerOpen = true`
+- `TabNavigation.vue` is no longer referenced anywhere in the codebase (kept on disk but unused)
+- `vue-tsc` type-check and `vite build` production build pass with 0 errors
