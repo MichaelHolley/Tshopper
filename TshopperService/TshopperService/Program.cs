@@ -51,6 +51,7 @@ builder.Services.AddDbContext<ShoppingListDbContext>(options =>
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IItemCategoryService, ItemCategoryService>();
+builder.Services.AddScoped<IStoreService, StoreService>();
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
