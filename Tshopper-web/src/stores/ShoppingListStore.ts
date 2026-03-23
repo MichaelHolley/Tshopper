@@ -185,6 +185,17 @@ export const useShoppingListStore = defineStore('shoppingList', {
       }
     },
 
+    async moveItemToStore(itemId: number, targetStoreId: number | null): Promise<boolean> {
+      const storeStore = useStoreStore()
+      try {
+        await this.connection?.invoke('MoveItemToStore', itemId, targetStoreId, storeStore.activeStoreId)
+        return true
+      } catch (err) {
+        console.error('❌ Error moving item to store:', err)
+        return false
+      }
+    },
+
     async setActiveStore(id: number | null) {
       const storeStore = useStoreStore()
       storeStore.setActiveStore(id)

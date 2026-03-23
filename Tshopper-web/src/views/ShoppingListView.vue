@@ -97,6 +97,10 @@ const toggleCategory = (itemId: number, categoryId: number) => {
   console.log('toggleCategory', itemId, categoryId)
 }
 
+const assignStore = (itemId: number, storeId: number | null) => {
+  shoppingListStore.moveItemToStore(itemId, storeId)
+}
+
 const toggleCheckedCollapsed = () => {
   checkedCollapsed.value = !checkedCollapsed.value
 }
@@ -160,7 +164,9 @@ const handleDragEnd = async () => {
             @delete-all="handleDeleteAll"
             @edit="startEditItem"
             @toggle-category="toggleCategory"
+            @assign-store="assignStore"
             :categories="categoryStore.categories"
+            :stores="storeStore.stores"
           />
         </li>
       </ul>
@@ -182,7 +188,7 @@ const handleDragEnd = async () => {
         :fallbackTolerance="3"
       >
         <template #item="{ element }">
-          <ShoppingListItem :item="element" :sortMode="true" :categories="[]" />
+          <ShoppingListItem :item="element" :sortMode="true" :categories="[]" :stores="[]" />
         </template>
       </draggable>
     </template>

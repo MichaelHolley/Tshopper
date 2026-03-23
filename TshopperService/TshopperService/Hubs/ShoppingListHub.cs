@@ -113,4 +113,22 @@ public sealed class ShoppingListHub : Hub
             throw new HubException($"{ex.Code}: {ex.Message}");
         }
     }
+
+    public async Task MoveItemToStore(int id, int? targetStoreId, int? currentStoreId)
+    {
+        try
+        {
+            await _shoppingListService.MoveItemToStoreAsync(id, targetStoreId);
+            // Broadcast update to the source store (item removed) and target store (item added)
+            await ReceiveUpdate(currentStoreId);
+            if (targetStoreId != currentStoreId)
+            {
+                await ReceiveUpdate(targetStoreId);
+            }
+        }
+        catch (BusinessException ex)
+        {
+            throw new HubException($"{ex.Code}: {ex.Message}");
+        }
+    }
 }

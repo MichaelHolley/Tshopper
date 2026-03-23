@@ -178,4 +178,26 @@ public class ShoppingListService : IShoppingListService
 
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task<ShoppingItem> MoveItemToStoreAsync(int id, int? targetStoreId)
+    {
+        var item = await _dbContext.ShoppingItems.FindAsync(id);
+        if (item == null)
+        {
+            throw new BusinessException($"Shopping item with ID {id} not found", BusinessErrorCodes.NOT_FOUND);
+        }
+
+        item.StoreId = targetStoreId;
+
+        // Place the item at the end of the unchecked list in the target store
+        var maxSortOrder = await _dbContext.ShoppingItems
+            .Where(i => i.StoreId == targetStoreId && i.Checked == null && i.Id != id)
+            .MaxAsync(i => (int?)i.SortOrder) ?? 0;
+
+        item.SortOrder = maxSortOrder + 1;
+
+        await _dbContext.SaveChangesAsync();
+
+        return item;
+    }
 }
