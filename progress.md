@@ -18,3 +18,13 @@
 - Updated `ShoppingListService` to filter all queries by `StoreId == storeId` (EF Core handles NULL equality correctly); `AddItemAsync` now sets `StoreId` on the new item; `UncheckItemAsync` scopes its `maxSortOrder` query to the item's own store
 - Updated `ShoppingListHub` to accept and forward `storeId` on `GetAllItems`, `AddItem`, `DeleteAllCheckedItems`, `DeleteItem`, and `ReorderItems`; `CheckItem` and `UncheckItem` derive `storeId` from the returned item; `ReceiveUpdate` now broadcasts `(storeId, items)` so clients can refresh only the affected store
 - Build passes with 0 errors
+
+### Task 4: Add Store interface to types.d.ts and create StoreStore.ts Pinia store
+- Added `Store` interface (`id`, `name`, `color`) to `Tshopper-web/src/types.d.ts`
+- Added optional `storeId?: number | null` field to `ShoppingItem` interface in `types.d.ts`
+- Created `Tshopper-web/src/stores/StoreStore.ts` with `useStoreStore` Pinia store containing:
+  - State: `stores: Store[]`, `activeStoreId: number | null`
+  - Getter: `activeStore` (resolves active store object from `activeStoreId`)
+  - Actions: `getStores`, `addStore`, `updateStore`, `deleteStore` (full REST CRUD against `/api/Store`), `setActiveStore`
+  - `deleteStore` clears `activeStoreId` if the active store is deleted; local list is kept sorted by name after add/update
+- Frontend type-check (`vue-tsc`) and production build pass with 0 errors
