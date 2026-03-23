@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useStoreStore } from '@/stores/StoreStore'
+import { ref } from 'vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import { useRouter } from 'vue-router'
 import StoreNav from './StoreNav.vue'
+import ManageStoresModal from './ManageStoresModal.vue'
 
 const props = defineProps<{
   open: boolean
@@ -13,10 +14,19 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const storeStore = useStoreStore()
 const authStore = useAuthStore()
 const shoppingListStore = useShoppingListStore()
 const router = useRouter()
+
+const manageStoresOpen = ref(false)
+
+function openManageStores() {
+  manageStoresOpen.value = true
+}
+
+function closeManageStores() {
+  manageStoresOpen.value = false
+}
 
 function logout() {
   shoppingListStore.disconnect()
@@ -59,8 +69,15 @@ function logout() {
         <StoreNav @close="emit('close')" />
       </div>
 
-      <!-- Drawer footer: logout -->
-      <div class="border-t border-neutral-800 px-3 py-3">
+      <!-- Drawer footer: manage stores + logout -->
+      <div class="border-t border-neutral-800 px-3 py-3 flex flex-col gap-1">
+        <button
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors w-full text-left"
+          @click="openManageStores"
+        >
+          <UIcon name="tabler:building-store" class="size-4 flex-shrink-0" />
+          <span>Manage Stores</span>
+        </button>
         <button
           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-red-400 transition-colors w-full text-left"
           @click="logout"
@@ -71,6 +88,9 @@ function logout() {
       </div>
     </div>
   </Transition>
+
+  <!-- Manage Stores modal (rendered outside the drawer stacking context) -->
+  <ManageStoresModal :open="manageStoresOpen" @close="closeManageStores" />
 </template>
 
 <style scoped>

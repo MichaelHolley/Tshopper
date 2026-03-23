@@ -47,3 +47,17 @@
 - Updated `Tshopper-web/src/App.vue`: imports `SideDrawer`, adds `drawerOpen` ref; passes `open` to `SideDrawer` and listens for `close`; added `storeStore.getStores()` call on authentication; removed `<TabNavigation>` from template; `NavBar` emits `open-drawer` to set `drawerOpen = true`
 - `TabNavigation.vue` is no longer referenced anywhere in the codebase (kept on disk but unused)
 - `vue-tsc` type-check and `vite build` production build pass with 0 errors
+
+### Task 7: Add "Manage Stores" modal in the side drawer (create, rename, delete)
+- Created `Tshopper-web/src/components/ManageStoresModal.vue`: full-featured modal for managing stores with:
+  - **Add Store** section: text input for name, native `<input type="color">` color picker (styled as a swatch), and an Add button; validates that name is non-empty; calls `storeStore.addStore`
+  - **Existing Stores** section: lists all stores sorted by name (from store); each row shows the colored dot + name in view mode with Edit (pencil) and Delete (trash) icon buttons; clicking Edit switches to inline edit mode with name input + color picker + Save/Cancel buttons; delete calls `storeStore.deleteStore` with per-row loading state
+  - Inline error messages for add and edit failures; shared delete error shown below the list
+  - Transitions: backdrop fade + modal scale-in/scale-out via CSS transitions
+  - `open` prop + `close` emit; resets all local state on close
+- Updated `Tshopper-web/src/components/SideDrawer.vue`:
+  - Imported `ManageStoresModal` and `ref`; removed unused `useStoreStore` import
+  - Added `manageStoresOpen` ref and `openManageStores` / `closeManageStores` helpers
+  - Added "Manage Stores" button in the drawer footer (above Logout) with `tabler:building-store` icon
+  - Placed `<ManageStoresModal>` outside the drawer panel (sibling in template) so its z-index stacks correctly above the drawer
+- Frontend `vue-tsc` type-check and `vite build` production build pass with 0 errors
