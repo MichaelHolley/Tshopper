@@ -17,8 +17,8 @@ const showInfo = computed(() => shoppingListStore.items?.length > 0)
 const routeLogin = computed(() => route.path === '/login')
 
 const activeStoreName = computed(() => {
-  if (storeStore.activeStoreId === null) return 'All items'
-  return storeStore.activeStore?.name ?? 'All items'
+  if (storeStore.activeStoreId === null) return 'Unassigned'
+  return storeStore.activeStore?.name ?? 'Unassigned'
 })
 </script>
 

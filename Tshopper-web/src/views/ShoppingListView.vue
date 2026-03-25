@@ -146,7 +146,7 @@ const handleDragEnd = async () => {
       <p class="text-sm">
         No items in
         <span class="font-semibold text-neutral-300">
-          {{ storeStore.activeStore ? storeStore.activeStore.name : 'All items' }}
+          {{ storeStore.activeStore ? storeStore.activeStore.name : 'Unassigned' }}
         </span>
       </p>
       <p class="text-xs">Add one using the form above.</p>
