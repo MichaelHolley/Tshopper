@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
-import { useStoreStore } from '@/stores/StoreStore'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -9,17 +8,11 @@ const emit = defineEmits<{
 }>()
 
 const shoppingListStore = useShoppingListStore()
-const storeStore = useStoreStore()
 const route = useRoute()
 
 const checked = computed(() => shoppingListStore.items.filter((item) => item.checked).length)
 const showInfo = computed(() => shoppingListStore.items?.length > 0)
 const routeLogin = computed(() => route.path === '/login')
-
-const activeStoreName = computed(() => {
-  if (storeStore.activeStoreId === null) return 'Unassigned'
-  return storeStore.activeStore?.name ?? 'Unassigned'
-})
 </script>
 
 <template>
