@@ -105,6 +105,7 @@ const handleCancel = () => {
 
   <UForm
     :validate="validate"
+    :validate-on="[]"
     :state="state"
     class="flex flex-row gap-2"
     @submit="handleSubmit"
