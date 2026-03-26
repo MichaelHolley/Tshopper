@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { ContextMenuItem } from '@nuxt/ui'
 import { computed } from 'vue'
-import type { Category, ShoppingItem, Store } from '../types'
+import type { ShoppingItem, Store } from '../types'
 
 const props = defineProps<{
   item: ShoppingItem
-  categories: Category[]
   stores: Store[]
   sortMode?: boolean
 }>()
@@ -15,7 +14,6 @@ const emit = defineEmits<{
   (e: 'delete', itemId: number): void
   (e: 'deleteAll'): void
   (e: 'edit', item: ShoppingItem): void
-  (e: 'toggleCategory', itemId: number, categoryId: number): void
   (e: 'assignStore', itemId: number, storeId: number | null): void
 }>()
 
@@ -28,20 +26,6 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
       },
     ],
     [
-      {
-        label: 'Category',
-        icon: 'tabler:category',
-        children: [
-          props.categories.map((category) => ({
-            label: category.name,
-            icon: 'tabler:category',
-            onSelect: () => {
-              emit('toggleCategory', props.item.id, category.id)
-            },
-          })),
-        ],
-        disabled: true,
-      },
       {
         label: 'Assign Store',
         icon: 'tabler:building-store',

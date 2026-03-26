@@ -2,7 +2,6 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from './stores/AuthStore'
-import { useCategoryStore } from './stores/CategoryStore'
 import { useShoppingListStore } from './stores/ShoppingListStore'
 import { useStoreStore } from './stores/StoreStore'
 import SideDrawer from './components/SideDrawer.vue'
@@ -10,7 +9,6 @@ import SideDrawer from './components/SideDrawer.vue'
 const route = useRoute()
 
 const shoppingListStore = useShoppingListStore()
-const categoryStore = useCategoryStore()
 const authStore = useAuthStore()
 const storeStore = useStoreStore()
 
@@ -22,7 +20,6 @@ watch(
     if (isAuthenticated) {
       console.info('🚀 User authenticated - initializing stores')
       shoppingListStore.initializeConnection()
-      categoryStore.getCategories()
       storeStore.getStores()
     } else {
       shoppingListStore.disconnect()

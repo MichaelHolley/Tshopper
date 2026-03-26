@@ -70,7 +70,7 @@ dotnet ef database update --project TshopperService
 - **Type Imports**: Use `import type` for type-only imports
 
   ```typescript
-  import type { ShoppingItem, Category } from '@/types'
+  import type { ShoppingItem, Store } from '@/types'
   import { HubConnectionBuilder } from '@microsoft/signalr'
   ```
 
@@ -98,7 +98,7 @@ import { useAuthStore } from './AuthStore'
 #### Naming Conventions
 
 - **Variables/Functions**: camelCase (`shoppingItems`, `addItem`)
-- **Types/Interfaces**: PascalCase (`ShoppingItem`, `Category`)
+- **Types/Interfaces**: PascalCase (`ShoppingItem`, `Store`)
 - **Constants**: SCREAMING_SNAKE_CASE or camelCase for local constants
 - **Vue Components**: PascalCase files (`ShoppingListItem.vue`)
 - **Stores**: PascalCase with "Store" suffix (`useShoppingListStore`)

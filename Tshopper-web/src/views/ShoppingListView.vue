@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import ShoppingListItem from '@/components/ShoppingListItem.vue'
 import ShoppingListForm from '@/components/ShoppingListForm.vue'
-import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import { useStoreStore } from '@/stores/StoreStore'
 import type { FormSubmitEvent } from '@nuxt/ui'
@@ -12,7 +11,6 @@ import draggable from 'vuedraggable'
 const VISIBLE_CHECKED = 3
 
 const shoppingListStore = useShoppingListStore()
-const categoryStore = useCategoryStore()
 const storeStore = useStoreStore()
 const checkedCollapsed = ref(true)
 const showDeleteAllDialog = ref(false)
@@ -93,10 +91,6 @@ const cancelEdit = () => {
   editingItem.value = null
 }
 
-const toggleCategory = (itemId: number, categoryId: number) => {
-  console.log('toggleCategory', itemId, categoryId)
-}
-
 const assignStore = (itemId: number, storeId: number | null) => {
   shoppingListStore.moveItemToStore(itemId, storeId)
 }
@@ -163,9 +157,7 @@ const handleDragEnd = async () => {
             @delete="deleteItem"
             @delete-all="handleDeleteAll"
             @edit="startEditItem"
-            @toggle-category="toggleCategory"
             @assign-store="assignStore"
-            :categories="categoryStore.categories"
             :stores="storeStore.stores"
           />
         </li>
@@ -186,9 +178,9 @@ const handleDragEnd = async () => {
         :touchStartThreshold="5"
         :forceFallback="false"
         :fallbackTolerance="3"
-      >
+        >
         <template #item="{ element }">
-          <ShoppingListItem :item="element" :sortMode="true" :categories="[]" :stores="[]" />
+          <ShoppingListItem :item="element" :sortMode="true" :stores="[]" />
         </template>
       </draggable>
     </template>
