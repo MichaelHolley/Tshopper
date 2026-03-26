@@ -42,7 +42,7 @@ const activeStoreName = computed(() => {
             'animate-pulse': shoppingListStore.isConnecting,
           }"
         >
-          {{ routeLogin ? 'Tshopper' : activeStoreName }}
+          Tshopper
         </h1>
       </div>
     </div>
