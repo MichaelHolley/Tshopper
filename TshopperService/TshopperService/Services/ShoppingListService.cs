@@ -13,10 +13,11 @@ public class ShoppingListService : IShoppingListService
         _dbContext = dbContext;
     }
 
-    public async Task<List<ShoppingItem>> GetAllItemsAsync()
+    public async Task<List<ShoppingItem>> GetAllItemsAsync(int? storeId)
     {
         var items = await _dbContext.ShoppingItems
-            .Where(i => i.Checked == null || i.Checked > DateTime.Now.AddDays(-7))
+            .Where(i => i.StoreId == storeId
+                && (i.Checked == null || i.Checked > DateTime.Now.AddDays(-7)))
             .ToListAsync();
 
         // Sort unchecked items by SortOrder, checked items by Checked date (newest first)
@@ -34,23 +35,24 @@ public class ShoppingListService : IShoppingListService
         return uncheckedItems.Concat(checkedItems).ToList();
     }
 
-    public async Task<ShoppingItem> AddItemAsync(string item, string quantity)
+    public async Task<ShoppingItem> AddItemAsync(string item, string quantity, int? storeId)
     {
         if (string.IsNullOrWhiteSpace(item))
         {
             throw new BusinessException("Item name cannot be empty", BusinessErrorCodes.INVALID_INPUT);
         }
 
-        // Get max SortOrder from unchecked items
+        // Get max SortOrder from unchecked items in the same store
         var maxSortOrder = await _dbContext.ShoppingItems
-            .Where(i => i.Checked == null)
+            .Where(i => i.StoreId == storeId && i.Checked == null)
             .MaxAsync(i => (int?)i.SortOrder) ?? 0;
 
         var newItem = new ShoppingItem
         {
             Item = item,
             Quantity = quantity,
-            SortOrder = maxSortOrder + 1
+            SortOrder = maxSortOrder + 1,
+            StoreId = storeId
         };
 
         await _dbContext.ShoppingItems.AddAsync(newItem);
@@ -85,9 +87,9 @@ public class ShoppingListService : IShoppingListService
 
         item.Checked = null;
 
-        // Set SortOrder to max + 1 to add to bottom of unchecked list
+        // Set SortOrder to max + 1 to add to bottom of unchecked list in the same store
         var maxSortOrder = await _dbContext.ShoppingItems
-            .Where(i => i.Checked == null && i.Id != id)
+            .Where(i => i.StoreId == item.StoreId && i.Checked == null && i.Id != id)
             .MaxAsync(i => (int?)i.SortOrder) ?? 0;
 
         item.SortOrder = maxSortOrder + 1;
@@ -97,9 +99,11 @@ public class ShoppingListService : IShoppingListService
         return item;
     }
 
-    public async Task DeleteAllCheckedItemsAsync()
+    public async Task DeleteAllCheckedItemsAsync(int? storeId)
     {
-        var items = await _dbContext.ShoppingItems.Where(i => i.Checked != null).ToListAsync();
+        var items = await _dbContext.ShoppingItems
+            .Where(i => i.StoreId == storeId && i.Checked != null)
+            .ToListAsync();
         if (!items.Any())
         {
             return;
@@ -142,7 +146,7 @@ public class ShoppingListService : IShoppingListService
         await _dbContext.SaveChangesAsync();
     }
 
-    public async Task ReorderItemsAsync(List<int> itemIds)
+    public async Task ReorderItemsAsync(List<int> itemIds, int? storeId)
     {
         if (itemIds == null || !itemIds.Any())
         {
@@ -150,7 +154,7 @@ public class ShoppingListService : IShoppingListService
         }
 
         var items = await _dbContext.ShoppingItems
-            .Where(i => itemIds.Contains(i.Id))
+            .Where(i => itemIds.Contains(i.Id) && i.StoreId == storeId)
             .ToListAsync();
 
         if (items.Count != itemIds.Count)
@@ -173,5 +177,27 @@ public class ShoppingListService : IShoppingListService
         }
 
         await _dbContext.SaveChangesAsync();
+    }
+
+    public async Task<ShoppingItem> MoveItemToStoreAsync(int id, int? targetStoreId)
+    {
+        var item = await _dbContext.ShoppingItems.FindAsync(id);
+        if (item == null)
+        {
+            throw new BusinessException($"Shopping item with ID {id} not found", BusinessErrorCodes.NOT_FOUND);
+        }
+
+        item.StoreId = targetStoreId;
+
+        // Place the item at the end of the unchecked list in the target store
+        var maxSortOrder = await _dbContext.ShoppingItems
+            .Where(i => i.StoreId == targetStoreId && i.Checked == null && i.Id != id)
+            .MaxAsync(i => (int?)i.SortOrder) ?? 0;
+
+        item.SortOrder = maxSortOrder + 1;
+
+        await _dbContext.SaveChangesAsync();
+
+        return item;
     }
 }

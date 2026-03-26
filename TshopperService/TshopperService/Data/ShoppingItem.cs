@@ -7,4 +7,7 @@ public class ShoppingItem
     public string Quantity { get; set; } = string.Empty;
     public DateTime? Checked { get; set; }
     public int SortOrder { get; set; }
+
+    public int? StoreId { get; set; }
+    public Store? Store { get; set; }
 }

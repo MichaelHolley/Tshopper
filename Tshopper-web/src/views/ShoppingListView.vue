@@ -3,6 +3,7 @@ import ShoppingListItem from '@/components/ShoppingListItem.vue'
 import ShoppingListForm from '@/components/ShoppingListForm.vue'
 import { useCategoryStore } from '@/stores/CategoryStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
+import { useStoreStore } from '@/stores/StoreStore'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { computed, ref, watch } from 'vue'
 import type { ItemFormState, ShoppingItem } from '../types'
@@ -12,6 +13,7 @@ const VISIBLE_CHECKED = 3
 
 const shoppingListStore = useShoppingListStore()
 const categoryStore = useCategoryStore()
+const storeStore = useStoreStore()
 const checkedCollapsed = ref(true)
 const showDeleteAllDialog = ref(false)
 const editingItem = ref<ShoppingItem | null>(null)
@@ -95,6 +97,10 @@ const toggleCategory = (itemId: number, categoryId: number) => {
   console.log('toggleCategory', itemId, categoryId)
 }
 
+const assignStore = (itemId: number, storeId: number | null) => {
+  shoppingListStore.moveItemToStore(itemId, storeId)
+}
+
 const toggleCheckedCollapsed = () => {
   checkedCollapsed.value = !checkedCollapsed.value
 }
@@ -126,8 +132,28 @@ const handleDragEnd = async () => {
   </div>
 
   <div class="mt-3">
+    <!-- Empty state -->
+    <div
+      v-if="shoppingListStore.items.length === 0"
+      class="flex flex-col items-center justify-center py-16 gap-3 text-neutral-500"
+    >
+      <span
+        v-if="storeStore.activeStore"
+        class="size-10 rounded-full"
+        :style="{ backgroundColor: storeStore.activeStore.color }"
+      />
+      <UIcon v-else name="tabler:shopping-cart" class="size-10" />
+      <p class="text-sm">
+        No items in
+        <span class="font-semibold text-neutral-300">
+          {{ storeStore.activeStore ? storeStore.activeStore.name : 'Unassigned' }}
+        </span>
+      </p>
+      <p class="text-xs">Add one using the form above.</p>
+    </div>
+
     <!-- Normal Mode: Single merged list with auto-animate -->
-    <template v-if="!sortMode">
+    <template v-else-if="!sortMode">
       <ul v-auto-animate="{ duration: 300, delay: 300 }">
         <li v-for="item in mergedItems" :key="item.id" class="flex">
           <ShoppingListItem
@@ -138,7 +164,9 @@ const handleDragEnd = async () => {
             @delete-all="handleDeleteAll"
             @edit="startEditItem"
             @toggle-category="toggleCategory"
+            @assign-store="assignStore"
             :categories="categoryStore.categories"
+            :stores="storeStore.stores"
           />
         </li>
       </ul>
@@ -160,7 +188,7 @@ const handleDragEnd = async () => {
         :fallbackTolerance="3"
       >
         <template #item="{ element }">
-          <ShoppingListItem :item="element" :sortMode="true" :categories="[]" />
+          <ShoppingListItem :item="element" :sortMode="true" :categories="[]" :stores="[]" />
         </template>
       </draggable>
     </template>
@@ -187,7 +215,14 @@ const handleDragEnd = async () => {
     description="This action requires confirmation"
   >
     <template #body>
-      <p>Are you sure you want to delete all checked items? This action cannot be undone.</p>
+      <p>
+        Are you sure you want to delete all checked items
+        <template v-if="storeStore.activeStore">
+          from
+          <span class="font-semibold">{{ storeStore.activeStore.name }}</span>
+        </template>
+        ? This action cannot be undone.
+      </p>
       <div class="flex flex-row justify-end gap-2">
         <UButton color="neutral" variant="ghost" @click="showDeleteAllDialog = false">
           Cancel

@@ -2,6 +2,7 @@
 import type { ItemFormState, ShoppingItem } from '@/types'
 import type { FormError, FormSubmitEvent } from '@nuxt/ui'
 import { onMounted, reactive, useTemplateRef, watch } from 'vue'
+import { useStoreStore } from '@/stores/StoreStore'
 
 interface Props {
   editingItem: ShoppingItem | null
@@ -14,6 +15,7 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+const storeStore = useStoreStore()
 
 const itemForm = useTemplateRef('itemForm')
 const itemInput = useTemplateRef('itemInput')
@@ -89,6 +91,18 @@ const handleCancel = () => {
 </script>
 
 <template>
+  <!-- Active store context badge -->
+  <div v-if="storeStore.activeStore" class="flex items-center gap-2 mb-2">
+    <span
+      class="size-2.5 rounded-full flex-shrink-0"
+      :style="{ backgroundColor: storeStore.activeStore.color }"
+    />
+    <span class="text-xs text-neutral-400">
+      Adding to
+      <span class="font-medium text-neutral-200">{{ storeStore.activeStore.name }}</span>
+    </span>
+  </div>
+
   <UForm
     :validate="validate"
     :state="state"
