@@ -63,8 +63,8 @@ const handleSubmit = async (event: FormSubmitEvent<LoginFormState>) => {
         {{ error }}
       </div>
 
-      <div class="mt-4">
-        <UButton type="submit" block :loading="loading">Login</UButton>
+      <div class="mt-4 flex justify-end">
+        <UButton type="submit" icon="tabler:login" :loading="loading">Login</UButton>
       </div>
     </UForm>
   </div>
