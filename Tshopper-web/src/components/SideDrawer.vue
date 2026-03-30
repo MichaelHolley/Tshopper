@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { useAuthStore } from '@/stores/AuthStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import StoreNav from './StoreNav.vue'
 import ManageStoresModal from './ManageStoresModal.vue'
+import StoreNav from './StoreNav.vue'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
 }>()
 
@@ -39,11 +39,7 @@ function logout() {
 <template>
   <!-- Backdrop -->
   <Transition name="backdrop">
-    <div
-      v-if="open"
-      class="fixed inset-0 z-40 bg-black/50"
-      @click="emit('close')"
-    />
+    <div v-if="open" class="fixed inset-0 z-40 bg-black/50" @click="emit('close')" />
   </Transition>
 
   <!-- Drawer panel -->
@@ -55,13 +51,7 @@ function logout() {
       <!-- Drawer header -->
       <div class="flex items-center justify-between px-4 py-3 border-b border-neutral-800">
         <h2 class="text-lg font-bold text-primary">Tshopper</h2>
-        <UButton
-          variant="ghost"
-          color="neutral"
-          icon="tabler:x"
-          size="sm"
-          @click="emit('close')"
-        />
+        <UButton variant="ghost" color="neutral" icon="tabler:x" size="sm" @click="emit('close')" />
       </div>
 
       <!-- Store & navigation list -->
