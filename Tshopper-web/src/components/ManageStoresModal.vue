@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
 import { useStoreStore } from '@/stores/StoreStore'
 import type { Store } from '@/types'
+import { reactive, ref } from 'vue'
 
-const props = defineProps<{
+defineProps<{
   open: boolean
 }>()
 
@@ -102,11 +102,7 @@ function handleClose() {
 
 <template>
   <Transition name="backdrop">
-    <div
-      v-if="open"
-      class="fixed inset-0 z-60 bg-black/60"
-      @click="handleClose"
-    />
+    <div v-if="open" class="fixed inset-0 z-60 bg-black/60" @click="handleClose" />
   </Transition>
 
   <Transition name="modal">
@@ -119,20 +115,15 @@ function handleClose() {
         @click.stop
       >
         <!-- Header -->
-        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-800 flex-shrink-0">
+        <div
+          class="flex items-center justify-between px-5 py-4 border-b border-neutral-800 flex-shrink-0"
+        >
           <h2 class="text-base font-semibold text-white">Manage Stores</h2>
-          <UButton
-            variant="ghost"
-            color="neutral"
-            icon="tabler:x"
-            size="sm"
-            @click="handleClose"
-          />
+          <UButton variant="ghost" color="neutral" icon="tabler:x" size="sm" @click="handleClose" />
         </div>
 
         <!-- Body -->
         <div class="overflow-y-auto flex-1 px-5 py-4 flex flex-col gap-5">
-
           <!-- Add new store -->
           <div>
             <p class="text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2">
@@ -148,22 +139,13 @@ function handleClose() {
                 @keydown.enter.prevent="handleAddStore"
               />
               <label class="relative cursor-pointer flex-shrink-0" title="Pick color">
-                <input
-                  v-model="newStoreColor"
-                  type="color"
-                  class="sr-only"
-                />
+                <input v-model="newStoreColor" type="color" class="sr-only" />
                 <span
                   class="block size-9 rounded-lg border-2 border-neutral-600 hover:border-primary transition-colors"
                   :style="{ backgroundColor: newStoreColor }"
                 />
               </label>
-              <UButton
-                icon="tabler:plus"
-                size="sm"
-                :loading="addLoading"
-                @click="handleAddStore"
-              />
+              <UButton icon="tabler:plus" size="sm" :loading="addLoading" @click="handleAddStore" />
             </div>
             <p v-if="addError" class="text-xs text-red-400 mt-1">{{ addError }}</p>
           </div>
@@ -187,10 +169,7 @@ function handleClose() {
                 class="border border-neutral-800 rounded-lg overflow-hidden"
               >
                 <!-- View mode -->
-                <div
-                  v-if="editingStore?.id !== store.id"
-                  class="flex items-center gap-3 px-3 py-2"
-                >
+                <div v-if="editingStore?.id !== store.id" class="flex items-center gap-3 px-3 py-2">
                   <span
                     class="size-3 rounded-full flex-shrink-0"
                     :style="{ backgroundColor: store.color }"
@@ -230,11 +209,7 @@ function handleClose() {
                       @keydown.escape.prevent="cancelEdit"
                     />
                     <label class="relative cursor-pointer flex-shrink-0" title="Pick color">
-                      <input
-                        v-model="editState.color"
-                        type="color"
-                        class="sr-only"
-                      />
+                      <input v-model="editState.color" type="color" class="sr-only" />
                       <span
                         class="block size-9 rounded-lg border-2 border-neutral-600 hover:border-primary transition-colors"
                         :style="{ backgroundColor: editState.color }"
@@ -285,7 +260,9 @@ function handleClose() {
 
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 .modal-enter-from,
 .modal-leave-to {
