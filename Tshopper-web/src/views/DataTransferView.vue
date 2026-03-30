@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { useAuthStore } from '@/stores/AuthStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
+import { api } from '@/lib/api'
 import { exportToCsvFile } from '@/utils/csv-export'
 import { computed, ref } from 'vue'
 
@@ -30,20 +30,7 @@ const submitForm = async () => {
   }
 
   try {
-    const authStore = useAuthStore()
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/Import`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authStore.token}`,
-      },
-      body: formData,
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
+    await api.post('Import', { body: formData })
     alert('Form submitted successfully!')
   } catch (error) {
     console.error('Error submitting form:', error)

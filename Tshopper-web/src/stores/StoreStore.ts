@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Store } from '@/types'
-import { useAuthStore } from './AuthStore'
+import { api } from '@/lib/api'
 
 export const useStoreStore = defineStore('store', {
   state: () => ({
@@ -15,13 +15,8 @@ export const useStoreStore = defineStore('store', {
 
   actions: {
     async getStores() {
-      const authStore = useAuthStore()
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/Store`, {
-          headers: { Authorization: `Bearer ${authStore.token}` },
-        })
-        if (!response.ok) throw new Error('Failed to fetch stores')
-        const data: Store[] = await response.json()
+        const data = await api.get('Store').json<Store[]>()
         this.stores = data
         return data
       } catch (err) {
@@ -31,18 +26,8 @@ export const useStoreStore = defineStore('store', {
     },
 
     async addStore(name: string, color: string) {
-      const authStore = useAuthStore()
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/Store`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authStore.token}`,
-          },
-          body: JSON.stringify({ name, color }),
-        })
-        if (!response.ok) throw new Error('Failed to add store')
-        const created: Store = await response.json()
+        const created = await api.post('Store', { json: { name, color } }).json<Store>()
         this.stores.push(created)
         this.stores.sort((a, b) => a.name.localeCompare(b.name))
         console.log('✅ Store added!')
@@ -54,17 +39,8 @@ export const useStoreStore = defineStore('store', {
     },
 
     async updateStore(id: number, name: string, color: string) {
-      const authStore = useAuthStore()
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/Store/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authStore.token}`,
-          },
-          body: JSON.stringify({ id, name, color }),
-        })
-        if (!response.ok) throw new Error('Failed to update store')
+        await api.put(`Store/${id}`, { json: { id, name, color } })
         const idx = this.stores.findIndex((s) => s.id === id)
         if (idx !== -1) {
           this.stores[idx] = { id, name, color }
@@ -79,13 +55,8 @@ export const useStoreStore = defineStore('store', {
     },
 
     async deleteStore(id: number) {
-      const authStore = useAuthStore()
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/Store/${id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${authStore.token}` },
-        })
-        if (!response.ok) throw new Error('Failed to delete store')
+        await api.delete(`Store/${id}`)
         this.stores = this.stores.filter((s) => s.id !== id)
         if (this.activeStoreId === id) {
           this.activeStoreId = null

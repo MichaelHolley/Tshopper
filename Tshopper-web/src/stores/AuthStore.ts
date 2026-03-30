@@ -1,4 +1,8 @@
 import { defineStore } from 'pinia'
+import ky from 'ky'
+
+// Use a base ky instance without auth hooks to avoid circular dependency with api.ts
+const authApi = ky.create({ prefixUrl: import.meta.env.VITE_API_URL })
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -8,19 +12,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async authenticate(password: string) {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/Auth/Login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ password }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Authentication failed')
-        }
-
-        const data = await response.json()
+        const data = await authApi.post('Auth/Login', { json: { password } }).json<{ token: string }>()
         this.setToken(data.token)
         return true
       } catch (error) {
@@ -46,24 +38,13 @@ export const useAuthStore = defineStore('auth', {
       if (!this.token) return false
 
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/Auth/Validate`, {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-          },
+        await authApi.get('Auth/Validate', {
+          headers: { Authorization: `Bearer ${this.token}` },
         })
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            this.logout()
-          }
-          return false
-        }
-
         return true
       } catch (error) {
         console.error('❌ Token validation error:', error)
         this.logout()
-
         return false
       }
     },
