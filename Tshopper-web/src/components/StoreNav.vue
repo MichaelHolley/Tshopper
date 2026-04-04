@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { usePreferencesStore } from '@/stores/PreferencesStore'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import { useStoreStore } from '@/stores/StoreStore'
 import { useRouter } from 'vue-router'
@@ -8,6 +9,7 @@ const emit = defineEmits<{
 }>()
 
 const storeStore = useStoreStore()
+const preferencesStore = usePreferencesStore()
 const shoppingListStore = useShoppingListStore()
 const router = useRouter()
 
@@ -21,6 +23,11 @@ function navigateTo(path: string) {
   router.push(path)
   emit('close')
 }
+
+async function toggleDefault(id: number) {
+  const next = preferencesStore.defaultStoreId === id ? null : id
+  await preferencesStore.updatePreferences({ defaultStoreId: next })
+}
 </script>
 
 <template>
@@ -30,7 +37,7 @@ function navigateTo(path: string) {
 
     <!-- Unassigned (no store) -->
     <button
-      class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left"
       :class="
         storeStore.activeStoreId === null
           ? 'bg-primary/15 text-primary'
@@ -42,14 +49,19 @@ function navigateTo(path: string) {
         class="size-3 rounded-full border-2 flex-shrink-0"
         :class="storeStore.activeStoreId === null ? 'border-primary' : 'border-neutral-500'"
       />
-      <span>Unassigned</span>
+      <span class="flex-1">Unassigned</span>
+      <UIcon
+        v-if="preferencesStore.defaultStoreId === null"
+        name="tabler:star-filled"
+        class="size-3.5 text-yellow-400 flex-shrink-0"
+      />
     </button>
 
     <!-- Individual stores -->
     <button
       v-for="store in storeStore.stores"
       :key="store.id"
-      class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left"
+      class="group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left"
       :class="
         storeStore.activeStoreId === store.id
           ? 'bg-primary/15 text-primary'
@@ -58,7 +70,21 @@ function navigateTo(path: string) {
       @click="selectStore(store.id)"
     >
       <span class="size-3 rounded-full flex-shrink-0" :style="{ backgroundColor: store.color }" />
-      <span>{{ store.name }}</span>
+      <span class="flex-1">{{ store.name }}</span>
+      <button
+        class="flex-shrink-0 transition-opacity"
+        :class="
+          preferencesStore.defaultStoreId === store.id
+            ? 'opacity-100 text-yellow-400'
+            : 'opacity-0 group-hover:opacity-100 text-neutral-500 hover:text-neutral-300'
+        "
+        @click.stop="toggleDefault(store.id)"
+      >
+        <UIcon
+          :name="preferencesStore.defaultStoreId === store.id ? 'tabler:star-filled' : 'tabler:star'"
+          class="size-3.5"
+        />
+      </button>
     </button>
 
     <p v-if="storeStore.stores.length === 0" class="text-xs text-neutral-500 px-3 py-1 italic">

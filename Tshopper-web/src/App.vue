@@ -2,6 +2,7 @@
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from './stores/AuthStore'
+import { usePreferencesStore } from './stores/PreferencesStore'
 import { useShoppingListStore } from './stores/ShoppingListStore'
 import { useStoreStore } from './stores/StoreStore'
 import SideDrawer from './components/SideDrawer.vue'
@@ -11,6 +12,7 @@ const route = useRoute()
 const shoppingListStore = useShoppingListStore()
 const authStore = useAuthStore()
 const storeStore = useStoreStore()
+const preferencesStore = usePreferencesStore()
 
 const drawerOpen = ref(false)
 
@@ -19,8 +21,20 @@ watch(
   (isAuthenticated) => {
     if (isAuthenticated) {
       console.info('🚀 User authenticated - initializing stores')
-      shoppingListStore.initializeConnection()
-      storeStore.getStores()
+      Promise.all([preferencesStore.getPreferences(), storeStore.getStores()]).then(
+        ([preferences, stores]) => {
+          const defaultStoreId = preferences?.defaultStoreId ?? null
+          if (defaultStoreId !== null) {
+            const exists = stores.some((s) => s.id === defaultStoreId)
+            if (exists) {
+              storeStore.setActiveStore(defaultStoreId)
+            } else {
+              preferencesStore.updatePreferences({ defaultStoreId: null })
+            }
+          }
+          shoppingListStore.initializeConnection()
+        },
+      )
     } else {
       shoppingListStore.disconnect()
       drawerOpen.value = false

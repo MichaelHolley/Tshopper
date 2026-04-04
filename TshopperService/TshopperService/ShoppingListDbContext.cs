@@ -7,6 +7,7 @@ public class ShoppingListDbContext : DbContext
 {
     public DbSet<ShoppingItem> ShoppingItems { get; set; }
     public DbSet<Store> Stores { get; set; }
+    public DbSet<UserPreference> UserPreferences { get; set; }
 
     public ShoppingListDbContext(DbContextOptions<ShoppingListDbContext> options) : base(options)
     {
@@ -29,6 +30,15 @@ public class ShoppingListDbContext : DbContext
             e.HasKey(s => s.Id);
             e.Property(s => s.Name).IsRequired();
             e.Property(s => s.Color).IsRequired();
+        });
+
+        modelBuilder.Entity<UserPreference>(e =>
+        {
+            e.HasKey(p => p.Id);
+            e.HasOne(p => p.DefaultStore)
+                .WithMany()
+                .HasForeignKey(p => p.DefaultStoreId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }
