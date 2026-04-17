@@ -116,7 +116,7 @@ function handleClose() {
       >
         <!-- Header -->
         <div
-          class="flex items-center justify-between px-5 py-4 border-b border-neutral-800 flex-shrink-0"
+          class="flex items-center justify-between px-5 py-4 border-b border-neutral-800 shrink-0"
         >
           <h2 class="text-base font-semibold text-white">Manage Stores</h2>
           <UButton variant="ghost" color="neutral" icon="tabler:x" size="sm" @click="handleClose" />
@@ -138,7 +138,7 @@ function handleClose() {
                 class="flex-1 bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-primary/50"
                 @keydown.enter.prevent="handleAddStore"
               />
-              <label class="relative cursor-pointer flex-shrink-0" title="Pick color">
+              <label class="relative cursor-pointer shrink-0" title="Pick color">
                 <input v-model="newStoreColor" type="color" class="sr-only" />
                 <span
                   class="block size-9 rounded-lg border-2 border-neutral-600 hover:border-primary transition-colors"
@@ -171,11 +171,11 @@ function handleClose() {
                 <!-- View mode -->
                 <div v-if="editingStore?.id !== store.id" class="flex items-center gap-3 px-3 py-2">
                   <span
-                    class="size-3 rounded-full flex-shrink-0"
+                    class="size-3 rounded-full shrink-0"
                     :style="{ backgroundColor: store.color }"
                   />
                   <span class="flex-1 text-sm text-neutral-200 truncate">{{ store.name }}</span>
-                  <div class="flex items-center gap-1 flex-shrink-0">
+                  <div class="flex items-center gap-1 shrink-0">
                     <UButton
                       variant="ghost"
                       color="neutral"
@@ -208,7 +208,7 @@ function handleClose() {
                       @keydown.enter.prevent="handleUpdateStore"
                       @keydown.escape.prevent="cancelEdit"
                     />
-                    <label class="relative cursor-pointer flex-shrink-0" title="Pick color">
+                    <label class="relative cursor-pointer shrink-0" title="Pick color">
                       <input v-model="editState.color" type="color" class="sr-only" />
                       <span
                         class="block size-9 rounded-lg border-2 border-neutral-600 hover:border-primary transition-colors"

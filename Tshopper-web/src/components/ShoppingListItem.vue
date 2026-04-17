@@ -86,7 +86,7 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
 <template>
   <div
     v-if="sortMode"
-    class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center"
+    class="w-full px-2 py-1 hover:bg-neutral-950 gap-2 rounded-sm flex flex-row justify-start items-center"
   >
     <UIcon
       name="ci:drag-vertical"
@@ -102,7 +102,7 @@ const contextMenuItems = computed<ContextMenuItem[]>(() => {
 
   <UContextMenu v-else :items="contextMenuItems" :ui="{ content: 'w-48' }" :disabled="sortMode">
     <button
-      class="w-full px-2 py-1 hover:bg-slate-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
+      class="w-full px-2 py-1 hover:bg-neutral-950 gap-2 rounded-sm flex flex-row justify-start items-center hover:cursor-pointer"
       @click="emit('toggle', props.item.id)"
     >
       <span

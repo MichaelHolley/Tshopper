@@ -91,50 +91,52 @@ const handleCancel = () => {
 </script>
 
 <template>
-  <!-- Active store context badge -->
-  <div v-if="storeStore.activeStore" class="flex items-center gap-2 mb-2">
-    <span
-      class="size-2.5 rounded-full flex-shrink-0"
-      :style="{ backgroundColor: storeStore.activeStore.color }"
-    />
-    <span class="text-xs text-neutral-400">
-      Adding to
-      <span class="font-medium text-neutral-200">{{ storeStore.activeStore.name }}</span>
-    </span>
-  </div>
-
-  <UForm
-    :validate="validate"
-    :validate-on="[]"
-    :state="state"
-    class="flex flex-row gap-2"
-    @submit="handleSubmit"
-    ref="itemForm"
-  >
-    <UFormField name="item" class="grow">
-      <UInput
-        v-model="state.item"
-        placeholder="Item"
-        :required="true"
-        class="w-full"
-        ref="itemInput"
+  <div class="p-2 border border-neutral-800 rounded-lg">
+    <!-- Active store context badge -->
+    <div v-if="storeStore.activeStore" class="flex items-center gap-2 mb-2">
+      <span
+        class="size-2.5 rounded-full shrink-0"
+        :style="{ backgroundColor: storeStore.activeStore.color }"
       />
-    </UFormField>
-    <UFormField name="quantity">
-      <UInput v-model="state.quantity" placeholder="Quantity" />
-    </UFormField>
-    <div>
-      <div class="flex flex-row gap-2">
-        <UButton v-if="editingItem" variant="outline" icon="maki:cross" @click="handleCancel">
-        </UButton>
-        <UButton
-          type="submit"
-          :icon="editingItem ? 'ci:arrow-reload-02' : 'ci:add-plus'"
-          class="float-end"
-        >
-          {{ editingItem ? 'Update' : 'Add' }}
-        </UButton>
-      </div>
+      <span class="text-xs text-neutral-400">
+        Adding to
+        <span class="font-medium text-neutral-200">{{ storeStore.activeStore.name }}</span>
+      </span>
     </div>
-  </UForm>
+
+    <UForm
+      :validate="validate"
+      :validate-on="[]"
+      :state="state"
+      class="flex flex-row gap-2"
+      @submit="handleSubmit"
+      ref="itemForm"
+    >
+      <UFormField name="item" class="grow">
+        <UInput
+          v-model="state.item"
+          placeholder="Item"
+          :required="true"
+          class="w-full"
+          ref="itemInput"
+        />
+      </UFormField>
+      <UFormField name="quantity">
+        <UInput v-model="state.quantity" placeholder="Quantity" />
+      </UFormField>
+      <div>
+        <div class="flex flex-row gap-2">
+          <UButton v-if="editingItem" variant="outline" icon="maki:cross" @click="handleCancel">
+          </UButton>
+          <UButton
+            type="submit"
+            :icon="editingItem ? 'ci:arrow-reload-02' : 'ci:add-plus'"
+            class="float-end"
+          >
+            {{ editingItem ? 'Update' : 'Add' }}
+          </UButton>
+        </div>
+      </div>
+    </UForm>
+  </div>
 </template>

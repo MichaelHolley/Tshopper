@@ -65,14 +65,14 @@ function logout() {
           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors w-full text-left"
           @click="openManageStores"
         >
-          <UIcon name="tabler:building-store" class="size-4 flex-shrink-0" />
+          <UIcon name="tabler:building-store" class="size-4 shrink-0" />
           <span>Manage Stores</span>
         </button>
         <button
           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-neutral-400 hover:bg-neutral-800 hover:text-red-400 transition-colors w-full text-left"
           @click="logout"
         >
-          <UIcon name="tabler:logout" class="size-4 flex-shrink-0" />
+          <UIcon name="tabler:logout" class="size-4 shrink-0" />
           <span>Logout</span>
         </button>
       </div>
