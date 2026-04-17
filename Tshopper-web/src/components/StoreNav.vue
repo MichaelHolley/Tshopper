@@ -46,19 +46,19 @@ async function toggleDefault(id: number) {
       @click="selectStore(null)"
     >
       <span
-        class="size-3 rounded-full border-2 flex-shrink-0"
+        class="size-3 rounded-full border-2 shrink-0"
         :class="storeStore.activeStoreId === null ? 'border-primary' : 'border-neutral-500'"
       />
       <span class="flex-1">Unassigned</span>
       <UIcon
         v-if="preferencesStore.defaultStoreId === null"
         name="tabler:star-filled"
-        class="size-3.5 text-yellow-400 flex-shrink-0"
+        class="size-3.5 text-yellow-400 shrink-0"
       />
     </button>
 
     <!-- Individual stores -->
-    <button
+    <div
       v-for="store in storeStore.stores"
       :key="store.id"
       class="group flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full text-left"
@@ -69,10 +69,10 @@ async function toggleDefault(id: number) {
       "
       @click="selectStore(store.id)"
     >
-      <span class="size-3 rounded-full flex-shrink-0" :style="{ backgroundColor: store.color }" />
+      <span class="size-3 rounded-full shrink-0" :style="{ backgroundColor: store.color }" />
       <span class="flex-1">{{ store.name }}</span>
       <button
-        class="flex-shrink-0 transition-opacity"
+        class="shrink-0 transition-opacity"
         :class="
           preferencesStore.defaultStoreId === store.id
             ? 'opacity-100 text-yellow-400'
@@ -81,11 +81,13 @@ async function toggleDefault(id: number) {
         @click.stop="toggleDefault(store.id)"
       >
         <UIcon
-          :name="preferencesStore.defaultStoreId === store.id ? 'tabler:star-filled' : 'tabler:star'"
+          :name="
+            preferencesStore.defaultStoreId === store.id ? 'tabler:star-filled' : 'tabler:star'
+          "
           class="size-3.5"
         />
       </button>
-    </button>
+    </div>
 
     <p v-if="storeStore.stores.length === 0" class="text-xs text-neutral-500 px-3 py-1 italic">
       No stores yet
@@ -102,7 +104,7 @@ async function toggleDefault(id: number) {
       class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-neutral-800 transition-colors w-full text-left"
       @click="navigateTo('/data')"
     >
-      <UIcon name="tabler:file-arrow-right" class="size-4 flex-shrink-0" />
+      <UIcon name="tabler:file-arrow-right" class="size-4 shrink-0" />
       <span>Data Transfer</span>
     </button>
   </div>
