@@ -138,7 +138,7 @@ const handleDragEnd = async () => {
     </UButton>
   </div>
 
-  <ChatDrawer :open="chatOpen" @close="chatOpen = false" />
+  <ChatDrawer v-model:open="chatOpen" />
 
   <div class="mt-3">
     <!-- Empty state -->
