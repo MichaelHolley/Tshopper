@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, onUnmounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/AuthStore'
 import { usePreferencesStore } from './stores/PreferencesStore'
 import { useShoppingListStore } from './stores/ShoppingListStore'
@@ -8,6 +8,7 @@ import { useStoreStore } from './stores/StoreStore'
 import SideDrawer from './components/SideDrawer.vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const shoppingListStore = useShoppingListStore()
 const authStore = useAuthStore()
@@ -38,6 +39,7 @@ watch(
     } else {
       shoppingListStore.disconnect()
       drawerOpen.value = false
+      router.push('/login')
     }
   },
   { immediate: true },
