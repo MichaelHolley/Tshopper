@@ -17,3 +17,8 @@ export interface ItemFormState {
   item: string
   quantity: string
 }
+
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}

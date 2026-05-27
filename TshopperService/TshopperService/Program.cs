@@ -51,6 +51,7 @@ builder.Services.AddDbContext<ShoppingListDbContext>(options =>
 builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
 builder.Services.AddScoped<IStoreService, StoreService>();
 builder.Services.AddScoped<IPreferencesService, PreferencesService>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
