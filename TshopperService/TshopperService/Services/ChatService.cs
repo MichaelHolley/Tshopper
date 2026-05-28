@@ -16,52 +16,52 @@ public class ChatService : IChatService
     private static readonly ChatTool ListItemsTool = ChatTool.CreateFunctionTool(
         "list_items",
         "List all current shopping items for the active store. Call this before update_item or remove_item.",
-        BinaryData.FromString("""{"type":"object","properties":{},"required":[]}""")
+        Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
     );
 
     private static readonly ChatTool AddItemTool = ChatTool.CreateFunctionTool(
         "add_item",
         "Add a new item to the shopping list.",
-        BinaryData.FromString("""
+        Schema(new
         {
-            "type": "object",
-            "properties": {
-                "name": {"type": "string", "description": "Item name"},
-                "quantity": {"type": "string", "description": "Quantity or amount, e.g. '2', '1 kg', '500 ml'. Use empty string if not specified."}
+            type = "object",
+            properties = new
+            {
+                name = new { type = "string", description = "Item name" },
+                quantity = new { type = "string", description = "Quantity or amount, e.g. '2', '1 kg', '500 ml'. Use empty string if not specified." }
             },
-            "required": ["name", "quantity"]
-        }
-        """)
+            required = new[] { "name", "quantity" }
+        })
     );
 
     private static readonly ChatTool UpdateItemTool = ChatTool.CreateFunctionTool(
         "update_item",
         "Update an existing item's name or quantity. Call list_items first to get the correct item ID.",
-        BinaryData.FromString("""
+        Schema(new
         {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer", "description": "Item ID from list_items"},
-                "name": {"type": "string", "description": "New item name"},
-                "quantity": {"type": "string", "description": "New quantity"}
+            type = "object",
+            properties = new
+            {
+                id = new { type = "integer", description = "Item ID from list_items" },
+                name = new { type = "string", description = "New item name" },
+                quantity = new { type = "string", description = "New quantity" }
             },
-            "required": ["id", "name", "quantity"]
-        }
-        """)
+            required = new[] { "id", "name", "quantity" }
+        })
     );
 
     private static readonly ChatTool RemoveItemTool = ChatTool.CreateFunctionTool(
         "remove_item",
         "Remove an item from the shopping list. Call list_items first to get the correct item ID.",
-        BinaryData.FromString("""
+        Schema(new
         {
-            "type": "object",
-            "properties": {
-                "id": {"type": "integer", "description": "Item ID from list_items"}
+            type = "object",
+            properties = new
+            {
+                id = new { type = "integer", description = "Item ID from list_items" }
             },
-            "required": ["id"]
-        }
-        """)
+            required = new[] { "id" }
+        })
     );
 
     public ChatService(
@@ -160,39 +160,46 @@ public class ChatService : IChatService
 
     private async Task<(string Json, bool Mutated)> ExecuteToolAsync(ChatToolCall toolCall, int? storeId)
     {
-        switch (toolCall.FunctionName)
+        var args = toolCall.FunctionArguments;
+
+        if (toolCall.FunctionName == ListItemsTool.FunctionName)
         {
-            case "list_items":
-            {
-                var items = await _shoppingListService.GetAllItemsAsync(storeId);
-                return (JsonSerializer.Serialize(items, JsonSerializerOptions.Web), false);
-            }
-            case "add_item":
-            {
-                using var doc = JsonDocument.Parse(toolCall.FunctionArguments);
-                var name = doc.RootElement.GetProperty("name").GetString()!;
-                var quantity = doc.RootElement.TryGetProperty("quantity", out var q) ? q.GetString() ?? "" : "";
-                var item = await _shoppingListService.AddItemAsync(name, quantity, storeId);
-                return (JsonSerializer.Serialize(item, JsonSerializerOptions.Web), true);
-            }
-            case "update_item":
-            {
-                using var doc = JsonDocument.Parse(toolCall.FunctionArguments);
-                var id = doc.RootElement.GetProperty("id").GetInt32();
-                var name = doc.RootElement.GetProperty("name").GetString()!;
-                var quantity = doc.RootElement.TryGetProperty("quantity", out var q) ? q.GetString() ?? "" : "";
-                var item = await _shoppingListService.UpdateItemAsync(id, name, quantity);
-                return (JsonSerializer.Serialize(item, JsonSerializerOptions.Web), true);
-            }
-            case "remove_item":
-            {
-                using var doc = JsonDocument.Parse(toolCall.FunctionArguments);
-                var id = doc.RootElement.GetProperty("id").GetInt32();
-                await _shoppingListService.DeleteItemAsync(id);
-                return ($"{{\"deleted\":true,\"id\":{id}}}", true);
-            }
-            default:
-                return ($"{{\"error\":\"Unknown tool '{toolCall.FunctionName}'\"}}", false);
+            var items = await _shoppingListService.GetAllItemsAsync(storeId);
+            return (Serialize(items), false);
         }
+        if (toolCall.FunctionName == AddItemTool.FunctionName)
+        {
+            var p = Deserialize<AddItemArgs>(args);
+            var item = await _shoppingListService.AddItemAsync(p.Name, p.Quantity, storeId);
+            return (Serialize(item), true);
+        }
+        if (toolCall.FunctionName == UpdateItemTool.FunctionName)
+        {
+            var p = Deserialize<UpdateItemArgs>(args);
+            var item = await _shoppingListService.UpdateItemAsync(p.Id, p.Name, p.Quantity);
+            return (Serialize(item), true);
+        }
+        if (toolCall.FunctionName == RemoveItemTool.FunctionName)
+        {
+            var p = Deserialize<RemoveItemArgs>(args);
+            await _shoppingListService.DeleteItemAsync(p.Id);
+            return (Serialize(new { deleted = true, id = p.Id }), true);
+        }
+
+        return (Serialize(new { error = $"Unknown tool '{toolCall.FunctionName}'" }), false);
     }
+
+    private static BinaryData Schema(object schema) =>
+        BinaryData.FromString(JsonSerializer.Serialize(schema, JsonSerializerOptions.Web));
+
+    private static string Serialize<T>(T value) =>
+        JsonSerializer.Serialize(value, JsonSerializerOptions.Web);
+
+    private static T Deserialize<T>(BinaryData data) =>
+        JsonSerializer.Deserialize<T>(data, JsonSerializerOptions.Web)
+            ?? throw new InvalidOperationException($"Failed to deserialize {typeof(T).Name}");
+
+    private record AddItemArgs(string Name, string Quantity);
+    private record UpdateItemArgs(int Id, string Name, string Quantity);
+    private record RemoveItemArgs(int Id);
 }
