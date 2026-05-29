@@ -2,7 +2,7 @@
 import { api } from '@/lib/api'
 import { useStoreStore } from '@/stores/StoreStore'
 import type { ChatMessage } from '@/types'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const open = defineModel<boolean>('open', { required: true })
 
@@ -11,6 +11,10 @@ const storeStore = useStoreStore()
 const history = ref<ChatMessage[]>([])
 const input = ref('')
 const status = ref<'ready' | 'submitted' | 'error'>('ready')
+
+watch(input, () => {
+  if (status.value === 'error') status.value = 'ready'
+})
 
 // Map to UChatMessages / UChatMessage parts format
 const uiMessages = computed(() =>
