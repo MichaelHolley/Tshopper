@@ -74,7 +74,7 @@ public class ChatService : IChatService
 
         var apiKey = configuration["OpenRouter:ApiKey"]
             ?? throw new InvalidOperationException("OpenRouter:ApiKey not configured");
-        var model = configuration["OpenRouter:Model"] ?? "anthropic/claude-haiku-4-5-20251001";
+        var model = configuration["OpenRouter:Model"] ?? "openai/gpt-5.4-mini";
         var baseUrl = configuration["OpenRouter:BaseUrl"] ?? "https://openrouter.ai/api/v1";
 
         var clientOptions = new OpenAIClientOptions
