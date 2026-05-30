@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ShoppingListItem from '@/components/ShoppingListItem.vue'
 import ShoppingListForm from '@/components/ShoppingListForm.vue'
+import ChatDrawer from '@/components/ChatDrawer.vue'
 import { useShoppingListStore } from '@/stores/ShoppingListStore'
 import { useStoreStore } from '@/stores/StoreStore'
 import type { FormSubmitEvent } from '@nuxt/ui'
@@ -103,6 +104,8 @@ const toggleSortMode = () => {
   sortMode.value = !sortMode.value
 }
 
+const chatOpen = ref(false)
+
 const handleDragEnd = async () => {
   const orderedIds = draggableItems.value.map((item) => item.id)
   await shoppingListStore.reorderItems(orderedIds)
@@ -112,7 +115,7 @@ const handleDragEnd = async () => {
 <template>
   <ShoppingListForm :editingItem="editingItem" @submit="addOrUpdateItem" @cancel="cancelEdit" />
 
-  <!-- Sort Mode Toggle Button -->
+  <!-- Toolbar row -->
   <div class="mt-3 flex flex-row justify-between items-center">
     <UButton
       :variant="sortMode ? 'solid' : 'outline'"
@@ -123,7 +126,19 @@ const handleDragEnd = async () => {
     >
       Sort-Mode
     </UButton>
+
+    <UButton
+      :variant="chatOpen ? 'solid' : 'outline'"
+      :color="chatOpen ? 'primary' : 'neutral'"
+      icon="tabler:message-circle"
+      @click="chatOpen = true"
+      :disabled="!shoppingListStore.isConnected"
+    >
+      AI Chat
+    </UButton>
   </div>
+
+  <ChatDrawer v-model:open="chatOpen" />
 
   <div class="mt-3">
     <!-- Empty state -->
