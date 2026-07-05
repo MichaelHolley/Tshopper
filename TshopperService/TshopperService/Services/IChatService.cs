@@ -5,5 +5,5 @@ public record ChatResult(string Reply, List<ChatMessageRecord> UpdatedHistory);
 
 public interface IChatService
 {
-    Task<ChatResult> ProcessAsync(string message, List<ChatMessageRecord> history, int? storeId);
+    Task<ChatResult> ProcessAsync(string message, List<ChatMessageRecord> history, int? storeId, CancellationToken cancellationToken = default);
 }

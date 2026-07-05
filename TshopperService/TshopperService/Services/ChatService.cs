@@ -3,12 +3,15 @@ using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using OpenAI;
 using OpenAI.Chat;
+using TshopperService.Exceptions;
 using TshopperService.Hubs;
 
 namespace TshopperService.Services;
 
 public class ChatService : IChatService
 {
+    private const int MaxIterations = 25; // generous: bounds round-trips, not operations
+
     private readonly IShoppingListService _shoppingListService;
     private readonly IHubContext<ShoppingListHub> _hubContext;
     private readonly ChatClient _chatClient;
@@ -64,6 +67,31 @@ public class ChatService : IChatService
         })
     );
 
+    private static readonly ChatTool RemoveItemsTool = ChatTool.CreateFunctionTool(
+        "remove_items",
+        "Remove multiple items at once. Prefer this over repeated remove_item calls when removing more than one item.",
+        Schema(new
+        {
+            type = "object",
+            properties = new
+            {
+                ids = new
+                {
+                    type = "array",
+                    items = new { type = "integer" },
+                    description = "Item IDs to remove (from list_items)"
+                }
+            },
+            required = new[] { "ids" }
+        })
+    );
+
+    private static readonly ChatTool ClearCheckedTool = ChatTool.CreateFunctionTool(
+        "clear_checked",
+        "Remove all checked items from the shopping list in a single operation. Prefer this over removing checked items one by one.",
+        Schema(new { type = "object", properties = new { }, required = Array.Empty<string>() })
+    );
+
     public ChatService(
         IShoppingListService shoppingListService,
         IHubContext<ShoppingListHub> hubContext,
@@ -86,7 +114,7 @@ public class ChatService : IChatService
         _chatClient = openAiClient.GetChatClient(model);
     }
 
-    public async Task<ChatResult> ProcessAsync(string message, List<ChatMessageRecord> history, int? storeId)
+    public async Task<ChatResult> ProcessAsync(string message, List<ChatMessageRecord> history, int? storeId, CancellationToken cancellationToken = default)
     {
         var messages = new List<ChatMessage>
         {
@@ -100,6 +128,7 @@ public class ChatService : IChatService
                 - For ambiguous requests, ask one concise clarifying question.
                 - For remove actions, confirm with the user before executing unless they have already confirmed.
                 - You can execute multiple operations in a single user message.
+                - When operating on many items, use remove_items or clear_checked and batch tool calls in a single turn rather than removing items one at a time.
                 - Keep responses brief — just confirm what you did or ask what you need.
                 """)
         };
@@ -118,15 +147,26 @@ public class ChatService : IChatService
         options.Tools.Add(AddItemTool);
         options.Tools.Add(UpdateItemTool);
         options.Tools.Add(RemoveItemTool);
+        options.Tools.Add(RemoveItemsTool);
+        options.Tools.Add(ClearCheckedTool);
 
         var mutated = false;
 
-        while (true)
+        for (var iteration = 0; ; iteration++)
         {
-            var completion = await _chatClient.CompleteChatAsync(messages, options);
+            ChatCompletionOptions callOptions = options;
+
+            if (iteration >= MaxIterations)
+            {
+                // Force a text reply instead of another tool call so the user gets a
+                // coherent answer instead of an infinite loop or a hard error.
+                callOptions = new ChatCompletionOptions();
+            }
+
+            var completion = await _chatClient.CompleteChatAsync(messages, callOptions, cancellationToken);
             var value = completion.Value;
 
-            if (value.FinishReason == ChatFinishReason.ToolCalls)
+            if (iteration < MaxIterations && value.FinishReason == ChatFinishReason.ToolCalls)
             {
                 messages.Add(new AssistantChatMessage(value));
 
@@ -140,12 +180,20 @@ public class ChatService : IChatService
                 continue;
             }
 
-            var reply = value.Content.Count > 0 ? value.Content[0].Text : string.Empty;
+            var reply = value.FinishReason switch
+            {
+                ChatFinishReason.Length =>
+                    "My response was cut off before I could finish. Could you ask again, maybe more specifically?",
+                ChatFinishReason.ContentFilter =>
+                    "I can't help with that request.",
+                _ when value.Content.Count > 0 => value.Content[0].Text,
+                _ => "Sorry, I couldn't complete that request. Please try rephrasing."
+            };
 
             if (mutated)
             {
                 var items = await _shoppingListService.GetAllItemsAsync(storeId);
-                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", storeId, items);
+                await _hubContext.Clients.All.SendAsync("ReceiveUpdate", storeId, items, cancellationToken);
             }
 
             var updatedHistory = new List<ChatMessageRecord>(history)
@@ -160,33 +208,55 @@ public class ChatService : IChatService
 
     private async Task<(string Json, bool Mutated)> ExecuteToolAsync(ChatToolCall toolCall, int? storeId)
     {
-        var args = toolCall.FunctionArguments;
+        try
+        {
+            var args = toolCall.FunctionArguments;
 
-        if (toolCall.FunctionName == ListItemsTool.FunctionName)
-        {
-            var items = await _shoppingListService.GetAllItemsAsync(storeId);
-            return (Serialize(items), false);
-        }
-        if (toolCall.FunctionName == AddItemTool.FunctionName)
-        {
-            var p = Deserialize<AddItemArgs>(args);
-            var item = await _shoppingListService.AddItemAsync(p.Name, p.Quantity, storeId);
-            return (Serialize(item), true);
-        }
-        if (toolCall.FunctionName == UpdateItemTool.FunctionName)
-        {
-            var p = Deserialize<UpdateItemArgs>(args);
-            var item = await _shoppingListService.UpdateItemAsync(p.Id, p.Name, p.Quantity);
-            return (Serialize(item), true);
-        }
-        if (toolCall.FunctionName == RemoveItemTool.FunctionName)
-        {
-            var p = Deserialize<RemoveItemArgs>(args);
-            await _shoppingListService.DeleteItemAsync(p.Id);
-            return (Serialize(new { deleted = true, id = p.Id }), true);
-        }
+            if (toolCall.FunctionName == ListItemsTool.FunctionName)
+            {
+                var items = await _shoppingListService.GetAllItemsAsync(storeId);
+                return (Serialize(items), false);
+            }
+            if (toolCall.FunctionName == AddItemTool.FunctionName)
+            {
+                var p = Deserialize<AddItemArgs>(args);
+                var item = await _shoppingListService.AddItemAsync(p.Name, p.Quantity, storeId);
+                return (Serialize(item), true);
+            }
+            if (toolCall.FunctionName == UpdateItemTool.FunctionName)
+            {
+                var p = Deserialize<UpdateItemArgs>(args);
+                var item = await _shoppingListService.UpdateItemAsync(p.Id, p.Name, p.Quantity);
+                return (Serialize(item), true);
+            }
+            if (toolCall.FunctionName == RemoveItemTool.FunctionName)
+            {
+                var p = Deserialize<RemoveItemArgs>(args);
+                await _shoppingListService.DeleteItemAsync(p.Id);
+                return (Serialize(new { deleted = true, id = p.Id }), true);
+            }
+            if (toolCall.FunctionName == RemoveItemsTool.FunctionName)
+            {
+                var p = Deserialize<RemoveItemsArgs>(args);
+                await _shoppingListService.DeleteItemsAsync(p.Ids);
+                return (Serialize(new { deleted = true, ids = p.Ids }), true);
+            }
+            if (toolCall.FunctionName == ClearCheckedTool.FunctionName)
+            {
+                await _shoppingListService.DeleteAllCheckedItemsAsync(storeId);
+                return (Serialize(new { cleared = true }), true);
+            }
 
-        return (Serialize(new { error = $"Unknown tool '{toolCall.FunctionName}'" }), false);
+            return (Serialize(new { error = $"Unknown tool '{toolCall.FunctionName}'" }), false);
+        }
+        catch (BusinessException ex)
+        {
+            return (Serialize(new { error = ex.Message }), false);
+        }
+        catch (Exception ex)
+        {
+            return (Serialize(new { error = $"Failed to execute '{toolCall.FunctionName}': {ex.Message}" }), false);
+        }
     }
 
     private static BinaryData Schema(object schema) =>
@@ -202,4 +272,5 @@ public class ChatService : IChatService
     private record AddItemArgs(string Name, string Quantity);
     private record UpdateItemArgs(int Id, string Name, string Quantity);
     private record RemoveItemArgs(int Id);
+    private record RemoveItemsArgs(List<int> Ids);
 }

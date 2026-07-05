@@ -124,7 +124,22 @@ public class ShoppingListService : IShoppingListService
         _dbContext.ShoppingItems.Remove(item);
         await _dbContext.SaveChangesAsync();
     }
-    
+
+    public async Task DeleteItemsAsync(List<int> ids)
+    {
+        var items = await _dbContext.ShoppingItems
+            .Where(i => ids.Contains(i.Id))
+            .ToListAsync();
+
+        if (items.Count != ids.Distinct().Count())
+        {
+            throw new BusinessException("One or more items not found", BusinessErrorCodes.NOT_FOUND);
+        }
+
+        _dbContext.ShoppingItems.RemoveRange(items);
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task<ShoppingItem?> UpdateItemAsync(int id, string item, string quantity)
     {
         var existingItem = await _dbContext.ShoppingItems.FindAsync(id);

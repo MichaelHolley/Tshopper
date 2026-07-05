@@ -28,7 +28,8 @@ public class ChatController : ControllerBase
         var result = await _chatService.ProcessAsync(
             request.Message,
             request.History ?? [],
-            request.StoreId);
+            request.StoreId,
+            HttpContext.RequestAborted);
 
         return Ok(new ChatResponse(result.Reply, result.UpdatedHistory));
     }
