@@ -46,7 +46,7 @@ public class ChatController : ControllerBase
         var decoded = new List<ChatImageContent>(images.Count);
         foreach (var image in images)
         {
-            if (!AllowedImageTypes.Contains(image.MediaType))
+            if (string.IsNullOrEmpty(image.MediaType) || !AllowedImageTypes.Contains(image.MediaType))
                 return BadRequest(new { error = $"Unsupported image type '{image.MediaType}'. Allowed: PNG, JPEG, WebP." });
 
             byte[] bytes;
