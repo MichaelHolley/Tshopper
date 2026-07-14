@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { api } from '@/lib/api'
 import { useStoreStore } from '@/stores/StoreStore'
-import type { ChatImageAttachment, ChatMessage } from '@/types'
+import type { ChatImageAttachment, ChatImagePreview, ChatMessage } from '@/types'
 import { computed, ref, watch } from 'vue'
 
 const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
@@ -30,13 +30,14 @@ const uiMessages = computed(() =>
     id: String(i),
     role: msg.role as 'user' | 'assistant',
     parts: [
-      ...(msg.imagePreviews ?? []).map((url, j) => ({
+      ...(msg.imagePreviews ?? []).map((preview, j) => ({
         type: 'file' as const,
-        mediaType: 'image/*',
-        url,
+        mediaType: preview.mediaType,
+        url: preview.url,
         filename: `image-${i}-${j}`,
       })),
-      { type: 'text' as const, id: String(i), text: msg.content },
+      // Skip an empty text part so image-only turns don't render a blank bubble.
+      ...(msg.content ? [{ type: 'text' as const, id: String(i), text: msg.content }] : []),
     ],
   })),
 )
@@ -77,9 +78,19 @@ async function onFilesSelected(event: Event) {
     }
 
     const dataUrl = await readAsDataUrl(file)
+    // Re-check after the await: a second overlapping selection could have filled the slots.
+    if (attachments.value.length >= MAX_IMAGES) {
+      attachmentError.value = `You can attach at most ${MAX_IMAGES} images.`
+      break
+    }
     // Strip the "data:<type>;base64," prefix — the API expects raw base64.
     const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1)
-    attachments.value.push({ mediaType: file.type, data: base64, previewUrl: dataUrl })
+    attachments.value.push({
+      id: crypto.randomUUID(),
+      mediaType: file.type,
+      data: base64,
+      previewUrl: dataUrl,
+    })
   }
 }
 
@@ -93,14 +104,15 @@ async function onSubmit() {
   const images = attachments.value
   if ((!message && images.length === 0) || status.value === 'submitted') return
 
+  const imagePreviews: ChatImagePreview[] = images.map((a) => ({
+    url: a.previewUrl,
+    mediaType: a.mediaType,
+  }))
+
   input.value = ''
   attachments.value = []
   attachmentError.value = ''
-  history.value.push({
-    role: 'user',
-    content: message,
-    imagePreviews: images.map((a) => a.previewUrl),
-  })
+  history.value.push({ role: 'user', content: message, imagePreviews })
   status.value = 'submitted'
 
   try {
@@ -108,14 +120,20 @@ async function onSubmit() {
       .post('Chat', {
         json: {
           message,
-          history: history.value.slice(0, -1).map(({ role, content }) => ({ role, content })),
+          // Send prior turns as text only — images live on the current turn (below).
+          // Fall back to a placeholder so an image-only turn isn't sent as empty content.
+          history: history.value
+            .slice(0, -1)
+            .map(({ role, content }) => ({ role, content: content || '[image]' })),
           storeId: storeStore.activeStoreId,
           images: images.map(({ mediaType, data }) => ({ mediaType, data })),
         },
       })
-      .json<{ reply: string; updatedHistory: ChatMessage[] }>()
+      .json<{ reply: string }>()
 
-    history.value = response.updatedHistory
+    // Append the assistant reply locally rather than replacing history with the server
+    // copy, which has no imagePreviews and would drop the just-sent thumbnails.
+    history.value.push({ role: 'assistant', content: response.reply })
     status.value = 'ready'
   } catch {
     history.value.push({
@@ -187,7 +205,7 @@ function clearHistory() {
         <div v-if="attachments.length > 0" class="flex flex-wrap gap-2">
           <div
             v-for="(attachment, index) in attachments"
-            :key="attachment.previewUrl"
+            :key="attachment.id"
             class="relative size-16 rounded-lg overflow-hidden border border-neutral-700"
           >
             <img :src="attachment.previewUrl" alt="Attachment preview" class="size-full object-cover" />

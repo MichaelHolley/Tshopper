@@ -114,7 +114,7 @@ public class ChatService : IChatService
         _chatClient = openAiClient.GetChatClient(model);
     }
 
-    public async Task<ChatResult> ProcessAsync(string message, List<ChatMessageRecord> history, int? storeId, List<ChatImage>? images, CancellationToken cancellationToken = default)
+    public async Task<ChatResult> ProcessAsync(string message, List<ChatMessageRecord> history, int? storeId, List<ChatImageContent>? images, CancellationToken cancellationToken = default)
     {
         var messages = new List<ChatMessage>
         {
@@ -266,7 +266,7 @@ public class ChatService : IChatService
         }
     }
 
-    private static UserChatMessage BuildUserMessage(string message, List<ChatImage>? images)
+    private static UserChatMessage BuildUserMessage(string message, List<ChatImageContent>? images)
     {
         if (images is null || images.Count == 0)
             return ChatMessage.CreateUserMessage(message);
@@ -279,10 +279,7 @@ public class ChatService : IChatService
             parts.Add(ChatMessageContentPart.CreateTextPart(message));
 
         foreach (var image in images)
-        {
-            var bytes = BinaryData.FromBytes(Convert.FromBase64String(image.Data));
-            parts.Add(ChatMessageContentPart.CreateImagePart(bytes, image.MediaType));
-        }
+            parts.Add(ChatMessageContentPart.CreateImagePart(image.Bytes, image.MediaType));
 
         return ChatMessage.CreateUserMessage(parts.ToArray());
     }
