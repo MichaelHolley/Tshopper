@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { api } from '@/lib/api'
 import { useStoreStore } from '@/stores/StoreStore'
-import type { ChatMessage } from '@/types'
+import type { ChatImageAttachment, ChatMessage } from '@/types'
 import { computed, ref, watch } from 'vue'
+
+const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+const MAX_IMAGES = 4
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024 // 5 MB, mirrors the backend limit
 
 const open = defineModel<boolean>('open', { required: true })
 
@@ -10,27 +14,93 @@ const storeStore = useStoreStore()
 
 const history = ref<ChatMessage[]>([])
 const input = ref('')
+const attachments = ref<ChatImageAttachment[]>([])
 const status = ref<'ready' | 'submitted' | 'error'>('ready')
+const attachmentError = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
 
 watch(input, () => {
   if (status.value === 'error') status.value = 'ready'
 })
 
-// Map to UChatMessages / UChatMessage parts format
+// Map to UChatMessages / UChatMessage parts format. Image previews (local-only) are
+// rendered as file parts ahead of the text.
 const uiMessages = computed(() =>
   history.value.map((msg, i) => ({
     id: String(i),
     role: msg.role as 'user' | 'assistant',
-    parts: [{ type: 'text' as const, id: String(i), text: msg.content }],
+    parts: [
+      ...(msg.imagePreviews ?? []).map((url, j) => ({
+        type: 'file' as const,
+        mediaType: 'image/*',
+        url,
+        filename: `image-${i}-${j}`,
+      })),
+      { type: 'text' as const, id: String(i), text: msg.content },
+    ],
   })),
 )
 
+function openFilePicker() {
+  attachmentError.value = ''
+  fileInput.value?.click()
+}
+
+function readAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error)
+    reader.readAsDataURL(file)
+  })
+}
+
+async function onFilesSelected(event: Event) {
+  const target = event.target as HTMLInputElement
+  const files = Array.from(target.files ?? [])
+  // Reset so re-selecting the same file fires the change event again.
+  target.value = ''
+  attachmentError.value = ''
+
+  for (const file of files) {
+    if (attachments.value.length >= MAX_IMAGES) {
+      attachmentError.value = `You can attach at most ${MAX_IMAGES} images.`
+      break
+    }
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      attachmentError.value = 'Only PNG, JPEG, and WebP images are supported.'
+      continue
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      attachmentError.value = 'Each image must be 5 MB or smaller.'
+      continue
+    }
+
+    const dataUrl = await readAsDataUrl(file)
+    // Strip the "data:<type>;base64," prefix — the API expects raw base64.
+    const base64 = dataUrl.slice(dataUrl.indexOf(',') + 1)
+    attachments.value.push({ mediaType: file.type, data: base64, previewUrl: dataUrl })
+  }
+}
+
+function removeAttachment(index: number) {
+  attachments.value.splice(index, 1)
+  attachmentError.value = ''
+}
+
 async function onSubmit() {
   const message = input.value.trim()
-  if (!message || status.value === 'submitted') return
+  const images = attachments.value
+  if ((!message && images.length === 0) || status.value === 'submitted') return
 
   input.value = ''
-  history.value.push({ role: 'user', content: message })
+  attachments.value = []
+  attachmentError.value = ''
+  history.value.push({
+    role: 'user',
+    content: message,
+    imagePreviews: images.map((a) => a.previewUrl),
+  })
   status.value = 'submitted'
 
   try {
@@ -38,8 +108,9 @@ async function onSubmit() {
       .post('Chat', {
         json: {
           message,
-          history: history.value.slice(0, -1),
+          history: history.value.slice(0, -1).map(({ role, content }) => ({ role, content })),
           storeId: storeStore.activeStoreId,
+          images: images.map(({ mediaType, data }) => ({ mediaType, data })),
         },
       })
       .json<{ reply: string; updatedHistory: ChatMessage[] }>()
@@ -57,6 +128,8 @@ async function onSubmit() {
 
 function clearHistory() {
   history.value = []
+  attachments.value = []
+  attachmentError.value = ''
   status.value = 'ready'
 }
 </script>
@@ -109,18 +182,59 @@ function clearHistory() {
     </template>
 
     <template #footer>
-      <UChatPrompt
-        v-model="input"
-        placeholder="Add milk, remove bread…"
-        variant="subtle"
-        :disabled="status === 'submitted'"
-        @submit="onSubmit"
-      >
-        <UChatPromptSubmit
-          :status="status"
-          @reload="onSubmit"
+      <div class="w-full flex flex-col gap-2">
+        <!-- Staged attachments -->
+        <div v-if="attachments.length > 0" class="flex flex-wrap gap-2">
+          <div
+            v-for="(attachment, index) in attachments"
+            :key="attachment.previewUrl"
+            class="relative size-16 rounded-lg overflow-hidden border border-neutral-700"
+          >
+            <img :src="attachment.previewUrl" alt="Attachment preview" class="size-full object-cover" />
+            <button
+              type="button"
+              class="absolute top-0.5 right-0.5 rounded-full bg-neutral-900/80 p-0.5 text-neutral-200 hover:text-white"
+              title="Remove image"
+              @click="removeAttachment(index)"
+            >
+              <UIcon name="i-tabler-x" class="size-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <p v-if="attachmentError" class="text-xs text-error">{{ attachmentError }}</p>
+
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          multiple
+          class="hidden"
+          @change="onFilesSelected"
         />
-      </UChatPrompt>
+
+        <UChatPrompt
+          v-model="input"
+          placeholder="Add milk, remove bread…"
+          variant="subtle"
+          :disabled="status === 'submitted'"
+          @submit="onSubmit"
+        >
+          <template #leading>
+            <UButton
+              color="neutral"
+              variant="ghost"
+              icon="i-tabler-photo-plus"
+              size="sm"
+              title="Attach image"
+              :disabled="status === 'submitted' || attachments.length >= MAX_IMAGES"
+              @click="openFilePicker"
+            />
+          </template>
+
+          <UChatPromptSubmit :status="status" @reload="onSubmit" />
+        </UChatPrompt>
+      </div>
     </template>
   </USlideover>
 </template>

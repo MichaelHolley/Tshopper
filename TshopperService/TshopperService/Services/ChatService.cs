@@ -114,7 +114,7 @@ public class ChatService : IChatService
         _chatClient = openAiClient.GetChatClient(model);
     }
 
-    public async Task<ChatResult> ProcessAsync(string message, List<ChatMessageRecord> history, int? storeId, CancellationToken cancellationToken = default)
+    public async Task<ChatResult> ProcessAsync(string message, List<ChatMessageRecord> history, int? storeId, List<ChatImage>? images, CancellationToken cancellationToken = default)
     {
         var messages = new List<ChatMessage>
         {
@@ -140,7 +140,7 @@ public class ChatService : IChatService
                 : ChatMessage.CreateAssistantMessage(msg.Content));
         }
 
-        messages.Add(ChatMessage.CreateUserMessage(message));
+        messages.Add(BuildUserMessage(message, images));
 
         var options = new ChatCompletionOptions();
         options.Tools.Add(ListItemsTool);
@@ -196,9 +196,16 @@ public class ChatService : IChatService
                 await _hubContext.Clients.All.SendAsync("ReceiveUpdate", storeId, items, cancellationToken);
             }
 
+            // Images live only on the current turn and are never persisted into history
+            // (keeps token cost bounded). For an image-only turn, store a placeholder so the
+            // stored user message is never empty.
+            var storedUserContent = string.IsNullOrWhiteSpace(message)
+                ? "[image]"
+                : message;
+
             var updatedHistory = new List<ChatMessageRecord>(history)
             {
-                new("user", message),
+                new("user", storedUserContent),
                 new("assistant", reply)
             };
 
@@ -257,6 +264,27 @@ public class ChatService : IChatService
         {
             return (Serialize(new { error = $"Failed to execute '{toolCall.FunctionName}': {ex.Message}" }), false);
         }
+    }
+
+    private static UserChatMessage BuildUserMessage(string message, List<ChatImage>? images)
+    {
+        if (images is null || images.Count == 0)
+            return ChatMessage.CreateUserMessage(message);
+
+        var parts = new List<ChatMessageContentPart>();
+
+        // Only include a text part when there is actual text; an image-only turn
+        // relies on the image plus the system prompt.
+        if (!string.IsNullOrWhiteSpace(message))
+            parts.Add(ChatMessageContentPart.CreateTextPart(message));
+
+        foreach (var image in images)
+        {
+            var bytes = BinaryData.FromBytes(Convert.FromBase64String(image.Data));
+            parts.Add(ChatMessageContentPart.CreateImagePart(bytes, image.MediaType));
+        }
+
+        return ChatMessage.CreateUserMessage(parts.ToArray());
     }
 
     private static BinaryData Schema(object schema) =>
