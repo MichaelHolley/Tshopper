@@ -1,5 +1,15 @@
 # Tshopper
 
+## TechStack
+
+- SvelteKit using Remote-Functions
+- shadcn-svelte (huntabyte/shadcn-svelte)
+- svelte-ai-elements (SikandarJODD/ai-elements)
+- ai-sdk
+- Drizzle with Turso
+
+You have access to BTCA to get more info on libraries via their repo, by calling "use btca".
+
 ## Documentation
 
 - Only add a comment when complexity is genuinely high **and** the naming does not already convey enough information.
