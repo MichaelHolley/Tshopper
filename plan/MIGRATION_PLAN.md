@@ -99,7 +99,9 @@ Streaming chat endpoint on the AI SDK with the OpenRouter provider and configura
 
 A pass across all slices: loading/empty/error states, optimistic-feel interactions where they matter (checking, adding), mobile ergonomics, toasts for failures, PWA manifest/icons, consistent shadcn theming. Tighten input validation and error responses in the command functions.
 
-**Done when:** a full manual walkthrough of every flow on a phone-sized viewport feels finished, not scaffolded.
+Live-query recovery for PWA: SvelteKit already reconnects live queries passively (exponential backoff) and actively on network-restore (`navigator.onLine` false→true), but not when a backgrounded/locked phone returns to the foreground — the socket is killed while frozen and `navigator.onLine` never flips. Add an app-wide hook that calls `.reconnect()` on the active live queries on `visibilitychange` to visible. This is thin recovery, not a return to legacy connection management (no state polling, no disabling controls); a "reconnecting…" indicator is optional.
+
+**Done when:** a full manual walkthrough of every flow on a phone-sized viewport feels finished, not scaffolded, and live sync survives a backgrounded/locked phone returning to the foreground.
 
 ## Phase 10 — Deployment and cutover
 
