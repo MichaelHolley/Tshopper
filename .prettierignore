@@ -8,3 +8,6 @@ bun.lockb
 # Miscellaneous
 /static/
 /drizzle/
+
+# Old stack kept for reference during the SvelteKit migration
+/legacy/
