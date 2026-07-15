@@ -2,10 +2,10 @@
 
 ## TechStack
 
-- SvelteKit using Remote-Functions
+- SvelteKit using Runes, Remote-Functions and Async expiremental features
 - shadcn-svelte (huntabyte/shadcn-svelte)
 - svelte-ai-elements (SikandarJODD/ai-elements)
-- ai-sdk
+- ai-sdk + openrouter/ai-sdk-provider
 - Drizzle with Turso
 
 You have access to BTCA to get more info on libraries via their repo, by calling "use btca".
