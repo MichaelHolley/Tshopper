@@ -88,22 +88,32 @@
 
 <StoreNav {stores} bind:activeStoreId={activeStore.current} onManage={() => (manageOpen = true)} />
 
-{#if sortMode}
-	<div class="text-muted-foreground py-1 text-sm">Drag items by the handle to reorder.</div>
-{:else}
+{#if !sortMode}
 	<ItemForm storeId={activeStore.current} bind:editing />
 {/if}
 
-{#if activeItems.length > 1}
-	<div class="flex justify-end">
-		<Button
-			variant={sortMode ? 'default' : 'ghost'}
-			size="sm"
-			onclick={() => (sortMode = !sortMode)}
-		>
-			<ArrowUpDownIcon />
-			{sortMode ? 'Done' : 'Reorder'}
-		</Button>
+{#if activeItems.length > 0}
+	<div class="flex items-center justify-between gap-3 border-b py-2">
+		<div class="min-w-0">
+			<div class="text-sm font-semibold">{sortMode ? 'Reordering' : 'To buy'}</div>
+			<div class="text-muted-foreground text-xs">
+				{sortMode
+					? 'Drag items by the handle.'
+					: `${activeItems.length} ${activeItems.length === 1 ? 'item' : 'items'}`}
+			</div>
+		</div>
+
+		{#if activeItems.length > 1}
+			<Button
+				variant={sortMode ? 'default' : 'outline'}
+				size="sm"
+				aria-pressed={sortMode}
+				onclick={() => (sortMode = !sortMode)}
+			>
+				<ArrowUpDownIcon />
+				{sortMode ? 'Done' : 'Reorder'}
+			</Button>
+		{/if}
 	</div>
 {/if}
 
