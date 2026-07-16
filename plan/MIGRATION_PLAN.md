@@ -95,21 +95,13 @@ Streaming chat endpoint on the AI SDK with the OpenRouter provider and configura
 
 **Done when:** "add milk and eggs, remove everything checked" streams a response while the list updates live in a second session.
 
-## Phase 9 — Polish and hardening
-
-A pass across all slices: loading/empty/error states, optimistic-feel interactions where they matter (checking, adding), mobile ergonomics, toasts for failures, PWA manifest/icons, consistent shadcn theming. Tighten input validation and error responses in the command functions.
-
-Live-query recovery for PWA: SvelteKit already reconnects live queries passively (exponential backoff) and actively on network-restore (`navigator.onLine` false→true), but not when a backgrounded/locked phone returns to the foreground — the socket is killed while frozen and `navigator.onLine` never flips. Add an app-wide hook that calls `.reconnect()` on the active live queries on `visibilitychange` to visible. This is thin recovery, not a return to legacy connection management (no state polling, no disabling controls); a "reconnecting…" indicator is optional.
-
-**Done when:** a full manual walkthrough of every flow on a phone-sized viewport feels finished, not scaffolded, and live sync survives a backgrounded/locked phone returning to the foreground.
-
-## Phase 10 — Deployment and cutover
+## Phase 9 — Deployment and cutover
 
 Single-container Docker build via adapter-node; CI workflow building and publishing it. Production configuration (password, session secret, Turso credentials, OpenRouter key/model) and an updated compose file replacing the two old services. Deploy, repopulate the list by hand, retire the old containers and images.
 
 **Done when:** the SvelteKit container serves production and the .NET/Vue containers are stopped.
 
-## Phase 11 — Cleanup
+## Phase 10 — Cleanup
 
 Delete `legacy/` along with its CI workflows and Docker artifacts; rewrite README and AGENTS.md for the new stack (SvelteKit conventions, remote-function patterns, Drizzle workflow, build/lint commands).
 
