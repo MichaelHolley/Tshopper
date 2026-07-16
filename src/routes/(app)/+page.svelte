@@ -4,7 +4,6 @@
 	import StoreNav from '$lib/components/store-nav.svelte';
 	import ItemForm from '$lib/components/item-form.svelte';
 	import ShoppingItem from '$lib/components/shopping-item.svelte';
-	import ManageStoresDialog from '$lib/components/manage-stores-dialog.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import type { ShoppingItem as Item } from '$lib/server/db/schema';
@@ -24,7 +23,6 @@
 
 	let editing = $state<Item | null>(null);
 	let checkedCollapsed = $state(true);
-	let manageOpen = $state(false);
 	let deleteAllOpen = $state(false);
 	let sortMode = $state(false);
 	let sortItems = $state<Item[]>([]);
@@ -86,7 +84,7 @@
 
 <svelte:head><title>Tshopper</title></svelte:head>
 
-<StoreNav {stores} bind:activeStoreId={activeStore.current} onManage={() => (manageOpen = true)} />
+<StoreNav {stores} bind:activeStoreId={activeStore.current} />
 
 {#if !sortMode}
 	<ItemForm storeId={activeStore.current} bind:editing />
@@ -176,8 +174,6 @@
 		{/if}
 	</div>
 {/if}
-
-<ManageStoresDialog bind:open={manageOpen} {stores} />
 
 <AlertDialog.Root bind:open={deleteAllOpen}>
 	<AlertDialog.Content>
