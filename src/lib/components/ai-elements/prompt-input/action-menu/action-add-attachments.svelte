@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { getAttachmentsContext } from "../context/attachments.svelte.js";
-	import ActionMenuItem from "./action-menu-item.svelte";
-	import ImageIcon from "@lucide/svelte/icons/image";
-	import { cn } from "$lib/utils";
+	import { getAttachmentsContext } from '../context/attachments.svelte.js';
+	import ActionMenuItem from './action-menu-item.svelte';
+	import ImageIcon from '@lucide/svelte/icons/image';
+	import { cn } from '$lib/utils';
 
 	interface Props {
 		onSelect?: () => void;
@@ -10,7 +10,7 @@
 		class?: string;
 	}
 
-	let { onSelect, label = "Add photos or files", class: className, ...props }: Props = $props();
+	let { onSelect, label = 'Add photos or files', class: className, ...props }: Props = $props();
 
 	let attachments = getAttachmentsContext();
 
@@ -21,7 +21,7 @@
 	};
 </script>
 
-<ActionMenuItem class={cn("gap-2", className)} onSelect={handleSelect} {...props}>
+<ActionMenuItem class={cn('gap-2', className)} onSelect={handleSelect} {...props}>
 	<ImageIcon class="size-4" />
 	{label}
 </ActionMenuItem>

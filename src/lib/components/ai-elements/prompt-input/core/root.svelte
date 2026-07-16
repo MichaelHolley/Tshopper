@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { FileUIPart } from "ai";
-	import { cn } from "$lib/utils";
-	import { watch } from "runed";
-	import { onDestroy } from "svelte";
-	import { AttachmentsContext, setAttachmentsContext } from "../context/attachments.svelte.js";
-	import { getPromptInputProvider } from "../context/provider.svelte.js";
+	import type { FileUIPart } from 'ai';
+	import { cn } from '$lib/utils';
+	import { watch } from 'runed';
+	import { onDestroy } from 'svelte';
+	import { AttachmentsContext, setAttachmentsContext } from '../context/attachments.svelte.js';
+	import { getPromptInputProvider } from '../context/provider.svelte.js';
 	import {
 		setPromptInputTextRegistration,
-		type PromptInputTextHandle,
-	} from "../context/text-registration.svelte.js";
-	import type { Message, PromptInputAttachment } from "../context/types.js";
+		type PromptInputTextHandle
+	} from '../context/text-registration.svelte.js';
+	import type { Message, PromptInputAttachment } from '../context/types.js';
 
 	interface Props {
 		class?: string;
@@ -22,17 +22,11 @@
 		resetFormOnSubmit?: boolean;
 		maxFiles?: number;
 		maxFileSize?: number; // bytes
-		onError?: (err: {
-			code: "max_files" | "max_file_size" | "accept";
-			message: string;
-		}) => void;
+		onError?: (err: { code: 'max_files' | 'max_file_size' | 'accept'; message: string }) => void;
 		onFileAdd?: (added: PromptInputAttachment[], attachments: PromptInputAttachment[]) => void;
-		onFileRemove?: (
-			removed: PromptInputAttachment[],
-			attachments: PromptInputAttachment[]
-		) => void;
+		onFileRemove?: (removed: PromptInputAttachment[], attachments: PromptInputAttachment[]) => void;
 		onSubmit: (message: Message, event: SubmitEvent) => void | Promise<void>;
-		children?: import("svelte").Snippet;
+		children?: import('svelte').Snippet;
 	}
 	// indexing
 
@@ -70,7 +64,7 @@
 			if (promptTextHandle === handle) {
 				promptTextHandle = null;
 			}
-		},
+		}
 	});
 
 	$effect(() => {
@@ -81,7 +75,7 @@
 			maxFileSize,
 			onError,
 			onFileAdd,
-			onFileRemove,
+			onFileRemove
 		});
 	});
 
@@ -115,13 +109,13 @@
 			if (!formRef) return;
 
 			let onDragOver = (e: DragEvent) => {
-				if (e.dataTransfer?.types?.includes("Files")) {
+				if (e.dataTransfer?.types?.includes('Files')) {
 					e.preventDefault();
 				}
 			};
 
 			let onDrop = (e: DragEvent) => {
-				if (e.dataTransfer?.types?.includes("Files")) {
+				if (e.dataTransfer?.types?.includes('Files')) {
 					e.preventDefault();
 				}
 				if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
@@ -129,12 +123,12 @@
 				}
 			};
 
-			formRef.addEventListener("dragover", onDragOver);
-			formRef.addEventListener("drop", onDrop);
+			formRef.addEventListener('dragover', onDragOver);
+			formRef.addEventListener('drop', onDrop);
 
 			return () => {
-				formRef?.removeEventListener("dragover", onDragOver);
-				formRef?.removeEventListener("drop", onDrop);
+				formRef?.removeEventListener('dragover', onDragOver);
+				formRef?.removeEventListener('drop', onDrop);
 			};
 		}
 	);
@@ -146,13 +140,13 @@
 			if (!globalDrop) return;
 
 			let onDragOver = (e: DragEvent) => {
-				if (e.dataTransfer?.types?.includes("Files")) {
+				if (e.dataTransfer?.types?.includes('Files')) {
 					e.preventDefault();
 				}
 			};
 
 			let onDrop = (e: DragEvent) => {
-				if (e.dataTransfer?.types?.includes("Files")) {
+				if (e.dataTransfer?.types?.includes('Files')) {
 					e.preventDefault();
 				}
 				if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
@@ -160,12 +154,12 @@
 				}
 			};
 
-			document.addEventListener("dragover", onDragOver);
-			document.addEventListener("drop", onDrop);
+			document.addEventListener('dragover', onDragOver);
+			document.addEventListener('drop', onDrop);
 
 			return () => {
-				document.removeEventListener("dragover", onDragOver);
-				document.removeEventListener("drop", onDrop);
+				document.removeEventListener('dragover', onDragOver);
+				document.removeEventListener('drop', onDrop);
 			};
 		}
 	);
@@ -178,7 +172,7 @@
 			if (syncHiddenInput && attachmentsContext.fileInputRef) {
 				// Clear the input when items are cleared
 				if (attachmentsContext.attachments.length === 0) {
-					attachmentsContext.fileInputRef.value = "";
+					attachmentsContext.fileInputRef.value = '';
 				}
 			}
 		}
@@ -189,14 +183,14 @@
 		if (target.files) {
 			attachmentsContext.add(target.files);
 		}
-		target.value = "";
+		target.value = '';
 	};
 
 	let convertFileToDataUrl = (file: File): Promise<string> =>
 		new Promise((resolve, reject) => {
 			let reader = new FileReader();
 			reader.onload = () => resolve(reader.result as string);
-			reader.onerror = () => reject(reader.error ?? new Error("Failed to read file."));
+			reader.onerror = () => reject(reader.error ?? new Error('Failed to read file.'));
 			reader.readAsDataURL(file);
 		});
 
@@ -214,11 +208,10 @@
 					: await convertFileToDataUrl(attachment.file);
 
 				return {
-					type: "file" as const,
+					type: 'file' as const,
 					url,
-					mediaType:
-						attachment.mediaType || attachment.file.type || "application/octet-stream",
-					filename: attachment.filename || attachment.file.name,
+					mediaType: attachment.mediaType || attachment.file.type || 'application/octet-stream',
+					filename: attachment.filename || attachment.file.name
 				};
 			})
 		);
@@ -231,11 +224,10 @@
 
 		let form = event.currentTarget as HTMLFormElement;
 		let text = usingProvider
-			? (controller?.textInput.value ?? "")
-			: (promptTextHandle?.getValue() ??
-				((new FormData(form).get("message") as string) || ""));
+			? (controller?.textInput.value ?? '')
+			: (promptTextHandle?.getValue() ?? ((new FormData(form).get('message') as string) || ''));
 		let submittedAttachments = attachmentsContext.attachments.map((attachment) => ({
-			...attachment,
+			...attachment
 		}));
 		let files = await createFiles(attachmentsContext.attachments);
 
@@ -244,13 +236,13 @@
 				{
 					text,
 					files,
-					attachments: submittedAttachments,
+					attachments: submittedAttachments
 				},
 				event
 			);
 
 			// Handle both sync and async onSubmit
-			if (result && typeof result === "object" && "then" in result) {
+			if (result && typeof result === 'object' && 'then' in result) {
 				await result;
 			}
 
@@ -269,7 +261,7 @@
 			}
 		} catch (error) {
 			// Don't clear on error - user may want to retry
-			console.error("Submit failed:", error);
+			console.error('Submit failed:', error);
 		}
 	};
 
@@ -301,7 +293,7 @@
 />
 <form
 	bind:this={formRef}
-	class={cn("bg-background w-full overflow-hidden rounded-xl border shadow-sm", className)}
+	class={cn('bg-background w-full overflow-hidden rounded-xl border shadow-sm', className)}
 	onsubmit={handleSubmit}
 	{...props}
 >

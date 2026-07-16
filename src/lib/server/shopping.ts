@@ -111,9 +111,7 @@ export async function deleteItem(id: string): Promise<void> {
 }
 
 export async function clearChecked(storeId: string | null): Promise<void> {
-	await db
-		.delete(shoppingItem)
-		.where(and(storeFilter(storeId), isNotNull(shoppingItem.checked)));
+	await db.delete(shoppingItem).where(and(storeFilter(storeId), isNotNull(shoppingItem.checked)));
 	notifyChange();
 }
 
@@ -140,7 +138,9 @@ export async function reorderItems(orderedIds: string[], storeId: string | null)
 	const items = await db
 		.select()
 		.from(shoppingItem)
-		.where(and(storeFilter(storeId), isNull(shoppingItem.checked), inArray(shoppingItem.id, orderedIds)));
+		.where(
+			and(storeFilter(storeId), isNull(shoppingItem.checked), inArray(shoppingItem.id, orderedIds))
+		);
 
 	if (items.length !== orderedIds.length) {
 		throw new Error('Reorder set does not match the unchecked items in this store');

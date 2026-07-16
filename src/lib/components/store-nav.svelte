@@ -32,7 +32,13 @@
 			</Button>
 		{/each}
 	</div>
-	<Button variant="ghost" size="icon" class="shrink-0" aria-label="Manage stores" onclick={onManage}>
+	<Button
+		variant="ghost"
+		size="icon"
+		class="shrink-0"
+		aria-label="Manage stores"
+		onclick={onManage}
+	>
 		<SettingsIcon />
 	</Button>
 </div>
