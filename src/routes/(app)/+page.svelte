@@ -9,7 +9,7 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import type { ShoppingItem as Item } from '$lib/server/db/schema';
 	import { dragHandleZone, type DndEvent } from 'svelte-dnd-action';
-	import { untrack } from 'svelte';
+	import { getActiveStore } from '$lib/active-store.svelte.js';
 	import { flip } from 'svelte/animate';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import ChevronUpIcon from '@lucide/svelte/icons/chevron-up';
@@ -20,11 +20,8 @@
 	const VISIBLE_CHECKED = 3;
 	const FLIP_MS = 150;
 
-	let { data } = $props();
+	const activeStore = getActiveStore();
 
-	// Seeded once from the default-store preference; later preference edits must not yank the
-	// list out from under someone who has since switched stores by hand.
-	let activeStoreId = $state<string | null>(untrack(() => data.defaultStoreId));
 	let editing = $state<Item | null>(null);
 	let checkedCollapsed = $state(true);
 	let manageOpen = $state(false);
@@ -33,12 +30,12 @@
 	let sortItems = $state<Item[]>([]);
 
 	function confirmClearChecked() {
-		clearChecked(activeStoreId);
+		clearChecked(activeStore.current);
 		deleteAllOpen = false;
 	}
 
 	const storesQuery = getStores();
-	const itemsQuery = $derived(getItems(activeStoreId));
+	const itemsQuery = $derived(getItems(activeStore.current));
 
 	const stores = $derived(storesQuery.current ?? []);
 	const items = $derived(itemsQuery.current ?? []);
@@ -47,7 +44,7 @@
 	const visibleChecked = $derived(
 		checkedCollapsed ? checkedItems.slice(0, VISIBLE_CHECKED) : checkedItems
 	);
-	const activeStore = $derived(stores.find((s) => s.id === activeStoreId) ?? null);
+	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
 
 	// Mirror the live unchecked list into a mutable copy the dndzone can reorder. Runs on
 	// entering sort mode and whenever the live query changes (e.g. a remote reorder), but not
@@ -62,15 +59,15 @@
 
 	function handleFinalize(e: CustomEvent<DndEvent<Item>>) {
 		sortItems = e.detail.items;
-		reorderItems({ orderedIds: sortItems.map((i) => i.id), storeId: activeStoreId });
+		reorderItems({ orderedIds: sortItems.map((i) => i.id), storeId: activeStore.current });
 	}
 
 	// Sorting is scoped to one store's unchecked list; switching stores leaves sort mode so the
 	// drag target can't go stale.
 	let sortedStoreId: string | null = null;
 	$effect(() => {
-		if (activeStoreId !== sortedStoreId) {
-			sortedStoreId = activeStoreId;
+		if (activeStore.current !== sortedStoreId) {
+			sortedStoreId = activeStore.current;
 			sortMode = false;
 		}
 	});
@@ -78,23 +75,23 @@
 	// If the active store is deleted (here or in another session), fall back to Unassigned.
 	$effect(() => {
 		if (
-			activeStoreId !== null &&
+			activeStore.current !== null &&
 			storesQuery.current !== undefined &&
-			!stores.some((s) => s.id === activeStoreId)
+			!stores.some((s) => s.id === activeStore.current)
 		) {
-			activeStoreId = null;
+			activeStore.current = null;
 		}
 	});
 </script>
 
 <svelte:head><title>Tshopper</title></svelte:head>
 
-<StoreNav {stores} bind:activeStoreId onManage={() => (manageOpen = true)} />
+<StoreNav {stores} bind:activeStoreId={activeStore.current} onManage={() => (manageOpen = true)} />
 
 {#if sortMode}
 	<div class="text-muted-foreground py-1 text-sm">Drag items by the handle to reorder.</div>
 {:else}
-	<ItemForm storeId={activeStoreId} bind:editing />
+	<ItemForm storeId={activeStore.current} bind:editing />
 {/if}
 
 {#if activeItems.length > 1}
@@ -129,14 +126,14 @@
 	</ul>
 {:else if items.length === 0}
 	<div class="text-muted-foreground flex flex-col items-center gap-3 py-16">
-		{#if activeStore}
-			<span class="size-10 rounded-full" style={`background-color: ${activeStore.color}`}></span>
+		{#if store}
+			<span class="size-10 rounded-full" style={`background-color: ${store.color}`}></span>
 		{:else}
 			<ShoppingCartIcon class="size-10" />
 		{/if}
 		<p class="text-sm">
 			No items in
-			<span class="text-foreground font-semibold">{activeStore ? activeStore.name : 'Unassigned'}</span>
+			<span class="text-foreground font-semibold">{store ? store.name : 'Unassigned'}</span>
 		</p>
 		<p class="text-xs">Add one using the form above.</p>
 	</div>
@@ -178,8 +175,8 @@
 			<AlertDialog.Title>Clear checked items?</AlertDialog.Title>
 			<AlertDialog.Description>
 				This permanently deletes all checked items in
-				<span class="font-semibold">{activeStore ? activeStore.name : 'Unassigned'}</span>. This
-				cannot be undone.
+				<span class="font-semibold">{store ? store.name : 'Unassigned'}</span>. This cannot be
+				undone.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
