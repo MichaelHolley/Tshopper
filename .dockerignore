@@ -1,0 +1,15 @@
+node_modules
+build
+.svelte-kit
+.git
+.github
+.claude
+.vscode
+plan
+legacy
+*.db
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db

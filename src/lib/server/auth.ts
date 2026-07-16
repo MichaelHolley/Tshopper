@@ -6,6 +6,10 @@ import { APP_PASSWORD, SESSION_SECRET } from '$app/env/private';
 
 export const SESSION_COOKIE = 'session';
 
+// Only ever unset while building — src/env.ts requires both before the app starts.
+const sessionSecret = SESSION_SECRET as string;
+const appPassword = APP_PASSWORD as string;
+
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 14; // 14 days
 
 function safeEqual(a: string, b: string): boolean {
@@ -16,11 +20,11 @@ function safeEqual(a: string, b: string): boolean {
 }
 
 function sign(payload: string): string {
-	return createHmac('sha256', SESSION_SECRET).update(payload).digest('base64url');
+	return createHmac('sha256', sessionSecret).update(payload).digest('base64url');
 }
 
 export function verifyPassword(input: string): boolean {
-	return safeEqual(input, APP_PASSWORD);
+	return safeEqual(input, appPassword);
 }
 
 /** Stateless signed token: `<issuedAtMs>.<hmac>`. Survives restarts as long as SESSION_SECRET is stable. */
