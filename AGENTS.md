@@ -1,268 +1,52 @@
-# Agent Guidelines for Tshopper
+# Tshopper
 
-This document provides guidelines for AI coding agents working in the Tshopper repository.
+## TechStack
 
-## Project Overview
+- SvelteKit using Runes, Remote-Functions and Async expiremental features
+- shadcn-svelte (huntabyte/shadcn-svelte)
+- svelte-ai-elements (SikandarJODD/ai-elements)
+- ai-sdk + openrouter/ai-sdk-provider
+- Drizzle with libsql (a `file:` DB in dev, the libsql container in production)
 
-Tshopper is a real-time shopping list application with:
+To get more info a library you have access to BTCA to clone their repo by calling "use btca".
 
-- **Frontend**: Vue 3 + TypeScript + Vite (Tshopper-web/)
-- **Backend**: .NET 8 ASP.NET Core with SignalR (TshopperService/)
-- **Database**: SQLite with Entity Framework Core
-- **Real-time**: SignalR for live updates across clients
+## Documentation
 
-## Build, Lint, and Test Commands
+- Only add a comment when complexity is genuinely high **and** the naming does not already convey enough information.
+- A comment that restates the function name, parameters, or return type is worthless — delete it. Well-named identifiers are the documentation.
+- Never add a comment just because a function is public or exported.
+- When a comment truly is warranted, prefer explaining _why_ over _what_, use JSDoc syntax, and keep it short and concise.
 
-### Frontend (Tshopper-web/)
+## Feedback Loop
 
-```bash
-# Development
-cd Tshopper-web
-pnpm dev              # Start dev server
+Use `package.json` scripts over `pnpx` and `npx` commands.
+Validate your changes with `pnpm run check` and `pnpm run lint`.
 
-# Build & Type Check
-pnpm build            # Full build with type checking
-pnpm build-only       # Build without type checking
-pnpm type-check       # Run TypeScript compiler check only
+Do not start a dev-server to test against with curl requests.
+Dev-Servers may be used for bug investigations or if explicitly told to.
 
-# Code Quality
-pnpm lint             # Run ESLint with auto-fix
-pnpm format           # Format code with Prettier
+---
 
-# Preview
-pnpm preview          # Preview production build
-```
+You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:
 
-### Backend (TshopperService/)
+## Available Svelte MCP Tools:
 
-```bash
-# Build
-cd TshopperService
-dotnet build          # Build solution
-dotnet build --configuration Release
+### 1. list-sections
 
-# Run
-dotnet run --project TshopperService/TshopperService.csproj
+Use this FIRST to discover all available documentation sections. Returns a structured list with titles, use_cases, and paths.
+When asked about Svelte or SvelteKit topics, ALWAYS use this tool at the start of the chat to find relevant sections.
 
-# Test (when tests are added)
-dotnet test                           # Run all tests
-dotnet test --filter FullyQualifiedName~ServiceTests  # Single test class
-dotnet test --filter Name~AddItemAsync                # Single test method
+### 2. get-documentation
 
-# Database migrations
-dotnet ef migrations add MigrationName --project TshopperService
-dotnet ef database update --project TshopperService
-```
+Retrieves full documentation content for specific sections. Accepts single or multiple sections.
+After calling the list-sections tool, you MUST analyze the returned documentation sections (especially the use_cases field) and then use the get-documentation tool to fetch ALL documentation sections that are relevant for the user's task.
 
-## Code Style Guidelines
+### 3. svelte-autofixer
 
-### Frontend (TypeScript/Vue)
+Analyzes Svelte code and returns issues and suggestions.
+You MUST use this tool whenever writing Svelte code before sending it to the user. Keep calling it until no issues or suggestions are returned.
 
-#### Formatting & Linting
+### 4. playground-link
 
-- **Prettier**: Semi-colons disabled, single quotes, 100 char line width
-- **ESLint**: Vue 3 essential rules + TypeScript recommended config
-- **Auto-fix**: Always run `pnpm lint` before committing
-
-#### TypeScript
-
-- **Strict Mode**: `useUnknownInCatchVariables: true` in tsconfig
-- **Type Imports**: Use `import type` for type-only imports
-
-  ```typescript
-  import type { ShoppingItem, Store } from '@/types'
-  import { HubConnectionBuilder } from '@microsoft/signalr'
-  ```
-
-- **No `any`**: Always provide explicit types, prefer `unknown` in catch blocks
-- **Vue Props/Emits**: Use TypeScript syntax with `defineProps<>()` and `defineEmits<>()`
-
-#### Imports Order
-
-1. Vue core imports
-2. Type imports (`import type`)
-3. Third-party libraries (e.g., SignalR, Pinia)
-4. Local stores/composables
-5. Local types/utilities
-
-Example:
-
-```typescript
-import { computed } from 'vue'
-import type { ShoppingItem } from '@/types'
-import { HubConnectionBuilder } from '@microsoft/signalr'
-import { defineStore } from 'pinia'
-import { useAuthStore } from './AuthStore'
-```
-
-#### Naming Conventions
-
-- **Variables/Functions**: camelCase (`shoppingItems`, `addItem`)
-- **Types/Interfaces**: PascalCase (`ShoppingItem`, `Store`)
-- **Constants**: SCREAMING_SNAKE_CASE or camelCase for local constants
-- **Vue Components**: PascalCase files (`ShoppingListItem.vue`)
-- **Stores**: PascalCase with "Store" suffix (`useShoppingListStore`)
-
-#### Vue Components
-
-- **Script Setup**: Always use `<script setup lang="ts">`
-- **Props**: Destructure with `defineProps<{ ... }>()`
-- **Emits**: Define with explicit types using `defineEmits<{ ... }>()`
-- **Computed**: Use `computed()` for derived state
-- **Template**: Use Tailwind CSS classes, avoid inline styles
-
-#### Nuxt UI
-
-This project uses [Nuxt UI](https://ui.nuxt.com) as the component library, configured for use in a Vue (non-Nuxt) app via `@nuxt/ui/vue-plugin`. Key points:
-
-- **Plugin registration**: The Nuxt UI Vue plugin must be registered in `main.ts`:
-  ```typescript
-  import ui from '@nuxt/ui/vue-plugin'
-  app.use(ui)
-  ```
-- **CSS import**: Include Nuxt UI's styles in your main CSS entry:
-  ```css
-  @import "@nuxt/ui";
-  ```
-- **Component usage**: Use Nuxt UI components (e.g., `<UButton>`, `<UInput>`, `<UModal>`) directly in templates — no per-component imports required.
-- **Theming**: Customize via the `app.config.ts` (or equivalent config object passed to the plugin) using Nuxt UI's token system.
-- **Icons**: Nuxt UI relies on `@iconify/vue`; use the `icon` prop with Iconify icon names (e.g., `icon="i-heroicons-plus"`).
-- **Avoid duplication**: Do not manually implement UI primitives (buttons, inputs, modals, etc.) that Nuxt UI already provides.
-
-#### Error Handling
-
-- **Console Logging**: Use emoji prefixes for visibility (✅, ❌, 🆕)
-
-  ```typescript
-  console.log('✅ Item Added!')
-  console.error('❌ Error adding item:', err)
-  ```
-
-- **Try-Catch**: Always wrap async SignalR calls in try-catch
-- **Return Status**: Return boolean for success/failure in store actions
-
-#### State Management
-
-- **Pinia**: Use for global state (auth, shopping list, categories)
-- **Store Pattern**:
-  - `state()`: Define reactive state
-  - `getters`: Computed derived state
-  - `actions`: Async methods for API/SignalR calls
-- **SignalR**: Manage connection lifecycle in store actions
-
-### Backend (C#/.NET)
-
-#### C# Conventions
-
-- **Nullable**: Enabled (`<Nullable>enable</Nullable>`)
-- **Implicit Usings**: Enabled for common namespaces
-- **Target Framework**: .NET 10.0
-
-#### Naming Conventions
-
-- **Classes/Interfaces**: PascalCase (`ShoppingListService`, `IShoppingListService`)
-- **Methods**: PascalCase (`GetAllItemsAsync`, `AddItemAsync`)
-- **Private Fields**: `_camelCase` with underscore prefix (`_dbContext`)
-- **Parameters**: camelCase (`itemId`, `categoryName`)
-- **Async Methods**: Suffix with `Async`
-
-#### Imports Organization
-
-- System namespaces first
-- Microsoft namespaces
-- Third-party packages
-- Local project namespaces (alphabetical)
-
-Example:
-
-```csharp
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using TshopperService.Data;
-using TshopperService.Exceptions;
-```
-
-#### Controllers
-
-- **Route**: `[Route("/api/[controller]")]`
-- **Attributes**: `[HttpGet]`, `[HttpPost]`, `[Authorize]` as needed
-- **Return Types**: `IActionResult`, `Ok()`, `Unauthorized()`, `NotFound()`
-- **Dependency Injection**: Constructor injection for services
-
-#### Services
-
-- **Interface**: Always create an interface (`IShoppingListService`)
-- **Async**: All database operations should be async with `Task<T>`
-- **DbContext**: Inject via constructor, use `_dbContext` naming
-
-#### Error Handling
-
-- **Custom Exceptions**: Use `BusinessException` for business logic errors
-- **Error Codes**: Use `BusinessErrorCodes` enum for categorization
-- **Middleware**: `BusinessExceptionMiddleware` handles exceptions globally
-- **Validation**: Validate input early, throw `BusinessException` for invalid data
-
-  ```csharp
-  if (string.IsNullOrWhiteSpace(item))
-  {
-      throw new BusinessException("Item name cannot be empty", BusinessErrorCodes.INVALID_INPUT);
-  }
-  ```
-
-- **Null Checks**: Always check for null after `FindAsync()` before operations
-
-#### Entity Framework
-
-- **Include Relations**: Use `.Include()` for related data
-- **Queries**: Use LINQ with async methods (`.ToListAsync()`, `.FirstOrDefaultAsync()`)
-- **Ordering**: Chain `.OrderBy()`, `.ThenBy()` for complex sorting
-- **Save Changes**: Always `await _dbContext.SaveChangesAsync()`
-
-#### SignalR Hubs
-
-- **Base Class**: Inherit from `Hub`
-- **Methods**: Public async methods invokable from clients
-- **Broadcasting**: Use `Clients.All.SendAsync()` for updates
-- **Groups**: Use `Groups.AddToGroupAsync()` for targeted messaging
-
-## Project Structure
-
-```
-Tshopper/
-├── Tshopper-web/           # Vue 3 frontend
-│   ├── src/
-│   │   ├── components/     # Vue components
-│   │   ├── stores/         # Pinia stores
-│   │   ├── views/          # Page components
-│   │   ├── utils/          # Utility functions
-│   │   └── types.d.ts      # TypeScript type definitions
-│   └── package.json
-└── TshopperService/        # .NET backend
-    └── TshopperService/
-        ├── Controllers/    # API controllers
-        ├── Services/       # Business logic
-        ├── Data/           # Entity models
-        ├── Dtos/           # Data transfer objects
-        ├── Hubs/           # SignalR hubs
-        ├── Middleware/     # Custom middleware
-        └── Migrations/     # EF Core migrations
-```
-
-## General Practices
-
-- **Async/Await**: Use async/await for all I/O operations
-- **Path Alias**: Use `@/` for absolute imports in frontend (maps to `src/`)
-- **Environment Variables**:
-  - Frontend: `import.meta.env.VITE_API_URL`
-  - Backend: `IConfiguration` injection
-- **Authentication**: JWT tokens with 72-hour expiry
-- **Real-time Updates**: All state mutations broadcast via SignalR
-- **Docker**: Both services containerized, see Dockerfiles
-
-## Testing (Future)
-
-When adding tests:
-
-- **Frontend**: Vitest + Vue Test Utils
-- **Backend**: xUnit + Moq for service tests
-- **Run**: `pnpm test` (frontend), `dotnet test` (backend)
+Generates a Svelte Playground link with the provided code.
+After completing the code, ask the user if they want a playground link. Only call this tool after user confirmation and NEVER if code was written to files in their project.

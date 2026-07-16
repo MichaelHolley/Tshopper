@@ -7,54 +7,29 @@ on:
     branches: [main]
 
 jobs:
-  build-frontend:
+  build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Tshopper-web
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
 
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
+          cache: pnpm
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm & dependencies
-        with:
-          version: 9.15.0
-          run_install: |
-            - cwd: Tshopper-web
-
-      - name: Generate type declarations
-        run: pnpm build-only
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Type check
-        run: pnpm type-check
+        run: pnpm run check
 
-  build-backend:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: TshopperService
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: "10.0.x"
-
-      - name: Restore dependencies
-        run: dotnet restore
+      - name: Lint
+        run: pnpm run lint
 
       - name: Build
-        run: dotnet build --no-restore --configuration Release
-
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: pnpm run build

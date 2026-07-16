@@ -1,0 +1,33 @@
+services:
+  tshopper:
+    image: mpholley/tshopper:latest
+    container_name: tshopper
+    ports:
+      - '6000:3000'
+    environment:
+      - ORIGIN=https://tshopper.example.com
+      - DATABASE_URL=http://libsql:8080
+      - APP_PASSWORD=abc123
+      - SESSION_SECRET=MySecretKeyWithEnoughCharacters
+      - OPENROUTER_API_KEY=your-api-key
+      - OPENROUTER_MODEL=openai/gpt-5.4-mini
+    depends_on:
+      libsql:
+        condition: service_healthy
+    restart: always
+
+  libsql:
+    image: ghcr.io/tursodatabase/libsql-server:latest
+    container_name: tshopper-db
+    volumes:
+      - libsql-data:/var/lib/sqld
+    restart: always
+    healthcheck:
+      test: ['CMD', 'bash', '-c', 'echo > /dev/tcp/127.0.0.1/8080']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  libsql-data:
