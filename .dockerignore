@@ -6,7 +6,6 @@ build
 .claude
 .vscode
 plan
-legacy
 *.db
 .env
 .env.*

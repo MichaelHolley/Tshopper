@@ -22,7 +22,7 @@ async function maxUncheckedSortOrder(storeId: string | null, excludeId?: string)
 
 /**
  * Unchecked items by manual order, then checked items newest-first. Checked items older
- * than 7 days are dropped, matching the legacy list view.
+ * than 7 days are dropped so the list does not grow without bound.
  */
 export async function listItems(storeId: string | null): Promise<ShoppingItem[]> {
 	const items = await db

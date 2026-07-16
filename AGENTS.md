@@ -6,7 +6,7 @@
 - shadcn-svelte (huntabyte/shadcn-svelte)
 - svelte-ai-elements (SikandarJODD/ai-elements)
 - ai-sdk + openrouter/ai-sdk-provider
-- Drizzle with Turso
+- Drizzle with libsql (a `file:` DB in dev, the libsql container in production)
 
 To get more info a library you have access to BTCA to clone their repo by calling "use btca".
 
@@ -15,7 +15,7 @@ To get more info a library you have access to BTCA to clone their repo by callin
 - Only add a comment when complexity is genuinely high **and** the naming does not already convey enough information.
 - A comment that restates the function name, parameters, or return type is worthless — delete it. Well-named identifiers are the documentation.
 - Never add a comment just because a function is public or exported.
-- When a comment truly is warranted, prefer explaining *why* over *what*, use JSDoc syntax, and keep it short and concise.
+- When a comment truly is warranted, prefer explaining _why_ over _what_, use JSDoc syntax, and keep it short and concise.
 
 ## Feedback Loop
 
@@ -50,4 +50,3 @@ You MUST use this tool whenever writing Svelte code before sending it to the use
 
 Generates a Svelte Playground link with the provided code.
 After completing the code, ask the user if they want a playground link. Only call this tool after user confirmation and NEVER if code was written to files in their project.
-
