@@ -7,7 +7,8 @@ import * as shopping from '$lib/server/shopping';
 export const getStores = query.live(async function* () {
 	requireAuth();
 	yield await shopping.listStores();
-	for await (const _ of changes()) {
+	for await (const change of changes()) {
+		void change;
 		yield await shopping.listStores();
 	}
 });
