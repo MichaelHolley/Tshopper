@@ -8,7 +8,7 @@
 - ai-sdk + openrouter/ai-sdk-provider
 - Drizzle with Turso
 
-You have access to BTCA to get more info on libraries via their repo, by calling "use btca".
+To get more info a library you have access to BTCA to clone their repo by calling "use btca".
 
 ## Documentation
 
@@ -21,6 +21,9 @@ You have access to BTCA to get more info on libraries via their repo, by calling
 
 Use `package.json` scripts over `pnpx` and `npx` commands.
 Validate your changes with `pnpm run check` and `pnpm run lint`.
+
+Do not start a dev-server to test against with curl requests.
+Dev-Servers may be used for bug investigations or if explicitly told to.
 
 ---
 
