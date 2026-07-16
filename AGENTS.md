@@ -17,6 +17,11 @@ You have access to BTCA to get more info on libraries via their repo, by calling
 - Never add a comment just because a function is public or exported.
 - When a comment truly is warranted, prefer explaining *why* over *what*, use JSDoc syntax, and keep it short and concise.
 
+## Feedback Loop
+
+Use `package.json` scripts over `pnpx` and `npx` commands.
+Validate your changes with `pnpm run check` and `pnpm run lint`.
+
 ---
 
 You are able to use the Svelte MCP server, where you have access to comprehensive Svelte 5 and SvelteKit documentation. Here's how to use the available tools effectively:

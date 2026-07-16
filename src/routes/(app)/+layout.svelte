@@ -3,12 +3,15 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
+	import SettingsDialog from '$lib/components/settings-dialog.svelte';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
+	import SettingsIcon from '@lucide/svelte/icons/settings';
 	import LogOutIcon from '@lucide/svelte/icons/log-out';
 
 	let { children } = $props();
 
 	let assistantOpen = $state(false);
+	let settingsOpen = $state(false);
 </script>
 
 <div class="flex min-h-svh flex-col">
@@ -24,6 +27,14 @@
 				>
 					<SparklesIcon />
 				</Button>
+				<Button
+					variant="ghost"
+					size="icon"
+					aria-label="Open settings"
+					onclick={() => (settingsOpen = true)}
+				>
+					<SettingsIcon />
+				</Button>
 				<form {...logout}>
 					<Button type="submit" variant="ghost" size="icon" aria-label="Sign out">
 						<LogOutIcon />
@@ -37,6 +48,8 @@
 		{@render children()}
 	</main>
 </div>
+
+<SettingsDialog bind:open={settingsOpen} />
 
 <Sheet.Root bind:open={assistantOpen}>
 	<Sheet.Content side="right" class="flex w-full flex-col gap-0 sm:max-w-md">

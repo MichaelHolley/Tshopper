@@ -9,6 +9,7 @@
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import type { ShoppingItem as Item } from '$lib/server/db/schema';
 	import { dragHandleZone, type DndEvent } from 'svelte-dnd-action';
+	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import ChevronUpIcon from '@lucide/svelte/icons/chevron-up';
@@ -19,7 +20,11 @@
 	const VISIBLE_CHECKED = 3;
 	const FLIP_MS = 150;
 
-	let activeStoreId = $state<string | null>(null);
+	let { data } = $props();
+
+	// Seeded once from the default-store preference; later preference edits must not yank the
+	// list out from under someone who has since switched stores by hand.
+	let activeStoreId = $state<string | null>(untrack(() => data.defaultStoreId));
 	let editing = $state<Item | null>(null);
 	let checkedCollapsed = $state(true);
 	let manageOpen = $state(false);
