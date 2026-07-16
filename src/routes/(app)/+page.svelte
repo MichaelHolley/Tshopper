@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getItems, clearChecked } from '$lib/items.remote';
+	import { getItems, clearChecked, reorderItems } from '$lib/items.remote';
 	import { getStores } from '$lib/stores.remote';
 	import StoreNav from '$lib/components/store-nav.svelte';
 	import ItemForm from '$lib/components/item-form.svelte';
@@ -8,18 +8,24 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 	import type { ShoppingItem as Item } from '$lib/server/db/schema';
+	import { dragHandleZone, type DndEvent } from 'svelte-dnd-action';
+	import { flip } from 'svelte/animate';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import ChevronUpIcon from '@lucide/svelte/icons/chevron-up';
 	import ShoppingCartIcon from '@lucide/svelte/icons/shopping-cart';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import ArrowUpDownIcon from '@lucide/svelte/icons/arrow-up-down';
 
 	const VISIBLE_CHECKED = 3;
+	const FLIP_MS = 150;
 
 	let activeStoreId = $state<string | null>(null);
 	let editing = $state<Item | null>(null);
 	let checkedCollapsed = $state(true);
 	let manageOpen = $state(false);
 	let deleteAllOpen = $state(false);
+	let sortMode = $state(false);
+	let sortItems = $state<Item[]>([]);
 
 	function confirmClearChecked() {
 		clearChecked(activeStoreId);
@@ -38,6 +44,32 @@
 	);
 	const activeStore = $derived(stores.find((s) => s.id === activeStoreId) ?? null);
 
+	// Mirror the live unchecked list into a mutable copy the dndzone can reorder. Runs on
+	// entering sort mode and whenever the live query changes (e.g. a remote reorder), but not
+	// during a local drag — consider events only mutate `sortItems`, leaving `activeItems` alone.
+	$effect(() => {
+		if (sortMode) sortItems = activeItems;
+	});
+
+	function handleConsider(e: CustomEvent<DndEvent<Item>>) {
+		sortItems = e.detail.items;
+	}
+
+	function handleFinalize(e: CustomEvent<DndEvent<Item>>) {
+		sortItems = e.detail.items;
+		reorderItems({ orderedIds: sortItems.map((i) => i.id), storeId: activeStoreId });
+	}
+
+	// Sorting is scoped to one store's unchecked list; switching stores leaves sort mode so the
+	// drag target can't go stale.
+	let sortedStoreId: string | null = null;
+	$effect(() => {
+		if (activeStoreId !== sortedStoreId) {
+			sortedStoreId = activeStoreId;
+			sortMode = false;
+		}
+	});
+
 	// If the active store is deleted (here or in another session), fall back to Unassigned.
 	$effect(() => {
 		if (
@@ -54,9 +86,43 @@
 
 <StoreNav {stores} bind:activeStoreId onManage={() => (manageOpen = true)} />
 
-<ItemForm storeId={activeStoreId} bind:editing />
+{#if sortMode}
+	<div class="text-muted-foreground py-1 text-sm">Drag items by the handle to reorder.</div>
+{:else}
+	<ItemForm storeId={activeStoreId} bind:editing />
+{/if}
 
-{#if items.length === 0}
+{#if activeItems.length > 1}
+	<div class="flex justify-end">
+		<Button
+			variant={sortMode ? 'default' : 'ghost'}
+			size="sm"
+			onclick={() => (sortMode = !sortMode)}
+		>
+			<ArrowUpDownIcon />
+			{sortMode ? 'Done' : 'Reorder'}
+		</Button>
+	</div>
+{/if}
+
+{#if sortMode}
+	<ul
+		use:dragHandleZone={{
+			items: sortItems,
+			flipDurationMs: FLIP_MS,
+			delayTouchStart: true,
+			dropTargetStyle: {}
+		}}
+		onconsider={handleConsider}
+		onfinalize={handleFinalize}
+	>
+		{#each sortItems as item (item.id)}
+			<li animate:flip={{ duration: FLIP_MS }}>
+				<ShoppingItem {item} {stores} sortMode onEdit={(i) => (editing = i)} />
+			</li>
+		{/each}
+	</ul>
+{:else if items.length === 0}
 	<div class="text-muted-foreground flex flex-col items-center gap-3 py-16">
 		{#if activeStore}
 			<span class="size-10 rounded-full" style={`background-color: ${activeStore.color}`}></span>

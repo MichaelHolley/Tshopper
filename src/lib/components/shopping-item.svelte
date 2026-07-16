@@ -8,12 +8,20 @@
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import StoreIcon from '@lucide/svelte/icons/store';
+	import GripVerticalIcon from '@lucide/svelte/icons/grip-vertical';
+	import { dragHandle } from 'svelte-dnd-action';
 
 	let {
 		item,
 		stores,
-		onEdit
-	}: { item: ShoppingItem; stores: Store[]; onEdit: (item: ShoppingItem) => void } = $props();
+		onEdit,
+		sortMode = false
+	}: {
+		item: ShoppingItem;
+		stores: Store[];
+		onEdit: (item: ShoppingItem) => void;
+		sortMode?: boolean;
+	} = $props();
 
 	const checked = $derived(item.checked !== null);
 	const otherStores = $derived(stores.filter((s) => s.id !== item.storeId));
@@ -25,7 +33,19 @@
 </script>
 
 <div class="flex items-center gap-3 border-b py-2.5">
-	<Checkbox {checked} onCheckedChange={toggle} aria-label={`Toggle ${item.item}`} />
+	{#if sortMode}
+		<div
+			use:dragHandle
+			role="button"
+			tabindex="0"
+			class="text-muted-foreground shrink-0 cursor-grab touch-none active:cursor-grabbing"
+			aria-label={`Drag to reorder ${item.item}`}
+		>
+			<GripVerticalIcon class="size-5" />
+		</div>
+	{:else}
+		<Checkbox {checked} onCheckedChange={toggle} aria-label={`Toggle ${item.item}`} />
+	{/if}
 	<div class="min-w-0 flex-1">
 		<p class={['truncate leading-tight', checked && 'text-muted-foreground line-through']}>
 			{item.item}
@@ -35,6 +55,7 @@
 		{/if}
 	</div>
 
+	{#if !sortMode}
 	<DropdownMenu.Root>
 		<DropdownMenu.Trigger>
 			{#snippet child({ props })}
@@ -79,4 +100,5 @@
 			</DropdownMenu.Item>
 		</DropdownMenu.Content>
 	</DropdownMenu.Root>
+	{/if}
 </div>

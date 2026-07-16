@@ -50,6 +50,14 @@ export const clearChecked = command(storeId, async (storeId) => {
 	await shopping.clearChecked(storeId);
 });
 
+export const reorderItems = command(
+	z.object({ orderedIds: z.array(z.string()), storeId }),
+	async ({ orderedIds, storeId }) => {
+		requireAuth();
+		await shopping.reorderItems(orderedIds, storeId);
+	}
+);
+
 export const moveItem = command(
 	z.object({ id: z.string(), targetStoreId: storeId }),
 	async ({ id, targetStoreId }) => {

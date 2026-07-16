@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNotNull, isNull, max, ne } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
 import { db } from './db';
 import { shoppingItem, store, type ShoppingItem, type Store } from './db/schema';
 import { notifyChange } from './events';
@@ -127,6 +127,34 @@ export async function moveItem(id: string, targetStoreId: string | null): Promis
 	if (!updated) throw new Error('Item not found');
 	notifyChange();
 	return updated;
+}
+
+/**
+ * Persist a manual order for the unchecked items of a store. `orderedIds` must be exactly
+ * the unchecked items in that store; sort order follows their position. Checked items and
+ * cross-store ids are rejected so a stale client can't scramble the list.
+ */
+export async function reorderItems(orderedIds: string[], storeId: string | null): Promise<void> {
+	if (orderedIds.length === 0) return;
+
+	const items = await db
+		.select()
+		.from(shoppingItem)
+		.where(and(storeFilter(storeId), isNull(shoppingItem.checked), inArray(shoppingItem.id, orderedIds)));
+
+	if (items.length !== orderedIds.length) {
+		throw new Error('Reorder set does not match the unchecked items in this store');
+	}
+
+	await db.transaction(async (tx) => {
+		for (let i = 0; i < orderedIds.length; i++) {
+			await tx
+				.update(shoppingItem)
+				.set({ sortOrder: i + 1 })
+				.where(eq(shoppingItem.id, orderedIds[i]));
+		}
+	});
+	notifyChange();
 }
 
 export async function listStores(): Promise<Store[]> {
