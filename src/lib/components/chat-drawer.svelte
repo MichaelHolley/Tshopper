@@ -70,8 +70,8 @@
 		</Sheet.Header>
 		<Separator />
 
-		<Conversation.Root class="flex-1">
-			<Conversation.Content class="gap-4">
+		<Conversation.Root class="min-h-0 flex-1">
+			<Conversation.Content class="min-h-0 flex-1 gap-4 overflow-y-auto">
 				{#if chat.messages.length === 0}
 					<Conversation.EmptyState
 						title="No messages yet"
