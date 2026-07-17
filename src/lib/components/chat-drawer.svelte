@@ -13,7 +13,6 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { getActiveStore } from '$lib/active-store.svelte.js';
-	import ChatAttachImageButton from './chat-attach-image-button.svelte';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import WrenchIcon from '@lucide/svelte/icons/wrench';
@@ -195,7 +194,12 @@
 					</PromptInput.Body>
 					<PromptInput.Toolbar>
 						<PromptInput.Tools>
-							<ChatAttachImageButton />
+							<PromptInput.ActionMenu>
+								<PromptInput.ActionMenuTrigger />
+								<PromptInput.ActionMenuContent>
+									<PromptInput.ActionAddAttachments label="Add an image" />
+								</PromptInput.ActionMenuContent>
+							</PromptInput.ActionMenu>
 						</PromptInput.Tools>
 						<PromptInput.Submit status={chat.status} onStop={() => chat.stop()} />
 					</PromptInput.Toolbar>
