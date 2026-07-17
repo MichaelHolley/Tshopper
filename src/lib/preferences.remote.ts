@@ -7,8 +7,7 @@ import * as preferences from '$lib/server/preferences';
 export const getPreferences = query.live(async function* () {
 	requireAuth();
 	yield await preferences.getPreferences();
-	for await (const change of changes()) {
-		void change;
+	for await (const _ of changes()) {
 		yield await preferences.getPreferences();
 	}
 });

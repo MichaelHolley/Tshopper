@@ -67,19 +67,9 @@ export function shoppingTools(storeId: string | null) {
 			}
 		}),
 
-		remove_item: tool({
-			description:
-				'Remove a single item from the shopping list. Call list_items first to get the correct item id.',
-			inputSchema: z.object({ id: z.string().describe('Item id from list_items') }),
-			execute: async ({ id }) => {
-				await shopping.deleteItem(id);
-				return { removed: 1 };
-			}
-		}),
-
 		remove_items: tool({
 			description:
-				'Remove multiple items at once. Prefer this over repeated remove_item calls when removing more than one item.',
+				'Remove one or more items from the shopping list. Call list_items first to get the correct item ids.',
 			inputSchema: z.object({
 				ids: z.array(z.string()).describe('Item ids from list_items')
 			}),
@@ -119,7 +109,7 @@ export function systemPrompt(storeName: string): string {
 		`The user's active list is: ${storeName}. Every tool you call is already scoped to it.`,
 		'Help users manage their shopping list using natural language.',
 		'Rules:',
-		'- Always call list_items before update_item, set_item_checked, remove_item or reorder_items to get accurate ids.',
+		'- Always call list_items before update_item, set_item_checked, remove_items or reorder_items to get accurate ids.',
 		'- Checking an item off keeps it on the list; removing deletes it. Do not confuse the two.',
 		'- For ambiguous requests, ask one concise clarifying question.',
 		'- You can execute multiple operations for a single user message.',

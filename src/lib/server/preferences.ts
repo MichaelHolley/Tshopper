@@ -5,21 +5,10 @@ import { notifyChange } from './events';
 
 const EMPTY: Preferences = { id: PREFERENCES_ID, defaultStoreId: null };
 
-/**
- * The singleton row is created lazily, so its absence is a valid empty state rather than an
- * error. A default store that no longer exists is cleared on read: the FK's `set null` covers
- * deletes made through the app, but a stale row shouldn't strand the app on a missing store.
- */
+/** The singleton row is created lazily, so its absence is a valid empty state rather than an error. */
 export async function getPreferences(): Promise<Preferences> {
-	const [row] = await db
-		.select({ prefs: preferences, storeId: store.id })
-		.from(preferences)
-		.leftJoin(store, eq(preferences.defaultStoreId, store.id))
-		.where(eq(preferences.id, PREFERENCES_ID));
-
-	if (!row) return EMPTY;
-	if (row.prefs.defaultStoreId !== null && row.storeId === null) return setDefaultStore(null);
-	return row.prefs;
+	const [row] = await db.select().from(preferences).where(eq(preferences.id, PREFERENCES_ID));
+	return row ?? EMPTY;
 }
 
 export async function setDefaultStore(storeId: string | null): Promise<Preferences> {

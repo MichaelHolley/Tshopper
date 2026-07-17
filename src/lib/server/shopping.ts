@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
 import { db } from './db';
 import { shoppingItem, store, type ShoppingItem, type Store } from './db/schema';
 import { notifyChange } from './events';
@@ -29,19 +29,13 @@ export async function listItems(storeId: string | null): Promise<ShoppingItem[]>
 		.select()
 		.from(shoppingItem)
 		.where(storeFilter(storeId))
-		.orderBy(asc(shoppingItem.sortOrder), desc(shoppingItem.checked));
+		.orderBy(asc(shoppingItem.sortOrder));
 
 	const cutoff = Date.now() - CHECKED_TTL_MS;
-	const unchecked: ShoppingItem[] = [];
-	const checked: ShoppingItem[] = [];
-	for (const item of items) {
-		if (item.checked === null) {
-			unchecked.push(item);
-		} else if (item.checked.getTime() > cutoff) {
-			checked.push(item);
-		}
-	}
-	checked.sort((a, b) => b.checked!.getTime() - a.checked!.getTime());
+	const unchecked = items.filter((i) => i.checked === null);
+	const checked = items
+		.filter((i) => i.checked !== null && i.checked.getTime() > cutoff)
+		.sort((a, b) => b.checked!.getTime() - a.checked!.getTime());
 	return [...unchecked, ...checked];
 }
 

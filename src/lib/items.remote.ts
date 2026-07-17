@@ -9,8 +9,7 @@ const storeId = z.string().nullable();
 export const getItems = query.live(storeId, async function* (storeId) {
 	requireAuth();
 	yield await shopping.listItems(storeId);
-	for await (const change of changes()) {
-		void change;
+	for await (const _ of changes()) {
 		yield await shopping.listItems(storeId);
 	}
 });

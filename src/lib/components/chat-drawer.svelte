@@ -20,9 +20,9 @@
 		add_item: 'Adding an item',
 		update_item: 'Updating an item',
 		set_item_checked: 'Checking an item off',
-		remove_item: 'Removing an item',
 		remove_items: 'Removing items',
-		clear_checked: 'Clearing checked items'
+		clear_checked: 'Clearing checked items',
+		reorder_items: 'Reordering the list'
 	};
 
 	let { open = $bindable(false) }: { open?: boolean } = $props();
