@@ -10,13 +10,56 @@ import type { RequestHandler } from './$types';
 /** Generous bound on round-trips, not on operations — a single turn may batch many tool calls. */
 const MAX_STEPS = 25;
 
+const IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+/** Data URLs carry base64, which inflates the payload by 4/3; the scheme header adds a few dozen chars. */
+const MAX_IMAGE_URL_LENGTH = Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 128;
+/** The client resends every prior data URL each turn, so the cap is per conversation, not per message. */
+const MAX_IMAGES_PER_REQUEST = 4;
+const MAX_REQUEST_BYTES = 8 * 1024 * 1024;
+
+const imagePartSchema = z.object({
+	type: z.literal('file'),
+	mediaType: z.enum(IMAGE_MEDIA_TYPES),
+	url: z.string().startsWith('data:image/').max(MAX_IMAGE_URL_LENGTH)
+});
+
+const countFileParts = (message: UIMessage) =>
+	(message.parts ?? []).filter((part) => part.type === 'file').length;
+
+const messageSchema = z
+	.custom<UIMessage>((value) => typeof value === 'object' && value !== null)
+	.superRefine((message, ctx) => {
+		const fileParts = (message.parts ?? []).filter((part) => part.type === 'file');
+
+		if (fileParts.length > 1) {
+			ctx.addIssue({ code: 'custom', message: 'Only one image per message' });
+		}
+
+		for (const part of fileParts) {
+			if (!imagePartSchema.safeParse(part).success) {
+				ctx.addIssue({ code: 'custom', message: 'Attachments must be images' });
+			}
+		}
+	});
+
 const bodySchema = z.object({
-	messages: z.array(z.custom<UIMessage>()),
+	messages: z.array(messageSchema).superRefine((messages, ctx) => {
+		const images = messages.reduce((count, message) => count + countFileParts(message), 0);
+		if (images > MAX_IMAGES_PER_REQUEST) {
+			ctx.addIssue({ code: 'custom', message: 'Too many images in this conversation' });
+		}
+	}),
 	storeId: z.string().nullable()
 });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.authenticated) error(401, 'Not authenticated');
+
+	// Reject an oversized body before buffering and parsing it.
+	if (Number(request.headers.get('content-length') ?? 0) > MAX_REQUEST_BYTES) {
+		error(413, 'Request too large');
+	}
 
 	const parsed = bodySchema.safeParse(await request.json());
 	if (!parsed.success) error(400, 'Invalid chat request');

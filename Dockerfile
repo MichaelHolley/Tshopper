@@ -15,6 +15,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
+# adapter-node defaults to 512K, which rejects a chat request carrying a base64 image.
+ENV BODY_SIZE_LIMIT=8M
 
 # adapter-node bundles every server dependency into build/, so no node_modules here.
 COPY --from=build /app/build ./build
