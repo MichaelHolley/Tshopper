@@ -98,7 +98,8 @@
 				<div class="text-muted-foreground text-xs">Drag items by the handle.</div>
 			{:else}
 				<div class="text-muted-foreground text-sm font-semibold">
-					{activeItems.length} {activeItems.length === 1 ? 'item' : 'items'}
+					{activeItems.length}
+					{activeItems.length === 1 ? 'item' : 'items'}
 				</div>
 			{/if}
 		</div>
