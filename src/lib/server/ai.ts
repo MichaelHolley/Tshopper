@@ -97,6 +97,18 @@ export function shoppingTools(storeId: string | null) {
 				await shopping.clearChecked(storeId);
 				return { cleared: true };
 			}
+		}),
+
+		reorder_items: tool({
+			description:
+				'Reorder the unchecked items on the shopping list, e.g. to group related items together. Call list_items first, then pass every unchecked item id in the new order — the array must contain exactly the current unchecked items, just rearranged.',
+			inputSchema: z.object({
+				orderedIds: z.array(z.string()).describe('Ids of all unchecked items, in the desired order')
+			}),
+			execute: async ({ orderedIds }) => {
+				await shopping.reorderItems(orderedIds, storeId);
+				return { reordered: orderedIds.length };
+			}
 		})
 	};
 }
@@ -112,6 +124,7 @@ export function systemPrompt(storeName: string): string {
 		'- For ambiguous requests, ask one concise clarifying question.',
 		'- You can execute multiple operations for a single user message.',
 		'- When operating on many items, use remove_items or clear_checked and batch tool calls in a single turn rather than one at a time.',
+		'- To reorder the list, call reorder_items with every unchecked item id in the new order.',
 		'- Keep responses brief — just confirm what you did or ask what you need.',
 		'- Reply in plain sentences. Do not use markdown formatting.'
 	].join('\n');
