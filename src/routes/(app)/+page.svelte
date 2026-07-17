@@ -93,12 +93,14 @@
 {#if activeItems.length > 0}
 	<div class="flex items-center justify-between gap-3 border-b py-2">
 		<div class="min-w-0">
-			<div class="text-sm font-semibold">{sortMode ? 'Reordering' : 'To buy'}</div>
-			<div class="text-muted-foreground text-xs">
-				{sortMode
-					? 'Drag items by the handle.'
-					: `${activeItems.length} ${activeItems.length === 1 ? 'item' : 'items'}`}
-			</div>
+			{#if sortMode}
+				<div class="text-sm font-semibold">Reordering</div>
+				<div class="text-muted-foreground text-xs">Drag items by the handle.</div>
+			{:else}
+				<div class="text-muted-foreground text-sm font-semibold">
+					{activeItems.length} {activeItems.length === 1 ? 'item' : 'items'}
+				</div>
+			{/if}
 		</div>
 
 		{#if activeItems.length > 1}
