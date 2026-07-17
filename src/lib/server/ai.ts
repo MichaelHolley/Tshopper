@@ -101,7 +101,7 @@ export function shoppingTools(storeId: string | null) {
 
 		reorder_items: tool({
 			description:
-				'Reorder the unchecked items on the shopping list, e.g. to group related items together. Call list_items first, then pass every unchecked item id in the new order — the array must contain exactly the current unchecked items, just rearranged.',
+				'Reorder the unchecked items on the shopping list, e.g. to group related items together. The array must contain exactly the current unchecked item ids, just rearranged.',
 			inputSchema: z.object({
 				orderedIds: z.array(z.string()).describe('Ids of all unchecked items, in the desired order')
 			}),
