@@ -27,8 +27,10 @@
 	function recoverLiveQueries() {
 		if (document.visibilityState !== 'visible') return;
 		getStores().reconnect();
-		getPreferences().reconnect();
 		getItems(activeStore.current).reconnect();
+		// Only active while the settings dialog is mounted; reconnecting it otherwise would open a
+		// connection nothing consumes.
+		if (settingsOpen) getPreferences().reconnect();
 	}
 </script>
 
