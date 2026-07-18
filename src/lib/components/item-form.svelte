@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { addItem, updateItem } from '$lib/items.remote';
+	import { toast } from 'svelte-sonner';
 	import type { ShoppingItem } from '$lib/server/db/schema';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import CheckIcon from '@lucide/svelte/icons/check';
@@ -37,6 +38,8 @@
 			item = '';
 			quantity = '';
 			inputRef?.focus();
+		} catch {
+			toast.error(editing ? 'Could not save item' : 'Could not add item');
 		} finally {
 			pending = false;
 		}
