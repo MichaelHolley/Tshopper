@@ -16,7 +16,6 @@ const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_IMAGE_URL_LENGTH = Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 128;
 /** The client resends every prior data URL each turn, so the cap is per conversation, not per message. */
 const MAX_IMAGES_PER_REQUEST = 4;
-const MAX_REQUEST_BYTES = 8 * 1024 * 1024;
 
 const imagePartSchema = z.object({
 	type: z.literal('file'),
@@ -24,19 +23,19 @@ const imagePartSchema = z.object({
 	url: z.string().startsWith('data:image/').max(MAX_IMAGE_URL_LENGTH)
 });
 
-const countFileParts = (message: UIMessage) =>
-	(message.parts ?? []).filter((part) => part.type === 'file').length;
+const fileParts = (message: UIMessage) =>
+	(message.parts ?? []).filter((part) => part.type === 'file');
 
 const messageSchema = z
 	.custom<UIMessage>((value) => typeof value === 'object' && value !== null)
 	.superRefine((message, ctx) => {
-		const fileParts = (message.parts ?? []).filter((part) => part.type === 'file');
+		const parts = fileParts(message);
 
-		if (fileParts.length > 1) {
+		if (parts.length > 1) {
 			ctx.addIssue({ code: 'custom', message: 'Only one image per message' });
 		}
 
-		for (const part of fileParts) {
+		for (const part of parts) {
 			if (!imagePartSchema.safeParse(part).success) {
 				ctx.addIssue({ code: 'custom', message: 'Attachments must be images' });
 			}
@@ -45,7 +44,7 @@ const messageSchema = z
 
 const bodySchema = z.object({
 	messages: z.array(messageSchema).superRefine((messages, ctx) => {
-		const images = messages.reduce((count, message) => count + countFileParts(message), 0);
+		const images = messages.reduce((count, message) => count + fileParts(message).length, 0);
 		if (images > MAX_IMAGES_PER_REQUEST) {
 			ctx.addIssue({ code: 'custom', message: 'Too many images in this conversation' });
 		}
@@ -55,11 +54,6 @@ const bodySchema = z.object({
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.authenticated) error(401, 'Not authenticated');
-
-	// Reject an oversized body before buffering and parsing it.
-	if (Number(request.headers.get('content-length') ?? 0) > MAX_REQUEST_BYTES) {
-		error(413, 'Request too large');
-	}
 
 	const parsed = bodySchema.safeParse(await request.json());
 	if (!parsed.success) error(400, 'Invalid chat request');
