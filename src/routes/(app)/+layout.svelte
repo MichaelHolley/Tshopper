@@ -21,7 +21,7 @@
 
 <div class="flex min-h-svh flex-col">
 	<header class="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
-		<div class="mx-auto flex h-14 w-full max-w-md items-center justify-between gap-2 px-4">
+		<div class="mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-2 px-4">
 			<a href="/" class="text-lg font-semibold tracking-tight">Tshopper</a>
 			<div class="flex items-center gap-1">
 				<Button
@@ -49,7 +49,7 @@
 		</div>
 	</header>
 
-	<main class="mx-auto flex w-full max-w-md flex-1 flex-col gap-2 px-4 py-4">
+	<main class="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-4 py-4">
 		{@render children()}
 	</main>
 </div>
