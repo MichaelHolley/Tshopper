@@ -18,6 +18,7 @@
 	import WrenchIcon from '@lucide/svelte/icons/wrench';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
+	import XIcon from '@lucide/svelte/icons/x';
 
 	const TOOL_LABELS: Record<string, string> = {
 		list_items: 'Reading the list',
@@ -81,23 +82,35 @@
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content side="right" class="flex w-full flex-col gap-0 p-0 sm:max-w-md">
-		<!-- pr-12 keeps the clear-history button clear of the sheet's own close button -->
-		<Sheet.Header class="flex-row items-start justify-between gap-2 space-y-0 pr-12">
+	<Sheet.Content
+		side="right"
+		showCloseButton={false}
+		class="flex w-full flex-col gap-0 p-0 sm:max-w-md"
+	>
+		<Sheet.Header class="flex-row items-center justify-between gap-2 space-y-0">
 			<div>
 				<Sheet.Title>Assistant</Sheet.Title>
 				<Sheet.Description>Ask me to add, remove, or check off items.</Sheet.Description>
 			</div>
-			{#if chat.messages.length > 0}
-				<Button
-					variant="ghost"
-					size="icon"
-					aria-label="Clear chat history"
-					onclick={() => (chat.messages = [])}
-				>
-					<Trash2Icon />
-				</Button>
-			{/if}
+			<div class="flex items-center gap-1">
+				{#if chat.messages.length > 0}
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						aria-label="Clear chat history"
+						onclick={() => (chat.messages = [])}
+					>
+						<Trash2Icon />
+					</Button>
+				{/if}
+				<Sheet.Close>
+					{#snippet child({ props })}
+						<Button variant="ghost" size="icon-sm" aria-label="Close" {...props}>
+							<XIcon />
+						</Button>
+					{/snippet}
+				</Sheet.Close>
+			</div>
 		</Sheet.Header>
 		<Separator />
 
