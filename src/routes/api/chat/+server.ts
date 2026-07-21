@@ -14,8 +14,8 @@ const IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 /** Data URLs carry base64, which inflates the payload by 4/3; the scheme header adds a few dozen chars. */
 const MAX_IMAGE_URL_LENGTH = Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 128;
-/** The client resends every prior data URL each turn, so the cap is per conversation, not per message. */
-const MAX_IMAGES_PER_REQUEST = 4;
+/** One image per conversation for now; the client resends every prior data URL, so this counts the whole thread. */
+const MAX_IMAGES_PER_REQUEST = 1;
 
 const imagePartSchema = z.object({
 	type: z.literal('file'),
@@ -29,13 +29,7 @@ const fileParts = (message: UIMessage) =>
 const messageSchema = z
 	.custom<UIMessage>((value) => typeof value === 'object' && value !== null)
 	.superRefine((message, ctx) => {
-		const parts = fileParts(message);
-
-		if (parts.length > 1) {
-			ctx.addIssue({ code: 'custom', message: 'Only one image per message' });
-		}
-
-		for (const part of parts) {
+		for (const part of fileParts(message)) {
 			if (!imagePartSchema.safeParse(part).success) {
 				ctx.addIssue({ code: 'custom', message: 'Attachments must be images' });
 			}
