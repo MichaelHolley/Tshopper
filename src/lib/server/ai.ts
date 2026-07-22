@@ -114,6 +114,7 @@ export function systemPrompt(storeName: string): string {
 		'- Checking an item off keeps it on the list; removing deletes it. Do not confuse the two.',
 		'- For ambiguous requests, ask one concise clarifying question.',
 		'- You can execute multiple operations for a single user message.',
+		'- The user may attach one image, such as a photo of a receipt or a handwritten list. Read it and act on it with the tools; do not just describe it unless asked.',
 		'- When operating on many items, use remove_items or clear_checked and batch tool calls in a single turn rather than one at a time.',
 		'- To reorder the list, call list_items right before reorder_items and pass every unchecked item id in the new order — the set must match exactly, especially if items were just added or removed in the same turn.',
 		'- Keep responses brief — just confirm what you did or ask what you need.',

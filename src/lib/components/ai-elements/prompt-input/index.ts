@@ -60,6 +60,8 @@ export {
 	setAttachmentsContext
 } from './context/attachments.svelte.js';
 
+export type { AttachmentError } from './context/attachments.svelte.js';
+
 export {
 	Controller,
 	TextController,

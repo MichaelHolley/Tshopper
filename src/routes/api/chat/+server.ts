@@ -7,11 +7,39 @@ import { shoppingTools, systemPrompt } from '$lib/server/ai';
 import * as shopping from '$lib/server/shopping';
 import type { RequestHandler } from './$types';
 
-/** Generous bound on round-trips, not on operations — a single turn may batch many tool calls. */
 const MAX_STEPS = 25;
 
+const IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const MAX_IMAGE_URL_LENGTH = Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 128;
+const MAX_IMAGES_PER_REQUEST = 1;
+
+const imagePartSchema = z.object({
+	type: z.literal('file'),
+	mediaType: z.enum(IMAGE_MEDIA_TYPES),
+	url: z.string().startsWith('data:image/').max(MAX_IMAGE_URL_LENGTH)
+});
+
+const fileParts = (message: UIMessage) =>
+	(message.parts ?? []).filter((part) => part.type === 'file');
+
+const messageSchema = z
+	.custom<UIMessage>((value) => typeof value === 'object' && value !== null)
+	.superRefine((message, ctx) => {
+		for (const part of fileParts(message)) {
+			if (!imagePartSchema.safeParse(part).success) {
+				ctx.addIssue({ code: 'custom', message: 'Attachments must be images' });
+			}
+		}
+	});
+
 const bodySchema = z.object({
-	messages: z.array(z.custom<UIMessage>()),
+	messages: z.array(messageSchema).superRefine((messages, ctx) => {
+		const images = messages.reduce((count, message) => count + fileParts(message).length, 0);
+		if (images > MAX_IMAGES_PER_REQUEST) {
+			ctx.addIssue({ code: 'custom', message: 'Too many images in this conversation' });
+		}
+	}),
 	storeId: z.string().nullable()
 });
 

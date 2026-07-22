@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { Chat } from '@ai-sdk/svelte';
-	import { DefaultChatTransport, getToolName, isToolUIPart } from 'ai';
+	import { DefaultChatTransport, getToolName, isFileUIPart, isToolUIPart } from 'ai';
 	import * as Conversation from '$lib/components/ai-elements/conversation/index.js';
 	import * as PromptInput from '$lib/components/ai-elements/prompt-input/index.js';
-	import type { PromptInputMessage } from '$lib/components/ai-elements/prompt-input/index.js';
+	import type {
+		AttachmentError,
+		PromptInputMessage
+	} from '$lib/components/ai-elements/prompt-input/index.js';
 	import { Loader } from '$lib/components/ai-elements/loader/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
+	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { getActiveStore } from '$lib/active-store.svelte.js';
@@ -26,6 +30,9 @@
 		reorder_items: 'Reordering the list'
 	};
 
+	// Kept in sync with the server's own limit in /api/chat;
+	const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+
 	let { open = $bindable(false) }: { open?: boolean } = $props();
 
 	const activeStore = getActiveStore();
@@ -34,11 +41,35 @@
 		transport: new DefaultChatTransport({ api: '/api/chat' })
 	});
 
+	let attachmentError = $state<string | null>(null);
+
+	// The library's own messages are file-generic and plural, which reads wrong for a one-image flow.
+	function handleAttachmentError(err: AttachmentError) {
+		attachmentError =
+			err.code === 'accept'
+				? 'Only image files can be attached.'
+				: err.code === 'max_file_size'
+					? 'Images must be smaller than 4 MB.'
+					: 'Only one image can be attached.';
+	}
+
 	// The tools are store-scoped server-side, so the active store has to ride along with each
 	// request rather than being baked into the transport at construction.
 	function handleSubmit(message: PromptInputMessage) {
-		if (!message.text.trim()) return;
-		chat.sendMessage({ text: message.text }, { body: { storeId: activeStore.current } });
+		attachmentError = null;
+
+		const text = message.text.trim();
+		const files = message.files;
+		const body = { storeId: activeStore.current };
+
+		// An image on its own is a valid prompt, but sending text: '' would add an empty text part.
+		if (!text) {
+			if (!files?.length) return;
+			chat.sendMessage({ files }, { body });
+			return;
+		}
+
+		chat.sendMessage({ text, files }, { body });
 	}
 
 	const busy = $derived(chat.status === 'submitted' || chat.status === 'streaming');
@@ -109,6 +140,15 @@
 							>
 								{part.text}
 							</div>
+						{:else if isFileUIPart(part) && part.mediaType.startsWith('image/')}
+							<img
+								src={part.url}
+								alt={part.filename ?? 'Attached image'}
+								class={[
+									'max-h-64 max-w-[85%] rounded-lg border object-contain',
+									message.role === 'user' ? 'self-end' : 'self-start'
+								]}
+							/>
 						{:else if isToolUIPart(part)}
 							{@const name = getToolName(part)}
 							<div class="text-muted-foreground flex items-center gap-2 self-start text-xs">
@@ -143,15 +183,49 @@
 		</Conversation.Root>
 
 		<div class="border-t p-4">
-			<PromptInput.Root onSubmit={handleSubmit} class="w-full">
-				<PromptInput.Body>
-					<PromptInput.Textarea placeholder="Add milk and eggs…" />
-				</PromptInput.Body>
-				<PromptInput.Toolbar>
-					<PromptInput.Tools />
-					<PromptInput.Submit status={chat.status} onStop={() => chat.stop()} />
-				</PromptInput.Toolbar>
-			</PromptInput.Root>
+			<Tooltip.Provider>
+				<PromptInput.Root
+					onSubmit={handleSubmit}
+					accept="image/*"
+					multiple={false}
+					maxFiles={1}
+					maxFileSize={MAX_IMAGE_BYTES}
+					onError={handleAttachmentError}
+					onFileAdd={() => (attachmentError = null)}
+					class="w-full"
+				>
+					<PromptInput.Body>
+						<div class="attachment-list">
+							<PromptInput.Attachments>
+								{#snippet children(attachment)}
+									<PromptInput.Attachment data={attachment} />
+								{/snippet}
+							</PromptInput.Attachments>
+						</div>
+						<PromptInput.Textarea placeholder="Add milk and eggs…" />
+					</PromptInput.Body>
+					<PromptInput.Toolbar>
+						<PromptInput.Tools>
+							<PromptInput.ActionMenu>
+								<PromptInput.ActionMenuTrigger />
+								<PromptInput.ActionMenuContent>
+									<PromptInput.ActionAddAttachments label="Add an image" />
+								</PromptInput.ActionMenuContent>
+							</PromptInput.ActionMenu>
+						</PromptInput.Tools>
+						<PromptInput.Submit status={chat.status} onStop={() => chat.stop()} />
+					</PromptInput.Toolbar>
+				</PromptInput.Root>
+			</Tooltip.Provider>
+			{#if attachmentError}
+				<p class="text-destructive mt-2 text-xs">{attachmentError}</p>
+			{/if}
 		</div>
 	</Sheet.Content>
 </Sheet.Root>
+
+<style>
+	.attachment-list :global(button[aria-label='Remove image']) {
+		opacity: 1;
+	}
+</style>

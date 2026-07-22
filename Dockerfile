@@ -15,6 +15,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
+# override adapter-node default of 512K
+ENV BODY_SIZE_LIMIT=8M
 
 # adapter-node bundles every server dependency into build/, so no node_modules here.
 COPY --from=build /app/build ./build
