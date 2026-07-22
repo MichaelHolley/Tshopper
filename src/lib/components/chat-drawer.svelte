@@ -30,7 +30,7 @@
 		reorder_items: 'Reordering the list'
 	};
 
-	// Kept in sync with the server's own limit in /api/chat; this copy only buys a friendlier message.
+	// Kept in sync with the server's own limit in /api/chat;
 	const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 	let { open = $bindable(false) }: { open?: boolean } = $props();
@@ -183,7 +183,6 @@
 		</Conversation.Root>
 
 		<div class="border-t p-4">
-			<!-- Attachment chips render tooltips, which throw without a provider in scope. -->
 			<Tooltip.Provider>
 				<PromptInput.Root
 					onSubmit={handleSubmit}
@@ -226,7 +225,6 @@
 </Sheet.Root>
 
 <style>
-	/* The chip's remove button reveals on hover, which never resolves on touch. */
 	.attachment-list :global(button[aria-label='Remove image']) {
 		opacity: 1;
 	}

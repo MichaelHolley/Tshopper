@@ -15,7 +15,8 @@
 	let attachments = getAttachmentsContext();
 
 	let handleSelect = (e: Event) => {
-		e.preventDefault();
+		// Keeps the ActionMenu open after picking an image.
+		// e.preventDefault();
 		onSelect?.();
 		attachments.openFileDialog();
 	};

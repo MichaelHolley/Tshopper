@@ -7,14 +7,11 @@ import { shoppingTools, systemPrompt } from '$lib/server/ai';
 import * as shopping from '$lib/server/shopping';
 import type { RequestHandler } from './$types';
 
-/** Generous bound on round-trips, not on operations — a single turn may batch many tool calls. */
 const MAX_STEPS = 25;
 
 const IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
-/** Data URLs carry base64, which inflates the payload by 4/3; the scheme header adds a few dozen chars. */
 const MAX_IMAGE_URL_LENGTH = Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 128;
-/** One image per conversation for now; the client resends every prior data URL, so this counts the whole thread. */
 const MAX_IMAGES_PER_REQUEST = 1;
 
 const imagePartSchema = z.object({
