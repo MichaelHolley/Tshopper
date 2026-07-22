@@ -110,7 +110,7 @@ export function systemPrompt(storeName: string): string {
 		'Help users manage their shopping list using natural language.',
 		'Rules:',
 		'- Always call list_items before update_item, set_item_checked, remove_items or reorder_items to get accurate ids.',
-		'- You may correct letter case in add_item or update_item calls (e.g. "milk" -> "Milk"), but only when fully certain of the correct canonical name and casing; otherwise keep the original casing exactly as given.',
+		'- You may correct letter case in add_item or update_item calls (e.g. "milk" -> "Milk") when fully certain of the correct capitalization. Do not change spelling, wording, or otherwise rename the item — if not fully certain, keep the original casing exactly as given.',
 		'- Checking an item off keeps it on the list; removing deletes it. Do not confuse the two.',
 		'- For ambiguous requests, ask one concise clarifying question.',
 		'- You can execute multiple operations for a single user message.',
