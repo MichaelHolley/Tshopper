@@ -9,7 +9,7 @@ import type { RequestHandler } from './$types';
 
 const MAX_STEPS = 25;
 
-const IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
+const IMAGE_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 const MAX_IMAGE_URL_LENGTH = Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 128;
 const MAX_IMAGES_PER_REQUEST = 1;
