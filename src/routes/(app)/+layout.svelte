@@ -4,6 +4,9 @@
 	import SettingsDialog from '$lib/components/settings-dialog.svelte';
 	import ChatDrawer from '$lib/components/chat-drawer.svelte';
 	import { setActiveStore } from '$lib/active-store.svelte.js';
+	import { getItems } from '$lib/items.remote';
+	import { getStores } from '$lib/stores.remote';
+	import { getPreferences } from '$lib/preferences.remote';
 	import { untrack } from 'svelte';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 	import SettingsIcon from '@lucide/svelte/icons/settings';
@@ -16,8 +19,22 @@
 
 	// Seeded once from the default-store preference; later preference edits must not yank the
 	// list out from under someone who has since switched stores by hand.
-	setActiveStore(untrack(() => data.defaultStoreId));
+	const activeStore = setActiveStore(untrack(() => data.defaultStoreId));
+
+	// A backgrounded/locked phone has its socket killed while frozen, but `navigator.onLine`
+	// never flips, so SvelteKit's active recovery misses it. Reconnect the live queries when the
+	// tab returns to the foreground.
+	function recoverLiveQueries() {
+		if (document.visibilityState !== 'visible') return;
+		getStores().reconnect();
+		getItems(activeStore.current).reconnect();
+		// Only active while the settings dialog is mounted; reconnecting it otherwise would open a
+		// connection nothing consumes.
+		if (settingsOpen) getPreferences().reconnect();
+	}
 </script>
+
+<svelte:document onvisibilitychange={recoverLiveQueries} />
 
 <div class="flex min-h-svh flex-col">
 	<header class="bg-background/80 sticky top-0 z-40 border-b backdrop-blur">

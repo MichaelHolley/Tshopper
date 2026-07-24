@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getItems, clearChecked, reorderItems } from '$lib/items.remote';
 	import { getStores } from '$lib/stores.remote';
+	import { toastError } from '$lib/toast';
 	import StoreNav from '$lib/components/store-nav.svelte';
 	import ItemForm from '$lib/components/item-form.svelte';
 	import ShoppingItem from '$lib/components/shopping-item.svelte';
@@ -28,7 +29,7 @@
 	let sortItems = $state<Item[]>([]);
 
 	function confirmClearChecked() {
-		clearChecked(activeStore.current);
+		clearChecked(activeStore.current).catch(toastError('Could not clear checked items'));
 		deleteAllOpen = false;
 	}
 
@@ -57,7 +58,9 @@
 
 	function handleFinalize(e: CustomEvent<DndEvent<Item>>) {
 		sortItems = e.detail.items;
-		reorderItems({ orderedIds: sortItems.map((i) => i.id), storeId: activeStore.current });
+		reorderItems({ orderedIds: sortItems.map((i) => i.id), storeId: activeStore.current }).catch(
+			toastError('Could not reorder items')
+		);
 	}
 
 	// Sorting is scoped to one store's unchecked list; switching stores leaves sort mode so the

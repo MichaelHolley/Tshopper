@@ -2,6 +2,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import { checkItem, uncheckItem, deleteItem, moveItem } from '$lib/items.remote';
+	import { toastError } from '$lib/toast';
 	import type { ShoppingItem, Store } from '$lib/server/db/schema';
 	import MoreVerticalIcon from '@lucide/svelte/icons/more-vertical';
 	import PencilIcon from '@lucide/svelte/icons/pencil';
@@ -26,8 +27,8 @@
 	const otherStores = $derived(stores.filter((s) => s.id !== item.storeId));
 
 	function toggle() {
-		if (!checked) checkItem(item.id);
-		else uncheckItem(item.id);
+		if (!checked) checkItem(item.id).catch(toastError('Could not check item'));
+		else uncheckItem(item.id).catch(toastError('Could not uncheck item'));
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -88,12 +89,22 @@
 				</DropdownMenu.SubTrigger>
 				<DropdownMenu.SubContent>
 					{#if item.storeId !== null}
-						<DropdownMenu.Item onSelect={() => moveItem({ id: item.id, targetStoreId: null })}>
+						<DropdownMenu.Item
+							onSelect={() =>
+								moveItem({ id: item.id, targetStoreId: null }).catch(
+									toastError('Could not move item')
+								)}
+						>
 							Unassigned
 						</DropdownMenu.Item>
 					{/if}
 					{#each otherStores as store (store.id)}
-						<DropdownMenu.Item onSelect={() => moveItem({ id: item.id, targetStoreId: store.id })}>
+						<DropdownMenu.Item
+							onSelect={() =>
+								moveItem({ id: item.id, targetStoreId: store.id }).catch(
+									toastError('Could not move item')
+								)}
+						>
 							<span class="size-2.5 rounded-full" style={`background-color: ${store.color}`}></span>
 							{store.name}
 						</DropdownMenu.Item>
@@ -104,7 +115,10 @@
 				</DropdownMenu.SubContent>
 			</DropdownMenu.Sub>
 			<DropdownMenu.Separator />
-			<DropdownMenu.Item variant="destructive" onSelect={() => deleteItem(item.id)}>
+			<DropdownMenu.Item
+				variant="destructive"
+				onSelect={() => deleteItem(item.id).catch(toastError('Could not delete item'))}
+			>
 				<Trash2Icon />
 				Delete
 			</DropdownMenu.Item>

@@ -4,6 +4,8 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { addStore, deleteStore, getStores, updateStore } from '$lib/stores.remote';
 	import { getPreferences, setDefaultStore } from '$lib/preferences.remote';
+	import { toast } from 'svelte-sonner';
+	import { toastError } from '$lib/toast';
 	import type { Store } from '$lib/server/db/schema';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import PencilIcon from '@lucide/svelte/icons/pencil';
@@ -38,9 +40,13 @@
 	async function create(event: SubmitEvent) {
 		event.preventDefault();
 		if (!newName.trim()) return;
-		await addStore({ name: newName, color: newColor });
-		newName = '';
-		newColor = DEFAULT_COLOR;
+		try {
+			await addStore({ name: newName, color: newColor });
+			newName = '';
+			newColor = DEFAULT_COLOR;
+		} catch {
+			toast.error('Could not create store');
+		}
 	}
 
 	function startEdit(store: Store) {
@@ -51,8 +57,12 @@
 
 	async function saveEdit() {
 		if (!editName.trim() || !editingId) return;
-		await updateStore({ id: editingId, name: editName, color: editColor });
-		editingId = null;
+		try {
+			await updateStore({ id: editingId, name: editName, color: editColor });
+			editingId = null;
+		} catch {
+			toast.error('Could not save store');
+		}
 	}
 </script>
 
@@ -74,7 +84,8 @@
 						role="radio"
 						aria-checked={defaultStoreId === option.id}
 						class="hover:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-2 text-left"
-						onclick={() => setDefaultStore(option.id)}
+						onclick={() =>
+							setDefaultStore(option.id).catch(toastError('Could not set default store'))}
 					>
 						{#if option.color}
 							<span
@@ -150,7 +161,7 @@
 								size="icon"
 								class="text-destructive size-8 shrink-0"
 								aria-label={`Delete ${store.name}`}
-								onclick={() => deleteStore(store.id)}
+								onclick={() => deleteStore(store.id).catch(toastError('Could not delete store'))}
 							>
 								<Trash2Icon />
 							</Button>
