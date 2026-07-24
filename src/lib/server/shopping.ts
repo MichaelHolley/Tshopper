@@ -9,7 +9,6 @@ function storeFilter(storeId: string | null) {
 	return storeId === null ? isNull(shoppingItem.storeId) : eq(shoppingItem.storeId, storeId);
 }
 
-/** Highest sort order among unchecked items in a store; append target sits at `result + 1`. */
 async function maxUncheckedSortOrder(storeId: string | null, excludeId?: string): Promise<number> {
 	const conditions = [storeFilter(storeId), isNull(shoppingItem.checked)];
 	if (excludeId) conditions.push(ne(shoppingItem.id, excludeId));
@@ -19,11 +18,6 @@ async function maxUncheckedSortOrder(storeId: string | null, excludeId?: string)
 		.where(and(...conditions));
 	return row?.value ?? 0;
 }
-
-/**
- * Unchecked items by manual order, then checked items newest-first. Checked items older
- * than 7 days are dropped so the list does not grow without bound.
- */
 export async function listItems(storeId: string | null): Promise<ShoppingItem[]> {
 	const items = await db
 		.select()
@@ -121,11 +115,6 @@ export async function moveItem(id: string, targetStoreId: string | null): Promis
 	return updated;
 }
 
-/**
- * Persist a manual order for the unchecked items of a store. `orderedIds` must be exactly
- * the unchecked items in that store; sort order follows their position. Checked items and
- * cross-store ids are rejected so a stale client can't scramble the list.
- */
 export async function reorderItems(orderedIds: string[], storeId: string | null): Promise<void> {
 	if (orderedIds.length === 0) return;
 
@@ -180,7 +169,6 @@ export async function updateStore(id: string, name: string, color: string): Prom
 	return updated;
 }
 
-/** Items keep their rows; the `set null` FK drops them into the unassigned list. */
 export async function deleteStore(id: string): Promise<void> {
 	await db.delete(store).where(eq(store.id, id));
 	notifyChange();

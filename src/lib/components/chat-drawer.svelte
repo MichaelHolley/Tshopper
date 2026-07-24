@@ -8,6 +8,7 @@
 		PromptInputMessage
 	} from '$lib/components/ai-elements/prompt-input/index.js';
 	import { Loader } from '$lib/components/ai-elements/loader/index.js';
+	import * as Suggestion from '$lib/components/ai-elements/suggestion/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -72,6 +73,19 @@
 		chat.sendMessage({ text, files }, { body });
 	}
 
+	const SUGGESTIONS = [
+		{
+			label: 'Sort by supermarket aisle',
+			prompt:
+				'Reorder the list so items appear in the order you would find them walking through a typical German supermarket.'
+		}
+	];
+
+	function sendSuggestion(prompt: string) {
+		attachmentError = null;
+		chat.sendMessage({ text: prompt }, { body: { storeId: activeStore.current } });
+	}
+
 	const busy = $derived(chat.status === 'submitted' || chat.status === 'streaming');
 
 	// A turn that is only tool calls so far has no text to show; keep the spinner up until
@@ -125,6 +139,13 @@
 							<SparklesIcon class="size-8" />
 						{/snippet}
 					</Conversation.EmptyState>
+					<Suggestion.Root class="justify-center px-4">
+						{#each SUGGESTIONS as { label, prompt } (prompt)}
+							<Suggestion.Item suggestion={prompt} onclick={sendSuggestion}>
+								{label}
+							</Suggestion.Item>
+						{/each}
+					</Suggestion.Root>
 				{/if}
 
 				{#each chat.messages as message (message.id)}
