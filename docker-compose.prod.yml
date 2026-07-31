@@ -10,7 +10,7 @@ services:
       - APP_PASSWORD=abc123
       - SESSION_SECRET=MySecretKeyWithEnoughCharacters
       - OPENROUTER_API_KEY=your-api-key
-      - OPENROUTER_MODEL=openai/gpt-5.4-mini
+      - OPENROUTER_MODEL=openai/gpt-5.6-luna
     depends_on:
       libsql:
         condition: service_healthy

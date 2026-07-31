@@ -21,7 +21,7 @@ export const variables = defineEnvVars({
 		schema: secret
 	},
 	OPENROUTER_MODEL: {
-		description: 'Model the chat assistant runs on, e.g. `openai/gpt-5.4-mini`.',
-		schema: z.string().default('openai/gpt-5.4-mini')
+		description: 'Model the chat assistant runs on, e.g. `openai/gpt-5.6-luna`.',
+		schema: z.string().default('openai/gpt-5.6-luna')
 	}
 });
