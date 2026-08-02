@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import * as ContextMenu from '$lib/components/ui/context-menu/index.js';
 	import { checkItem, uncheckItem, deleteItem, moveItem } from '$lib/items.remote';
 	import { toastError } from '$lib/toast';
 	import type { ShoppingItem, Store } from '$lib/server/db/schema';
-	import MoreVerticalIcon from '@lucide/svelte/icons/more-vertical';
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import StoreIcon from '@lucide/svelte/icons/store';
@@ -26,7 +24,11 @@
 	const checked = $derived(item.checked !== null);
 	const otherStores = $derived(stores.filter((s) => s.id !== item.storeId));
 
+	let contextMenuOpen = $state(false);
+
 	function toggle() {
+		if (contextMenuOpen) return;
+
 		if (!checked) checkItem(item.id).catch(toastError('Could not check item'));
 		else uncheckItem(item.id).catch(toastError('Could not uncheck item'));
 	}
@@ -36,12 +38,6 @@
 
 		event.preventDefault();
 		toggle();
-	}
-
-	function stopRowToggle(event: Event, handler: unknown) {
-		event.stopPropagation();
-
-		if (typeof handler === 'function') handler(event);
 	}
 </script>
 
@@ -54,76 +50,6 @@
 			<p class="text-muted-foreground truncate text-xs">{item.quantity}</p>
 		{/if}
 	</div>
-{/snippet}
-
-{#snippet itemActions()}
-	<DropdownMenu.Root>
-		<DropdownMenu.Trigger>
-			{#snippet child({ props })}
-				<Button
-					{...props}
-					onclick={(event) => stopRowToggle(event, props.onclick)}
-					onkeydown={(event) => stopRowToggle(event, props.onkeydown)}
-					variant="ghost"
-					size="icon"
-					class="size-8 shrink-0"
-					aria-label="Item actions"
-				>
-					<MoreVerticalIcon />
-				</Button>
-			{/snippet}
-		</DropdownMenu.Trigger>
-		<DropdownMenu.Content
-			align="end"
-			onclick={(event) => event.stopPropagation()}
-			onkeydown={(event) => event.stopPropagation()}
-		>
-			<DropdownMenu.Item onSelect={() => onEdit(item)}>
-				<PencilIcon />
-				Edit
-			</DropdownMenu.Item>
-			<DropdownMenu.Sub>
-				<DropdownMenu.SubTrigger>
-					<StoreIcon />
-					Move to
-				</DropdownMenu.SubTrigger>
-				<DropdownMenu.SubContent>
-					{#if item.storeId !== null}
-						<DropdownMenu.Item
-							onSelect={() =>
-								moveItem({ id: item.id, targetStoreId: null }).catch(
-									toastError('Could not move item')
-								)}
-						>
-							Unassigned
-						</DropdownMenu.Item>
-					{/if}
-					{#each otherStores as store (store.id)}
-						<DropdownMenu.Item
-							onSelect={() =>
-								moveItem({ id: item.id, targetStoreId: store.id }).catch(
-									toastError('Could not move item')
-								)}
-						>
-							<span class="size-2.5 rounded-full" style={`background-color: ${store.color}`}></span>
-							{store.name}
-						</DropdownMenu.Item>
-					{/each}
-					{#if otherStores.length === 0 && item.storeId === null}
-						<DropdownMenu.Item disabled>No other stores</DropdownMenu.Item>
-					{/if}
-				</DropdownMenu.SubContent>
-			</DropdownMenu.Sub>
-			<DropdownMenu.Separator />
-			<DropdownMenu.Item
-				variant="destructive"
-				onSelect={() => deleteItem(item.id).catch(toastError('Could not delete item'))}
-			>
-				<Trash2Icon />
-				Delete
-			</DropdownMenu.Item>
-		</DropdownMenu.Content>
-	</DropdownMenu.Root>
 {/snippet}
 
 {#if sortMode}
@@ -140,14 +66,66 @@
 		{@render itemDetails()}
 	</div>
 {:else}
-	<div
-		class="flex cursor-pointer items-center gap-3 border-b py-2.5"
-		role="button"
-		tabindex="0"
-		onclick={toggle}
-		onkeydown={handleKeydown}
-	>
-		{@render itemDetails()}
-		{@render itemActions()}
-	</div>
+	<ContextMenu.Root bind:open={contextMenuOpen}>
+		<ContextMenu.Trigger>
+			{#snippet child({ props })}
+				<div
+					{...props}
+					class="flex cursor-pointer items-center gap-3 border-b py-2.5 select-none"
+					role="button"
+					tabindex="0"
+					onclick={toggle}
+					onkeydown={handleKeydown}
+				>
+					{@render itemDetails()}
+				</div>
+			{/snippet}
+		</ContextMenu.Trigger>
+		<ContextMenu.Content>
+			<ContextMenu.Item onSelect={() => onEdit(item)}>
+				<PencilIcon />
+				Edit
+			</ContextMenu.Item>
+			<ContextMenu.Sub>
+				<ContextMenu.SubTrigger>
+					<StoreIcon />
+					Move to
+				</ContextMenu.SubTrigger>
+				<ContextMenu.SubContent>
+					{#if item.storeId !== null}
+						<ContextMenu.Item
+							onSelect={() =>
+								moveItem({ id: item.id, targetStoreId: null }).catch(
+									toastError('Could not move item')
+								)}
+						>
+							Unassigned
+						</ContextMenu.Item>
+					{/if}
+					{#each otherStores as store (store.id)}
+						<ContextMenu.Item
+							onSelect={() =>
+								moveItem({ id: item.id, targetStoreId: store.id }).catch(
+									toastError('Could not move item')
+								)}
+						>
+							<span class="size-2.5 rounded-full" style={`background-color: ${store.color}`}></span>
+							{store.name}
+						</ContextMenu.Item>
+					{/each}
+					{#if otherStores.length === 0 && item.storeId === null}
+						<ContextMenu.Item disabled>No other stores</ContextMenu.Item>
+					{/if}
+				</ContextMenu.SubContent>
+			</ContextMenu.Sub>
+			<ContextMenu.Separator />
+			<ContextMenu.Item
+				variant="destructive"
+				onSelect={() => deleteItem(item.id).catch(toastError('Could not delete item'))}
+			>
+				<Trash2Icon />
+				Delete
+			</ContextMenu.Item>
+		</ContextMenu.Content>
+	</ContextMenu.Root>
 {/if}
