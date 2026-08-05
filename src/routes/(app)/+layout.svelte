@@ -32,6 +32,14 @@
 	const stores = $derived(storesQuery.current ?? []);
 	const storeColor = $derived(stores.find((s) => s.id === activeStore.current)?.color);
 
+	// Sheets, dialogs and toasts portal to <body>, outside the shell, so the store color has to live
+	// on the document root as well for them to theme with the rest of the app.
+	$effect(() => {
+		const root = document.documentElement;
+		if (storeColor) root.style.setProperty('--store-color', storeColor);
+		else root.style.removeProperty('--store-color');
+	});
+
 	// A backgrounded/locked phone has its socket killed while frozen, but `navigator.onLine`
 	// never flips, so SvelteKit's active recovery misses it. Reconnect the live queries when the
 	// tab returns to the foreground.
@@ -106,7 +114,7 @@
 		</main>
 
 		{#if wide.current && assistantOpen}
-			<aside class="flex w-88 shrink-0 flex-col border-l">
+			<aside class="flex w-88 shrink-0 flex-col border-l" style="border-color: var(--store-edge)">
 				<ChatPanel variant="docked" onClose={() => (assistantOpen = false)} />
 			</aside>
 		{/if}

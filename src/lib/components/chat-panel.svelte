@@ -94,7 +94,7 @@
 	const DESCRIPTION = 'Ask me to add, remove, or check off items.';
 </script>
 
-<div class="flex min-h-0 flex-1 flex-col">
+<div class="flex min-h-0 flex-1 flex-col bg-(--store-raised)">
 	<div class="flex flex-row items-start justify-between gap-2 p-4">
 		<div class="flex flex-col gap-0.5">
 			{#if variant === 'sheet'}
@@ -171,7 +171,7 @@
 							{#if part.state === 'output-error'}
 								<TriangleAlertIcon class="text-destructive size-3.5" />
 							{:else if part.state === 'output-available'}
-								<CheckIcon class="size-3.5 text-green-600" />
+								<CheckIcon class="text-primary size-3.5" />
 							{:else}
 								<WrenchIcon class="size-3.5 animate-pulse" />
 							{/if}

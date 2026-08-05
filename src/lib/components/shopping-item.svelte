@@ -180,7 +180,7 @@
 	}
 
 	.row[data-checked] {
-		background-color: var(--row-sunk);
+		background-color: var(--store-sunk);
 		box-shadow:
 			var(--row-settle),
 			0 0 0 1px transparent;

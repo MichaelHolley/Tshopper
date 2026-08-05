@@ -12,7 +12,8 @@
 	--card-foreground: oklch(0.17 0.014 155);
 	--popover: oklch(1 0.002 150);
 	--popover-foreground: oklch(0.17 0.014 155);
-	--primary: oklch(0.527 0.154 150.069);
+	--brand: oklch(0.527 0.154 150.069);
+	--primary: var(--brand);
 	--primary-foreground: oklch(0.982 0.018 155.826);
 	--secondary: oklch(0.967 0.006 150);
 	--secondary-foreground: oklch(0.24 0.02 155);
@@ -40,10 +41,9 @@
 	--sidebar-ring: oklch(0.62 0.09 150);
 	--store-wash: 7%;
 	--row-tint: 4%;
-	--row-raised: oklch(1 0.002 150);
-	--row-raised-hover: oklch(0.988 0.006 150);
-	--row-sunk: oklch(0.955 0.008 150);
-	--row-edge: oklch(0.17 0.014 155 / 9%);
+	--row-raised: oklch(1 0 0);
+	--row-raised-hover: oklch(0.988 0 0);
+	--row-sunk: oklch(0.955 0 0);
 	--row-lift:
 		0 1px 1px oklch(0.25 0.05 155 / 6%), 0 2px 5px -2px oklch(0.25 0.05 155 / 9%),
 		inset 0 1px 0 oklch(1 0 0 / 60%);
@@ -61,7 +61,8 @@
 	--card-foreground: oklch(0.965 0.008 150);
 	--popover: oklch(0.222 0.018 158);
 	--popover-foreground: oklch(0.965 0.008 150);
-	--primary: oklch(0.72 0.168 152);
+	--brand: oklch(0.72 0.168 152);
+	--primary: var(--brand);
 	--primary-foreground: oklch(0.19 0.05 155);
 	--secondary: oklch(0.278 0.02 158);
 	--secondary-foreground: oklch(0.965 0.008 150);
@@ -88,10 +89,9 @@
 	--sidebar-ring: oklch(0.72 0.168 152 / 70%);
 	--store-wash: 6%;
 	--row-tint: 9%;
-	--row-raised: oklch(0.232 0.019 158);
-	--row-raised-hover: oklch(0.262 0.022 158);
-	--row-sunk: oklch(0.132 0.012 158);
-	--row-edge: oklch(0.9 0.06 155 / 9%);
+	--row-raised: oklch(0.232 0 0);
+	--row-raised-hover: oklch(0.262 0 0);
+	--row-sunk: oklch(0.132 0 0);
 	--row-lift:
 		0 1px 2px oklch(0.06 0.02 158 / 55%), 0 3px 8px -3px oklch(0.06 0.02 158 / 60%),
 		inset 0 1px 0 oklch(0.95 0.05 155 / 7%);
@@ -169,7 +169,7 @@
  */
 :root,
 .app-shell {
-	--store-color: var(--primary);
+	--store-color: var(--brand);
 	--store-edge-amount: 15%;
 	--store-canvas: color-mix(in oklab, var(--store-color) var(--store-wash), var(--background));
 	--store-raised: color-mix(in oklab, var(--store-color) var(--row-tint), var(--row-raised));
@@ -178,14 +178,41 @@
 		var(--store-color) var(--row-tint),
 		var(--row-raised-hover)
 	);
+	--store-sunk: color-mix(in oklab, var(--store-color) var(--row-tint), var(--row-sunk));
 	--store-edge: color-mix(in oklab, var(--store-color) var(--store-edge-amount), transparent);
 	--store-quiet: color-mix(in oklab, var(--store-color) 12%, transparent);
 	--store-selected: color-mix(in oklab, var(--store-color) 22%, transparent);
 }
 
+/**
+ * Solid fills are the one place a user hex sits behind text, so the store's hue is kept but its
+ * lightness and chroma are pinned to the app's own primary — a color whose contrast against
+ * `--primary-foreground` is already known. Guarded by `@supports` because without relative color
+ * syntax there is no safe derivation and the brand green has to stand in.
+ */
+@supports (color: oklch(from red 0.5 min(c, 0.1) h)) {
+	:root,
+	.app-shell {
+		--primary: oklch(from var(--store-color) 0.527 min(c, 0.154) h);
+		--primary-foreground: oklch(from var(--primary) 0.982 0.018 h);
+		--ring: oklch(from var(--primary) 0.62 0.09 h);
+	}
+
+	.dark,
+	.dark .app-shell {
+		--primary: oklch(from var(--store-color) 0.72 min(c, 0.168) h);
+		--primary-foreground: oklch(from var(--primary) 0.19 0.05 h);
+		--ring: oklch(from var(--primary) 0.72 0.168 h / 70%);
+	}
+}
+
+:root,
+.app-shell {
+	transition: --store-color 350ms ease-out;
+}
+
 .app-shell {
 	background-color: var(--store-canvas);
-	transition: --store-color 350ms ease-out;
 }
 
 .dark,
