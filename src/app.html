@@ -6,6 +6,17 @@
 		<meta name="text-scale" content="scale" />
 		<link rel="manifest" href="/manifest.json" />
 		<meta name="theme-color" content="oklch(0.527 0.154 150.069)" />
+		<script>
+			// Runs before first paint so the stored theme never flashes the wrong palette.
+			(() => {
+				const stored = localStorage.getItem('theme');
+				const dark =
+					stored === 'dark' ||
+					(stored !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+				document.documentElement.classList.toggle('dark', dark);
+				document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

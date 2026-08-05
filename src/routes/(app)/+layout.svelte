@@ -5,6 +5,7 @@
 	import ChatDrawer from '$lib/components/chat-drawer.svelte';
 	import ChatPanel from '$lib/components/chat-panel.svelte';
 	import StoreNav from '$lib/components/store-nav.svelte';
+	import ThemeToggle from '$lib/components/theme-toggle.svelte';
 	import StoreRail from '$lib/components/store-rail.svelte';
 	import { setActiveStore } from '$lib/active-store.svelte.js';
 	import { getItems, getItemCounts } from '$lib/items.remote';
@@ -69,6 +70,7 @@
 				>
 					<SparklesIcon />
 				</Button>
+				<ThemeToggle />
 				<Button
 					variant="ghost"
 					size="icon"

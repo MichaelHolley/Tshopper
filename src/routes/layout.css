@@ -3,7 +3,7 @@
 @import 'shadcn-svelte/tailwind.css';
 @import '@fontsource-variable/inter';
 
-@custom-variant dark (@media (prefers-color-scheme: dark));
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
 	--background: oklch(0.994 0.004 150);
@@ -54,54 +54,52 @@
 	--row-settle: inset 0 1px 2px oklch(0.25 0.05 155 / 8%);
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--background: oklch(0.163 0.014 158);
-		--foreground: oklch(0.965 0.008 150);
-		--card: oklch(0.222 0.018 158);
-		--card-foreground: oklch(0.965 0.008 150);
-		--popover: oklch(0.222 0.018 158);
-		--popover-foreground: oklch(0.965 0.008 150);
-		--primary: oklch(0.72 0.168 152);
-		--primary-foreground: oklch(0.19 0.05 155);
-		--secondary: oklch(0.278 0.02 158);
-		--secondary-foreground: oklch(0.965 0.008 150);
-		--muted: oklch(0.272 0.018 158);
-		--muted-foreground: oklch(0.715 0.022 152);
-		--accent: oklch(0.295 0.03 155);
-		--accent-foreground: oklch(0.965 0.008 150);
-		--destructive: oklch(0.704 0.191 22.216);
-		--border: oklch(0.85 0.05 155 / 13%);
-		--input: oklch(0.85 0.05 155 / 17%);
-		--ring: oklch(0.72 0.168 152 / 70%);
-		--chart-1: oklch(0.871 0.15 154.449);
-		--chart-2: oklch(0.723 0.219 149.579);
-		--chart-3: oklch(0.627 0.194 149.214);
-		--chart-4: oklch(0.527 0.154 150.069);
-		--chart-5: oklch(0.448 0.119 151.328);
-		--sidebar: oklch(0.195 0.016 158);
-		--sidebar-foreground: oklch(0.965 0.008 150);
-		--sidebar-primary: oklch(0.75 0.18 152);
-		--sidebar-primary-foreground: oklch(0.19 0.05 155);
-		--sidebar-accent: oklch(0.295 0.03 155);
-		--sidebar-accent-foreground: oklch(0.965 0.008 150);
-		--sidebar-border: oklch(0.85 0.05 155 / 13%);
-		--sidebar-ring: oklch(0.72 0.168 152 / 70%);
-		--store-wash: 6%;
-		--row-tint: 9%;
-		--row-raised: oklch(0.232 0.019 158);
-		--row-raised-hover: oklch(0.262 0.022 158);
-		--row-sunk: oklch(0.132 0.012 158);
-		--row-edge: oklch(0.9 0.06 155 / 9%);
-		--row-lift:
-			0 1px 2px oklch(0.06 0.02 158 / 55%), 0 3px 8px -3px oklch(0.06 0.02 158 / 60%),
-			inset 0 1px 0 oklch(0.95 0.05 155 / 7%);
-		--row-lift-hover:
-			0 2px 4px oklch(0.06 0.02 158 / 55%), 0 8px 18px -5px oklch(0.06 0.02 158 / 65%),
-			inset 0 1px 0 oklch(0.95 0.05 155 / 10%);
-		--row-press: 0 0 0 0 oklch(0.06 0.02 158 / 0%), inset 0 1px 3px oklch(0.06 0.02 158 / 60%);
-		--row-settle: inset 0 1px 2px oklch(0.06 0.02 158 / 50%);
-	}
+.dark {
+	--background: oklch(0.163 0.014 158);
+	--foreground: oklch(0.965 0.008 150);
+	--card: oklch(0.222 0.018 158);
+	--card-foreground: oklch(0.965 0.008 150);
+	--popover: oklch(0.222 0.018 158);
+	--popover-foreground: oklch(0.965 0.008 150);
+	--primary: oklch(0.72 0.168 152);
+	--primary-foreground: oklch(0.19 0.05 155);
+	--secondary: oklch(0.278 0.02 158);
+	--secondary-foreground: oklch(0.965 0.008 150);
+	--muted: oklch(0.272 0.018 158);
+	--muted-foreground: oklch(0.715 0.022 152);
+	--accent: oklch(0.295 0.03 155);
+	--accent-foreground: oklch(0.965 0.008 150);
+	--destructive: oklch(0.704 0.191 22.216);
+	--border: oklch(0.85 0.05 155 / 13%);
+	--input: oklch(0.85 0.05 155 / 17%);
+	--ring: oklch(0.72 0.168 152 / 70%);
+	--chart-1: oklch(0.871 0.15 154.449);
+	--chart-2: oklch(0.723 0.219 149.579);
+	--chart-3: oklch(0.627 0.194 149.214);
+	--chart-4: oklch(0.527 0.154 150.069);
+	--chart-5: oklch(0.448 0.119 151.328);
+	--sidebar: oklch(0.195 0.016 158);
+	--sidebar-foreground: oklch(0.965 0.008 150);
+	--sidebar-primary: oklch(0.75 0.18 152);
+	--sidebar-primary-foreground: oklch(0.19 0.05 155);
+	--sidebar-accent: oklch(0.295 0.03 155);
+	--sidebar-accent-foreground: oklch(0.965 0.008 150);
+	--sidebar-border: oklch(0.85 0.05 155 / 13%);
+	--sidebar-ring: oklch(0.72 0.168 152 / 70%);
+	--store-wash: 6%;
+	--row-tint: 9%;
+	--row-raised: oklch(0.232 0.019 158);
+	--row-raised-hover: oklch(0.262 0.022 158);
+	--row-sunk: oklch(0.132 0.012 158);
+	--row-edge: oklch(0.9 0.06 155 / 9%);
+	--row-lift:
+		0 1px 2px oklch(0.06 0.02 158 / 55%), 0 3px 8px -3px oklch(0.06 0.02 158 / 60%),
+		inset 0 1px 0 oklch(0.95 0.05 155 / 7%);
+	--row-lift-hover:
+		0 2px 4px oklch(0.06 0.02 158 / 55%), 0 8px 18px -5px oklch(0.06 0.02 158 / 65%),
+		inset 0 1px 0 oklch(0.95 0.05 155 / 10%);
+	--row-press: 0 0 0 0 oklch(0.06 0.02 158 / 0%), inset 0 1px 3px oklch(0.06 0.02 158 / 60%);
+	--row-settle: inset 0 1px 2px oklch(0.06 0.02 158 / 50%);
 }
 
 @theme inline {
@@ -190,11 +188,9 @@
 	transition: --store-color 350ms ease-out;
 }
 
-@media (prefers-color-scheme: dark) {
-	:root,
-	.app-shell {
-		--store-edge-amount: 18%;
-	}
+.dark,
+.dark .app-shell {
+	--store-edge-amount: 18%;
 }
 
 @media (prefers-reduced-motion: reduce) {
