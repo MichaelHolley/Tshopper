@@ -50,10 +50,45 @@
 		item = '';
 		quantity = '';
 	}
+
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+		if (event.key === 'Escape' && editing) {
+			event.preventDefault();
+			cancel();
+			return;
+		}
+
+		if (event.key !== '/') return;
+		const target = event.target as HTMLElement | null;
+		if (target?.isContentEditable) return;
+		if (target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
+		event.preventDefault();
+		inputRef?.focus();
+	}
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 <form onsubmit={submit} class="flex gap-2">
-	<Input bind:ref={inputRef} bind:value={item} placeholder="Add an item" autocomplete="off" />
+	<div class="relative min-w-0 flex-1">
+		<Input
+			bind:ref={inputRef}
+			bind:value={item}
+			placeholder="Add an item"
+			autocomplete="off"
+			class="pr-8"
+		/>
+		{#if !item}
+			<kbd
+				aria-hidden="true"
+				class="text-muted-foreground pointer-events-none absolute top-1/2 right-2 hidden -translate-y-1/2 rounded border px-1 font-sans text-xs leading-4 lg:block"
+			>
+				/
+			</kbd>
+		{/if}
+	</div>
 	<Input bind:value={quantity} placeholder="Qty" class="w-20 shrink-0" autocomplete="off" />
 	<Button type="submit" size="icon" class="shrink-0" disabled={!item.trim() || pending}>
 		{#if editing}<CheckIcon />{:else}<PlusIcon />{/if}

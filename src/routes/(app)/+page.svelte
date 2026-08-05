@@ -2,7 +2,6 @@
 	import { getItems, clearChecked, reorderItems } from '$lib/items.remote';
 	import { getStores } from '$lib/stores.remote';
 	import { toastError } from '$lib/toast';
-	import StoreNav from '$lib/components/store-nav.svelte';
 	import ItemForm from '$lib/components/item-form.svelte';
 	import ShoppingItem from '$lib/components/shopping-item.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -87,8 +86,6 @@
 
 <svelte:head><title>Tshopper</title></svelte:head>
 
-<StoreNav {stores} bind:activeStoreId={activeStore.current} />
-
 {#if !sortMode}
 	<ItemForm storeId={activeStore.current} bind:editing />
 {/if}
@@ -152,12 +149,16 @@
 		<p class="text-xs">Add one using the form above.</p>
 	</div>
 {:else}
-	<ul>
+	<ul class="@3xl:columns-[22rem] @3xl:gap-x-10 @3xl:[column-rule:1px_solid_var(--border)]">
 		{#each activeItems as item (item.id)}
-			<li><ShoppingItem {item} {stores} onEdit={(i) => (editing = i)} /></li>
+			<li class="break-inside-avoid">
+				<ShoppingItem {item} {stores} onEdit={(i) => (editing = i)} />
+			</li>
 		{/each}
 		{#each visibleChecked as item (item.id)}
-			<li><ShoppingItem {item} {stores} onEdit={(i) => (editing = i)} /></li>
+			<li class="break-inside-avoid">
+				<ShoppingItem {item} {stores} onEdit={(i) => (editing = i)} />
+			</li>
 		{/each}
 	</ul>
 

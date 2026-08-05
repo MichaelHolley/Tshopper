@@ -118,6 +118,10 @@
 	--radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@utility gutter {
+	padding-inline: max(1rem, env(safe-area-inset-left)) max(1rem, env(safe-area-inset-right));
+}
+
 @layer base {
 	* {
 		@apply border-border outline-ring/50;

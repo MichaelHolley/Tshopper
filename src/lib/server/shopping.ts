@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
+import { and, asc, count, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
 import { db } from './db';
 import { shoppingItem, store, type ShoppingItem, type Store } from './db/schema';
 import { notifyChange } from './events';
@@ -31,6 +31,16 @@ export async function listItems(storeId: string | null): Promise<ShoppingItem[]>
 		.filter((i) => i.checked !== null && i.checked.getTime() > cutoff)
 		.sort((a, b) => b.checked!.getTime() - a.checked!.getTime());
 	return [...unchecked, ...checked];
+}
+
+export type StoreItemCount = { storeId: string | null; count: number };
+
+export async function listUncheckedCounts(): Promise<StoreItemCount[]> {
+	return db
+		.select({ storeId: shoppingItem.storeId, count: count() })
+		.from(shoppingItem)
+		.where(isNull(shoppingItem.checked))
+		.groupBy(shoppingItem.storeId);
 }
 
 export async function addItem(

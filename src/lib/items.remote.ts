@@ -14,6 +14,14 @@ export const getItems = query.live(storeId, async function* (storeId) {
 	}
 });
 
+export const getItemCounts = query.live(async function* () {
+	requireAuth();
+	yield await shopping.listUncheckedCounts();
+	for await (const _ of changes()) {
+		yield await shopping.listUncheckedCounts();
+	}
+});
+
 export const addItem = command(
 	z.object({ item: z.string(), quantity: z.string(), storeId }),
 	async ({ item, quantity, storeId }) => {

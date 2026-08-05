@@ -1,35 +1,28 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { getActiveStore } from '$lib/active-store.svelte.js';
 	import { getPreferences } from '$lib/preferences.remote';
+	import { orderStoreEntries } from '$lib/store-entries';
 	import type { Store } from '$lib/server/db/schema';
 
-	let {
-		stores,
-		activeStoreId = $bindable(null)
-	}: { stores: Store[]; activeStoreId?: string | null } = $props();
+	let { stores, class: className }: { stores: Store[]; class?: string } = $props();
 
+	const activeStore = getActiveStore();
 	const preferencesQuery = getPreferences();
-	const defaultStoreId = $derived(preferencesQuery.current?.defaultStoreId ?? null);
-
-	type Entry = { id: string | null; name: string; color: string | null };
-
-	const entries = $derived.by<Entry[]>(() => {
-		const unassigned: Entry = { id: null, name: 'Unassigned', color: null };
-		const rest: Entry[] = stores.map((s) => ({ id: s.id, name: s.name, color: s.color }));
-		const ordered = [...rest, unassigned];
-		const defaultIndex = ordered.findIndex((e) => e.id === defaultStoreId);
-		if (defaultIndex > 0) ordered.unshift(...ordered.splice(defaultIndex, 1));
-		return ordered;
-	});
+	const entries = $derived(
+		orderStoreEntries(stores, preferencesQuery.current?.defaultStoreId ?? null)
+	);
 </script>
 
-<div class="flex gap-1.5 overflow-x-auto pb-1">
+<div class={['flex gap-1.5 overflow-x-auto pb-1', className]}>
 	{#each entries as entry (entry.id)}
+		{@const active = activeStore.current === entry.id}
 		<Button
-			variant={activeStoreId === entry.id ? 'default' : 'outline'}
+			variant={active ? 'default' : 'outline'}
 			size="sm"
 			class="shrink-0"
-			onclick={() => (activeStoreId = entry.id)}
+			aria-current={active ? 'true' : undefined}
+			onclick={() => (activeStore.current = entry.id)}
 		>
 			{#if entry.color}
 				<span

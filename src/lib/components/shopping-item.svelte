@@ -71,7 +71,7 @@
 			{#snippet child({ props })}
 				<div
 					{...props}
-					class="flex cursor-pointer items-center gap-3 border-b py-2.5 select-none"
+					class="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b py-2.5 transition-colors select-none"
 					role="button"
 					tabindex="0"
 					onclick={toggle}

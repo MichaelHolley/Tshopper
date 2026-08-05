@@ -111,16 +111,22 @@ components:
 Tshopper is designed for a person standing in a grocery aisle with one hand on a cart and the other
 on a phone. Everything in the system answers to that scene. Rows are tall enough to hit without
 looking twice, the list occupies the full column with no card chrome competing for the eye, and the
-only saturated color on screen is the green that says *this is the store you're in* and *this is the
-button that does the thing*. Nothing decorative earns its pixels.
+only saturated color on screen is the green that says _this is the store you're in_ and _this is the
+button that does the thing_. Nothing decorative earns its pixels.
 
 The system is deliberately flat in-page: hairline rules divide items, a single 1px ring defines a
 container, and there is no shadow anywhere in the reading surface. Overlays are the exception, and
 that exception is the whole depth model — dialogs, sheets, and menus lift off the page with a real
 shadow so a temporary layer is never mistaken for the list itself. Type is one family, Inter
 Variable, worked through weight and size rather than contrast between faces. The interface is
-compact by intent: 32px controls, 0.45rem corners, tight gutters, a single 672px column that reads
-as a phone column even on a desktop.
+compact by intent: 32px controls, 0.45rem corners, tight gutters, and a 672px reading column.
+
+The desktop is the same companion at a different moment — not in the aisle but at the kitchen table,
+planning, with a mouse and a keyboard and a screen that can hold the whole list at once. So the
+desktop earns a real frame: the stores that scrolled sideways on a phone stand still in a rail with
+their counts visible, the list that ran off the fold flows into ruled columns, and the assistant that
+had to cover the list sits beside it instead. Nothing is added that the phone does not have; what
+the phone had to hide, the desktop shows.
 
 Color energy comes from two sources and no others: the app's green, and the per-store dot colors the
 household picks themselves. Because store colors are user data, the system stays neutral around
@@ -128,7 +134,7 @@ them; every gray is chroma-free so a user's magenta or orange store dot reads cl
 
 **Key Characteristics:**
 
-- One column, max 672px, phone-shaped at every width
+- Phone-shaped single column below 1024px; a rail-plus-list app frame above it
 - Hairline dividers instead of cards for list content
 - Flat in-page, lifted overlays
 - One typeface (Inter Variable), hierarchy by weight and size
@@ -177,7 +183,7 @@ A chroma-free neutral field with one green accent and user-owned store colors on
 user data and may be any hue; the interface must never tint its own neutrals, or a user's chosen
 color starts to look wrong against them.
 
-**The Two Reds Rule.** Destructive intent is red *text on a tinted wash*, never a solid red fill.
+**The Two Reds Rule.** Destructive intent is red _text on a tinted wash_, never a solid red fill.
 Solid saturated fill is reserved for the green primary, so a filled button is always the safe one.
 
 ## Typography
@@ -211,10 +217,21 @@ Hierarchy is weight (400/500/600) and size only.
 
 ## Layout
 
-A single centered column, `max-width: 42rem` (672px), with a `1rem` horizontal gutter that never
-changes across breakpoints. There is no desktop layout: the wide viewport gets the same phone column
-with more empty space around it, because the phone is the product and a second layout would be a
-second thing to maintain and diverge.
+Two layouts, one system. Below `64rem` (1024px) the app is a single centered column,
+`max-width: 42rem` (672px), with a `1rem` horizontal gutter — the phone shape, unchanged, and still
+the shape the product is designed around.
+
+At `1024px` and above the shell becomes a fixed-height app frame (`h-svh`, no document scroll) with
+a persistent `14rem` store rail on the left, a scrolling list region in the middle, and — at
+`80rem` (1280px) and above — an optional `22rem` assistant panel docked on the right. Each region
+scrolls independently.
+
+The list region is a container query context, not a viewport one: the number of list columns follows
+the space the region actually has, so opening the assistant reflows the list without a viewport
+change. Below `48rem` of region width the list is one column capped at `42rem`; above it the region
+opens to `72rem` and the list flows into `22rem`-minimum columns divided by a hairline
+`column-rule`. Reordering is always single-column — a drag target that can jump between columns is
+not a drag target.
 
 Vertical structure is a sticky 56px header, then a flex column of content with `0.5rem` between
 blocks and `1rem` of top and bottom padding. The header is `bg-background/80` with `backdrop-blur`
@@ -230,8 +247,9 @@ Control heights are fixed and compact: 36px (`lg`), 32px (default and all icon b
 used for store chips and list actions), 24px (`xs`). Touch targets rely on the full row being
 tappable rather than on large buttons.
 
-The store nav is a single horizontally-scrolling row of chips with `0.375rem` between them; it never
-wraps and never collapses into a dropdown.
+The store nav takes one of two forms and never a third: a horizontally-scrolling row of chips with
+`0.375rem` between them below `1024px`, or the vertical rail above it. It never wraps and never
+collapses into a dropdown.
 
 ## Elevation & Depth
 
@@ -314,6 +332,14 @@ The shopping item row is the system's defining element and does not use a card.
   The dot is omitted for "Unassigned", which is the only entry with no color.
 - **Order:** the household's default store sorts first; "Unassigned" always sorts last.
 
+### Store Rail (desktop)
+
+The same selector, given a column instead of a strip. 36px rows in a `14rem` rail, same green fill
+for the active entry, same 10px color dot leading the label — but the dot is never omitted, because
+a column reads by its left edge: "Unassigned" gets a hollow ring of the same size rather than a gap.
+Each row carries its unchecked item count in Muted Ink at the trailing edge, tabular, hidden at zero.
+The count is the thing the strip had no room for and the reason the rail earns its width.
+
 ### Cards / Containers
 
 - **Corner Style:** 10.1px (`--radius-xl`).
@@ -335,16 +361,25 @@ The shopping item row is the system's defining element and does not use a card.
 
 ### Navigation
 
-The header is the entire navigation: a sticky, blurred, hairline-bottomed 56px bar holding the
-wordmark on the left and three ghost icon buttons on the right (assistant, settings, sign out). It
-never grows, never gains a menu, and never changes between breakpoints. There is no bottom tab bar
-and no sidebar.
+A sticky, blurred, hairline-bottomed 56px bar holding the wordmark on the left and three ghost icon
+buttons on the right (assistant, settings, sign out). It never grows, never gains a menu, and holds
+the identical three actions at every width — only its inner column releases from `42rem` to full
+bleed once the rail appears beneath it. There is no bottom tab bar. Below `1024px` the header is the
+entire navigation; above it the store rail joins it, and nothing else ever does.
+
+The assistant button is a toggle, not an opener: it reports state with `aria-pressed` and dismisses
+the panel it opened, because on desktop that panel stays on screen.
 
 ### Assistant Sheet
 
-The AI assistant opens as a bottom sheet over the list, with Panel-lift shadow and a top border,
-sliding up 10 units on open. It overlays rather than replaces the list, because both paths act on
+Below `80rem` the AI assistant opens as a sheet over the list, with Panel-lift shadow and a border,
+sliding in 10 units on open. It overlays rather than replaces the list, because both paths act on
 the same live state and the user should see the list update as the assistant works.
+
+At `80rem` and above that intent stops being a compromise: the assistant docks as a `22rem` column
+to the right of the list, flat, separated by a hairline, with no shadow and no overlay — it is not
+temporary, so it does not lift. The conversation itself is the same panel in both places and
+survives the switch between them; only its container changes.
 
 ## Do's and Don'ts
 
@@ -361,14 +396,19 @@ the same live state and the user should see the list update as the assistant wor
 - **Do** shadow overlays (sheets, dialogs, menus) and leave everything in-page flat with a hairline
   or a `ring-1`.
 - **Do** keep inputs at 16px on mobile so iOS does not zoom on focus.
-- **Do** keep the single 672px column at every viewport; a wide screen gets margin, not a new layout.
+- **Do** drive desktop reflow from container width, not viewport width — the assistant panel changes
+  how much room the list has without changing the viewport at all.
+- **Do** give pointer devices a row hover tint (`muted/50`, full-bleed, no radius). Touch has the
+  1px press translate; a mouse has nothing, and in two columns you need to know which row you're on.
+- **Do** give the desktop its own affordances where the phone had none: `/` focuses the add field,
+  Escape leaves edit mode, and the rail shows counts the chip strip had no room for.
 
 ### Don't:
 
 - **Don't** introduce a second typeface. Inter Variable does every role.
 - **Don't** put item names below 1rem, or add a text size step between body and caption.
-- **Don't** wrap list items in cards, or give a row a background, radius, or shadow — including on
-  hover.
+- **Don't** wrap list items in cards, or give a row a radius or a shadow. The hover tint above is the
+  only background a row ever gets, and it stays full-bleed so the divider still runs edge to edge.
 - **Don't** use a solid red button. Destructive is Alert text on a 10% wash.
 - **Don't** add an in-app theme toggle; light and dark follow `prefers-color-scheme` only.
 - **Don't** tint the green into a gradient, a large field, or a decorative background. It marks
