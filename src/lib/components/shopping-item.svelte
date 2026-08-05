@@ -43,22 +43,20 @@
 
 {#snippet itemDetails()}
 	<div class="min-w-0 flex-1">
-		<p class={['truncate leading-tight', checked && 'text-muted-foreground line-through']}>
-			{item.item}
-		</p>
-		{#if item.quantity}
-			<p class="text-muted-foreground truncate text-xs">{item.quantity}</p>
-		{/if}
+		<span class="name">{item.item}</span>
 	</div>
+	{#if item.quantity}
+		<span class="quantity">{item.quantity}</span>
+	{/if}
 {/snippet}
 
 {#if sortMode}
-	<div class="flex items-center gap-3 border-b py-2.5">
+	<div class="row" data-dragging>
 		<div
 			use:dragHandle
 			role="button"
 			tabindex="0"
-			class="text-muted-foreground shrink-0 cursor-grab touch-none active:cursor-grabbing"
+			class="text-muted-foreground -ml-1 shrink-0 cursor-grab touch-none active:cursor-grabbing"
 			aria-label={`Drag to reorder ${item.item}`}
 		>
 			<GripVerticalIcon class="size-5" />
@@ -71,8 +69,10 @@
 			{#snippet child({ props })}
 				<div
 					{...props}
-					class="hover:bg-muted/50 flex cursor-pointer items-center gap-3 border-b py-2.5 transition-colors select-none"
-					role="button"
+					class="row"
+					data-checked={checked || undefined}
+					role="checkbox"
+					aria-checked={checked}
 					tabindex="0"
 					onclick={toggle}
 					onkeydown={handleKeydown}
@@ -129,3 +129,130 @@
 		</ContextMenu.Content>
 	</ContextMenu.Root>
 {/if}
+
+<style>
+	.row {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		min-height: 2.75rem;
+		padding: 0.5rem 0.75rem;
+		border-radius: var(--radius-xl);
+		background-color: var(--store-raised);
+		box-shadow:
+			var(--row-lift),
+			0 0 0 1px var(--store-edge);
+		cursor: pointer;
+		user-select: none;
+		transition:
+			background-color 200ms ease-out,
+			box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1),
+			transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.row[data-dragging] {
+		cursor: default;
+	}
+
+	.row:focus-visible {
+		outline: none;
+		box-shadow:
+			var(--row-lift),
+			0 0 0 1px var(--color-ring),
+			0 0 0 4px color-mix(in oklch, var(--color-ring) 40%, transparent);
+	}
+
+	@media (hover: hover) {
+		.row:hover:not([data-checked]) {
+			background-color: var(--store-raised-hover);
+			box-shadow:
+				var(--row-lift-hover),
+				0 0 0 1px var(--store-edge);
+		}
+	}
+
+	.row:active:not([data-checked], [data-dragging]) {
+		transform: translateY(1px);
+		box-shadow:
+			var(--row-press),
+			0 0 0 1px var(--store-edge);
+		transition-duration: 60ms;
+	}
+
+	.row[data-checked] {
+		background-color: var(--row-sunk);
+		box-shadow:
+			var(--row-settle),
+			0 0 0 1px transparent;
+	}
+
+	.name {
+		position: relative;
+		display: inline-block;
+		max-width: 100%;
+		overflow: hidden;
+		white-space: nowrap;
+		text-overflow: ellipsis;
+		vertical-align: bottom;
+		font-weight: 500;
+		line-height: 1.25;
+		color: var(--color-foreground);
+		transition:
+			color 260ms ease-out,
+			font-weight 260ms ease-out;
+	}
+
+	.name::after {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 55%;
+		width: 100%;
+		height: 1px;
+		background-color: currentColor;
+		transform: translateY(-50%) scaleX(0);
+		transform-origin: left center;
+		transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	[data-checked] .name {
+		font-weight: 400;
+		color: var(--color-muted-foreground);
+	}
+
+	[data-checked] .name::after {
+		transform: translateY(-50%) scaleX(1);
+	}
+
+	.quantity {
+		flex-shrink: 0;
+		padding: 0.125rem 0.4rem;
+		border-radius: var(--radius-md);
+		background-color: var(--store-quiet);
+		font-size: 0.75rem;
+		font-weight: 500;
+		line-height: 1rem;
+		font-variant-numeric: tabular-nums;
+		color: var(--color-foreground);
+		transition:
+			background-color 260ms ease-out,
+			color 260ms ease-out;
+	}
+
+	[data-checked] .quantity {
+		background-color: transparent;
+		color: var(--color-muted-foreground);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.row,
+		.name,
+		.name::after {
+			transition-duration: 1ms;
+		}
+
+		.row:active:not([data-checked], [data-dragging]) {
+			transform: none;
+		}
+	}
+</style>

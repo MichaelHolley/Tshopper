@@ -27,8 +27,11 @@
 			aria-current={active ? 'true' : undefined}
 			class={[
 				'flex h-9 items-center gap-2.5 rounded-lg px-2 text-left text-sm transition-colors active:translate-y-px',
-				active ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'
+				active ? 'font-semibold' : 'hover:bg-muted'
 			]}
+			style={active
+				? 'background-color: var(--store-selected); box-shadow: inset 0 0 0 1px var(--store-edge)'
+				: undefined}
 			onclick={() => (activeStore.current = entry.id)}
 		>
 			<span
@@ -42,7 +45,7 @@
 			<span class="min-w-0 flex-1 truncate">{entry.name}</span>
 			{#if open > 0}
 				<span
-					class={['text-xs tabular-nums', active ? 'opacity-70' : 'text-muted-foreground']}
+					class={['text-xs tabular-nums', active ? 'text-foreground' : 'text-muted-foreground']}
 					aria-label={`${open} ${open === 1 ? 'item' : 'items'}`}
 				>
 					{open}

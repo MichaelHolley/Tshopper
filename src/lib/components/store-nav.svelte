@@ -18,19 +18,20 @@
 	{#each entries as entry (entry.id)}
 		{@const active = activeStore.current === entry.id}
 		<Button
-			variant={active ? 'default' : 'outline'}
+			variant="outline"
 			size="sm"
-			class="shrink-0"
+			class={['shrink-0', active && 'font-semibold']}
+			style={active
+				? 'background-color: var(--store-selected); border-color: var(--store-edge)'
+				: undefined}
 			aria-current={active ? 'true' : undefined}
 			onclick={() => (activeStore.current = entry.id)}
 		>
-			{#if entry.color}
-				<span
-					aria-hidden="true"
-					class="size-2.5 rounded-full"
-					style={`background-color: ${entry.color}`}
-				></span>
-			{/if}
+			<span
+				aria-hidden="true"
+				class={['size-2.5 rounded-full', !entry.color && 'border border-current opacity-40']}
+				style={entry.color ? `background-color: ${entry.color}` : undefined}
+			></span>
 			{entry.name}
 		</Button>
 	{/each}

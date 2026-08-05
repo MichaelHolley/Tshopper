@@ -29,6 +29,7 @@
 
 	const storesQuery = getStores();
 	const stores = $derived(storesQuery.current ?? []);
+	const storeColor = $derived(stores.find((s) => s.id === activeStore.current)?.color);
 
 	// A backgrounded/locked phone has its socket killed while frozen, but `navigator.onLine`
 	// never flips, so SvelteKit's active recovery misses it. Reconnect the live queries when the
@@ -46,9 +47,13 @@
 
 <svelte:document onvisibilitychange={recoverLiveQueries} />
 
-<div class="flex min-h-svh flex-col lg:h-svh lg:overflow-hidden">
+<div
+	class="app-shell flex min-h-svh flex-col lg:h-svh lg:overflow-hidden"
+	style={storeColor ? `--store-color: ${storeColor}` : undefined}
+>
 	<header
-		class="bg-background/80 sticky top-0 z-40 shrink-0 border-b pt-[env(safe-area-inset-top)] backdrop-blur lg:static"
+		class="sticky top-0 z-40 shrink-0 border-b pt-[env(safe-area-inset-top)] backdrop-blur lg:static"
+		style="background-color: color-mix(in oklab, var(--store-canvas) 82%, transparent); border-color: var(--store-edge)"
 	>
 		<div
 			class="gutter mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-2 lg:mx-0 lg:max-w-none"
@@ -82,7 +87,10 @@
 	</header>
 
 	<div class="flex min-h-0 flex-1">
-		<div class="hidden w-56 shrink-0 overflow-y-auto border-r lg:block">
+		<div
+			class="hidden w-56 shrink-0 overflow-y-auto border-r lg:block"
+			style="border-color: var(--store-edge)"
+		>
 			<StoreRail {stores} />
 		</div>
 

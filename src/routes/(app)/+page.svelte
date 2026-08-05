@@ -91,7 +91,10 @@
 {/if}
 
 {#if activeItems.length > 0}
-	<div class="flex items-center justify-between gap-3 border-b py-2">
+	<div
+		class="flex items-center justify-between gap-3 border-b py-2"
+		style="border-color: var(--store-edge)"
+	>
 		<div class="min-w-0">
 			{#if sortMode}
 				<div class="text-sm font-semibold">Reordering</div>
@@ -120,6 +123,7 @@
 
 {#if sortMode}
 	<ul
+		class="mt-3"
 		use:dragHandleZone={{
 			items: sortItems,
 			flipDurationMs: FLIP_MS,
@@ -130,7 +134,7 @@
 		onfinalize={handleFinalize}
 	>
 		{#each sortItems as item (item.id)}
-			<li animate:flip={{ duration: FLIP_MS }}>
+			<li class="mb-2" animate:flip={{ duration: FLIP_MS }}>
 				<ShoppingItem {item} {stores} sortMode onEdit={(i) => (editing = i)} />
 			</li>
 		{/each}
@@ -149,14 +153,14 @@
 		<p class="text-xs">Add one using the form above.</p>
 	</div>
 {:else}
-	<ul class="@3xl:columns-[22rem] @3xl:gap-x-10 @3xl:[column-rule:1px_solid_var(--border)]">
+	<ul class="mt-3 @3xl:columns-[22rem] @3xl:gap-x-6">
 		{#each activeItems as item (item.id)}
-			<li class="break-inside-avoid">
+			<li class="mb-2 break-inside-avoid">
 				<ShoppingItem {item} {stores} onEdit={(i) => (editing = i)} />
 			</li>
 		{/each}
 		{#each visibleChecked as item (item.id)}
-			<li class="break-inside-avoid">
+			<li class="mb-2 break-inside-avoid">
 				<ShoppingItem {item} {stores} onEdit={(i) => (editing = i)} />
 			</li>
 		{/each}
