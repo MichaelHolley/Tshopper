@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="text-scale" content="scale" />
 		<link rel="manifest" href="/manifest.json" />
-		<meta name="theme-color" content="oklch(0.527 0.154 150.069)" />
+		<meta name="theme-color" content="#fbfefc" />
 		<script>
 			// Runs before first paint so the stored theme never flashes the wrong palette.
 			(() => {
@@ -15,6 +15,9 @@
 					(stored !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
 				document.documentElement.classList.toggle('dark', dark);
 				document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+				document
+					.querySelector('meta[name="theme-color"]')
+					.setAttribute('content', dark ? '#09100c' : '#fbfefc');
 			})();
 		</script>
 		%sveltekit.head%
