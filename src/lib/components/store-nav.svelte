@@ -2,15 +2,19 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { getActiveStore } from '$lib/active-store.svelte.js';
 	import { getPreferences } from '$lib/preferences.remote';
+	import { getStores } from '$lib/stores.remote';
 	import { orderStoreEntries } from '$lib/store-entries';
-	import type { Store } from '$lib/server/db/schema';
 
-	let { stores, class: className }: { stores: Store[]; class?: string } = $props();
+	let { class: className }: { class?: string } = $props();
 
 	const activeStore = getActiveStore();
+
+	// Kick both queries off before awaiting either, so they load side by side.
+	const storesQuery = getStores();
 	const preferencesQuery = getPreferences();
+
 	const entries = $derived(
-		orderStoreEntries(stores, preferencesQuery.current?.defaultStoreId ?? null)
+		orderStoreEntries(await storesQuery, (await preferencesQuery).defaultStoreId)
 	);
 </script>
 

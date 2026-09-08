@@ -4,6 +4,7 @@
 	import SettingsDialog from '$lib/components/settings-dialog.svelte';
 	import ChatDrawer from '$lib/components/chat-drawer.svelte';
 	import ChatPanel from '$lib/components/chat-panel.svelte';
+	import QueryBoundary from '$lib/components/query-boundary.svelte';
 	import StoreNav from '$lib/components/store-nav.svelte';
 	import ThemeToggle from '$lib/components/theme-toggle.svelte';
 	import StoreRail from '$lib/components/store-rail.svelte';
@@ -28,9 +29,12 @@
 	// list out from under someone who has since switched stores by hand.
 	const activeStore = setActiveStore(untrack(() => data.defaultStoreId));
 
+	// Read without awaiting: the shell paints before the stores land, and until then it just
+	// uses the neutral palette rather than suspending the whole app behind a colour.
 	const storesQuery = getStores();
-	const stores = $derived(storesQuery.current ?? []);
-	const storeColor = $derived(stores.find((s) => s.id === activeStore.current)?.color);
+	const storeColor = $derived(
+		storesQuery.current?.find((s) => s.id === activeStore.current)?.color
+	);
 
 	// Sheets, dialogs and toasts portal to <body>, outside the shell, so the store color has to live
 	// on the document root as well for them to theme with the rest of the app.
@@ -55,6 +59,31 @@
 </script>
 
 <svelte:document onvisibilitychange={recoverLiveQueries} />
+
+{#snippet railSkeleton()}
+	<div class="flex animate-pulse flex-col gap-1.5 p-3 pt-8" aria-hidden="true">
+		{#each { length: 4 }, i (i)}
+			<div class="bg-muted h-9 rounded-lg"></div>
+		{/each}
+	</div>
+{/snippet}
+
+{#snippet navSkeleton()}
+	<div class="flex animate-pulse gap-1.5 pb-1 lg:hidden" aria-hidden="true">
+		{#each { length: 3 }, i (i)}
+			<div class="bg-muted h-8 w-24 shrink-0 rounded-md"></div>
+		{/each}
+	</div>
+{/snippet}
+
+{#snippet listSkeleton()}
+	<div class="flex animate-pulse flex-col gap-2" aria-hidden="true">
+		<div class="bg-muted h-12 rounded-xl"></div>
+		{#each { length: 5 }, i (i)}
+			<div class="bg-muted h-11 rounded-xl"></div>
+		{/each}
+	</div>
+{/snippet}
 
 <div
 	class="app-shell flex min-h-svh flex-col lg:h-svh lg:overflow-hidden"
@@ -101,15 +130,21 @@
 			class="hidden w-56 shrink-0 overflow-y-auto border-r lg:block"
 			style="border-color: var(--store-edge)"
 		>
-			<StoreRail {stores} />
+			<QueryBoundary message="Could not load stores." skeleton={railSkeleton}>
+				<StoreRail />
+			</QueryBoundary>
 		</div>
 
 		<main class="@container min-w-0 flex-1 lg:overflow-y-auto">
 			<div
 				class="gutter mx-auto flex w-full max-w-2xl flex-col gap-2 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] @3xl:max-w-6xl"
 			>
-				<StoreNav {stores} class="lg:hidden" />
-				{@render children()}
+				<QueryBoundary message="Could not load stores." skeleton={navSkeleton}>
+					<StoreNav class="lg:hidden" />
+				</QueryBoundary>
+				<QueryBoundary message="Could not load your list." skeleton={listSkeleton}>
+					{@render children()}
+				</QueryBoundary>
 			</div>
 		</main>
 

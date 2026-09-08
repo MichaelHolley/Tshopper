@@ -33,10 +33,9 @@
 	}
 
 	const storesQuery = getStores();
-	const itemsQuery = $derived(getItems(activeStore.current));
 
-	const stores = $derived(storesQuery.current ?? []);
-	const items = $derived(itemsQuery.current ?? []);
+	const stores = $derived(await storesQuery);
+	const items = $derived(await getItems(activeStore.current));
 	const activeItems = $derived(items.filter((i) => i.checked === null));
 	const checkedItems = $derived(items.filter((i) => i.checked !== null));
 	const visibleChecked = $derived(
@@ -74,11 +73,7 @@
 
 	// If the active store is deleted (here or in another session), fall back to Unassigned.
 	$effect(() => {
-		if (
-			activeStore.current !== null &&
-			storesQuery.current !== undefined &&
-			!stores.some((s) => s.id === activeStore.current)
-		) {
+		if (activeStore.current !== null && !stores.some((s) => s.id === activeStore.current)) {
 			activeStore.current = null;
 		}
 	});
