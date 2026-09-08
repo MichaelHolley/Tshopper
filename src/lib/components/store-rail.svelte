@@ -2,19 +2,20 @@
 	import { getActiveStore } from '$lib/active-store.svelte.js';
 	import { getItemCounts } from '$lib/items.remote';
 	import { getPreferences } from '$lib/preferences.remote';
+	import { getStores } from '$lib/stores.remote';
 	import { orderStoreEntries } from '$lib/store-entries';
-	import type { Store } from '$lib/server/db/schema';
-
-	let { stores }: { stores: Store[] } = $props();
 
 	const activeStore = getActiveStore();
+
+	// Kick all three queries off before awaiting any, so they load side by side.
+	const storesQuery = getStores();
 	const preferencesQuery = getPreferences();
 	const countsQuery = getItemCounts();
 
 	const entries = $derived(
-		orderStoreEntries(stores, preferencesQuery.current?.defaultStoreId ?? null)
+		orderStoreEntries(await storesQuery, (await preferencesQuery).defaultStoreId)
 	);
-	const counts = $derived(countsQuery.current ?? []);
+	const counts = $derived(await countsQuery);
 </script>
 
 <nav aria-label="Stores" class="flex flex-col gap-0.5 p-3">
