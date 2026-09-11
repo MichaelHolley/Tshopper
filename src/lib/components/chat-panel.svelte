@@ -24,6 +24,7 @@
 	const TOOL_LABELS: Record<string, string> = {
 		list_items: 'Reading the list',
 		add_item: 'Adding an item',
+		add_items: 'Adding items',
 		update_item: 'Updating an item',
 		set_item_checked: 'Checking an item off',
 		remove_items: 'Removing items',
