@@ -6,26 +6,26 @@ colors:
   grocery-green-dark: 'oklch(0.72 0.168 152)'
   grocery-green-foreground: 'oklch(0.982 0.018 155.826)'
   grocery-green-foreground-dark: 'oklch(0.19 0.05 155)'
-  paper: 'oklch(0.994 0.004 150)'
-  paper-dark: 'oklch(0.163 0.014 158)'
-  surface: 'oklch(1 0.002 150)'
-  surface-dark: 'oklch(0.222 0.018 158)'
-  ink: 'oklch(0.17 0.014 155)'
-  ink-dark: 'oklch(0.965 0.008 150)'
-  ink-muted: 'oklch(0.535 0.018 155)'
-  ink-muted-dark: 'oklch(0.715 0.022 152)'
-  hairline: 'oklch(0.9 0.011 150)'
-  hairline-dark: 'oklch(0.85 0.05 155 / 13%)'
-  fill-quiet: 'oklch(0.965 0.007 150)'
-  fill-quiet-dark: 'oklch(0.272 0.018 158)'
+  paper: 'oklch(0.985 0 0)'
+  paper-dark: 'oklch(0.15 0 0)'
+  surface: 'oklch(1 0 0)'
+  surface-dark: 'oklch(0.213 0 0)'
+  ink: 'oklch(0.17 0 0)'
+  ink-dark: 'oklch(0.965 0 0)'
+  ink-muted: 'oklch(0.535 0 0)'
+  ink-muted-dark: 'oklch(0.715 0 0)'
+  hairline: 'oklch(0.9 0 0)'
+  hairline-dark: 'oklch(1 0 0 / 12%)'
+  fill-quiet: 'oklch(0.965 0 0)'
+  fill-quiet-dark: 'oklch(0.272 0 0)'
   alert: 'oklch(0.577 0.245 27.325)'
   alert-dark: 'oklch(0.704 0.191 22.216)'
   focus-ring: 'oklch(0.62 0.09 150)'
   focus-ring-dark: 'oklch(0.72 0.168 152 / 70%)'
-  row-raised: 'oklch(1 0.002 150)'
-  row-raised-dark: 'oklch(0.232 0.019 158)'
-  row-sunk: 'oklch(0.955 0.008 150)'
-  row-sunk-dark: 'oklch(0.132 0.012 158)'
+  row-raised: 'oklch(1 0 0)'
+  row-raised-dark: 'oklch(0.224 0 0)'
+  row-sunk: 'oklch(0.955 0 0)'
+  row-sunk-dark: 'oklch(0.122 0 0)'
   store-color: "the active store's own color, set by the household — an identity mark, never a surface"
 typography:
   title:
@@ -137,7 +137,7 @@ components:
 
 **Creative North Star: "The Aisle Companion"**
 
-Tshopper is designed for a person standing in a grocery aisle with one hand on a cart and the other on a phone, and every decision in the system answers to that scene. The field is a green-leaning neutral — `{colors.paper}` under `{colors.ink}`, with no gray anywhere at chroma zero — and exactly one saturated color is allowed to sit on a surface: `{colors.grocery-green}`, spent only on the button that does the thing. Rows are tall enough to hit without looking twice, the list owns the full column, and nothing decorative earns its pixels.
+Tshopper is designed for a person standing in a grocery aisle with one hand on a cart and the other on a phone, and every decision in the system answers to that scene. The field is a true neutral — `{colors.paper}` under `{colors.ink}`, every surface at chroma zero — and exactly one saturated color is allowed to sit on a surface: `{colors.grocery-green}`, spent only on the button that does the thing. Rows are tall enough to hit without looking twice, the list owns the full column, and nothing decorative earns its pixels.
 
 The system is deliberately flat in-page with one exception, and the exception is the list. Items you still need are raised off the page; items you have picked up are pressed into it — so the list's shape tells you how far along you are before you read a word. Containers stay a single 1px `{colors.hairline}` ring, and row lift is kept small so overlays still own the large drop shadow that marks a temporary layer. Type is one family, Inter Variable, worked through weight and size rather than contrast between faces. The interface is compact by intent: 32px controls, `{rounded.lg}` corners, tight gutters, and a 672px reading column.
 
@@ -151,14 +151,14 @@ A store's color is identity, not atmosphere. The household picks a color per sto
 - Raised item rows that sink when checked; hairlines elsewhere, never card grids
 - Flat in-page except the list, where depth is state; large shadows reserved for overlays
 - One typeface (Inter Variable), hierarchy by weight and size
-- Neutrals carry a whisper of the green hue — nothing in the app is ever a dead gray
+- Neutrals are true grays at chroma zero — color in the field means the field is broken
 - `{colors.store-color}` lives in a 10px circle and nowhere else
 - Compact controls: 32px default height, 28px small
 - Automatic light/dark from the OS, no in-app toggle
 
 ## Colors
 
-A green-leaning neutral field, one green accent reserved for action, one red reserved for destruction, and a per-store hue that is only ever a dot. Every token ships a light and a dark value; dark is not a dimmed light, it is its own build.
+A true-neutral gray field, one green accent reserved for action, one red reserved for destruction, and a per-store hue that is only ever a dot. Every token ships a light and a dark value; dark is not a dimmed light, it is its own build.
 
 ### Primary
 
@@ -167,9 +167,9 @@ A green-leaning neutral field, one green accent reserved for action, one red res
 
 ### Neutral
 
-Every neutral carries 0.002–0.022 chroma at hue 150–158 — far below anything that reads as "green", far above the dead gray it replaces.
+Every neutral is chroma 0. The field carries no hue at all, so the only color on screen is a color that means something: green for action, red for destruction, the store's own hue in its dot.
 
-- **Paper** (`{colors.paper}` / `{colors.paper-dark}`): the page. Dark Paper is a deep green-black, not a neutral black.
+- **Paper** (`{colors.paper}` / `{colors.paper-dark}`): the page. Dark Paper is a near-black gray; light Paper sits a step below Surface so a raised row reads as raised.
 - **Surface** (`{colors.surface}` / `{colors.surface-dark}`): cards, popovers, sheets, dialogs.
 - **Ink** (`{colors.ink}` / `{colors.ink-dark}`): item names and headings.
 - **Muted Ink** (`{colors.ink-muted}` / `{colors.ink-muted-dark}`): quantities, counts, hints, icon-only affordances at rest. Both values clear 4.5:1 on Paper.
@@ -386,7 +386,7 @@ The one place in the reading surface where depth carries meaning: **an item stil
 - **Do** keep the row's lift far smaller than any overlay's. A row is seated on the page; a sheet floats above it.
 - **Do** render `{colors.store-color}` as a `0.625rem` circle, and reserve the circle for exactly that.
 - **Do** mark the selected store with `{colors.fill-quiet}` and a 600-weight label. Neutral selection, colored identity.
-- **Do** keep every neutral in the 150–158 hue band at low chroma. A gray at chroma 0 is a bug, not a rule.
+- **Do** keep every neutral at chroma 0. A tinted surface is a bug: hue in this app is reserved for meaning, never for atmosphere.
 - **Do** keep inputs at 16px on mobile so iOS does not zoom on focus.
 - **Do** drive desktop reflow from container width, not viewport width — the assistant panel changes how much room the list has without changing the viewport at all.
 - **Do** give pointer devices a row hover that lifts fill and shadow one step, on unchecked rows only. Touch has the 1px press translate; a mouse has nothing, and in two columns you need to know which row you are on.

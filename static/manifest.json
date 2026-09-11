@@ -5,8 +5,8 @@
 	"description": "Shopping list app",
 	"start_url": "/",
 	"display": "standalone",
-	"background_color": "#fbfefc",
-	"theme_color": "#fbfefc",
+	"background_color": "#fafafa",
+	"theme_color": "#fafafa",
 	"orientation": "portrait-primary",
 	"icons": [
 		{
