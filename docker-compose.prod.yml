@@ -2,6 +2,8 @@ services:
   tshopper:
     image: mpholley/tshopper:latest
     container_name: tshopper
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     ports:
       - '6000:3000'
     environment:
@@ -28,6 +30,17 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  watchtower:
+    image: nickfedor/watchtower
+    container_name: tshopper-watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_SCHEDULE=0 0 * * * *
+      - WATCHTOWER_LABEL_ENABLE=true
+    restart: unless-stopped
 
 volumes:
   libsql-data:
