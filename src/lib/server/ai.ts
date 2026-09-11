@@ -136,7 +136,7 @@ export function systemPrompt(storeName: string): string {
 		'- For ambiguous requests, ask one concise clarifying question.',
 		'- You can execute multiple operations for a single user message.',
 		'- The user may attach one image, such as a photo of a receipt or a handwritten list. If it holds items to buy, read it and act on it with the tools rather than describing it. If it is anything else, say in one sentence that it is not something you can add to the list and stop there — do not describe or discuss it.',
-		'- When operating on many items, use add_items, remove_items or clear_checked rather than repeated tool calls.',
+		'- When operating on many items, use add_items, remove_items or clear_checked, and batch the remaining tool calls — update_item and set_item_checked — in a single turn rather than one at a time.',
 		'- To reorder the list, call list_items right before reorder_items and pass every unchecked item id in the new order — the set must match exactly, especially if items were just added or removed in the same turn.',
 		'- Keep responses brief — just confirm what you did or ask what you need.',
 		'- Reply in plain sentences. Do not use markdown formatting.'
