@@ -17,6 +17,14 @@ To get more info a library you have access to BTCA to clone their repo by callin
 - Never add a comment just because a function is public or exported.
 - When a comment truly is warranted, prefer explaining _why_ over _what_, use JSDoc syntax, and keep it short and concise.
 
+## Agent Tools
+
+Tools in `src/lib/server/ai.ts` take their arguments from a model, so treat the `inputSchema` as the validation boundary.
+
+- Encode every constraint the service layer enforces into the zod schema (`.min(1)` on names that cannot be empty, `.max()` on arrays). The AI SDK validates and repairs the call before `execute` runs; a throw inside `execute` only reaches the model as an opaque error.
+- This matters most for tools that act on a batch: one invalid entry throws and aborts the whole operation, and the error text does not say which entry was bad.
+- Keep the service-layer checks in `src/lib/server/shopping.ts` as they are — the UI's remote functions call the same code and do not go through the tool schema.
+
 ## Feedback Loop
 
 Use `package.json` scripts over `pnpx` and `npx` commands.

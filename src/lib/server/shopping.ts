@@ -48,16 +48,30 @@ export async function addItem(
 	quantity: string,
 	storeId: string | null
 ): Promise<ShoppingItem> {
-	const name = item.trim();
-	if (!name) throw new Error('Item name cannot be empty');
+	const [created] = await addItems([{ item, quantity }], storeId);
+	return created;
+}
 
-	const sortOrder = (await maxUncheckedSortOrder(storeId)) + 1;
-	const [created] = await db
+export async function addItems(
+	items: Array<{ item: string; quantity: string }>,
+	storeId: string | null
+): Promise<ShoppingItem[]> {
+	const normalized = items.map(({ item, quantity }) => {
+		const name = item.trim();
+		if (!name) throw new Error('Item name cannot be empty');
+		return { item: name, quantity: quantity.trim() };
+	});
+	if (normalized.length === 0) return [];
+
+	const sortOrder = await maxUncheckedSortOrder(storeId);
+	const created = await db
 		.insert(shoppingItem)
-		.values({ item: name, quantity: quantity.trim(), storeId, sortOrder })
+		.values(
+			normalized.map((item, index) => ({ ...item, storeId, sortOrder: sortOrder + index + 1 }))
+		)
 		.returning();
 	notifyChange();
-	return created;
+	return created.sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 export async function updateItem(
