@@ -126,9 +126,9 @@
 		height: 3rem;
 		padding: 0.25rem;
 		border-radius: var(--radius-xl);
-		background-color: color-mix(in oklab, var(--store-color) 14%, var(--row-raised));
+		background-color: var(--row-raised);
 		box-shadow:
-			0 0 0 1px var(--store-selected),
+			0 0 0 1px var(--color-border),
 			var(--row-settle);
 		transition:
 			background-color 260ms ease-out,
@@ -175,7 +175,7 @@
 		flex-shrink: 0;
 		margin-block: 0.5rem;
 		padding-left: 0.5rem;
-		border-left: 1px solid var(--store-edge);
+		border-left: 1px solid var(--color-border);
 	}
 
 	.qty input {
@@ -203,7 +203,7 @@
 		transform: translateY(-50%);
 		padding: 0.125rem 0.4rem;
 		border-radius: var(--radius-md);
-		background-color: var(--store-quiet);
+		background-color: var(--color-muted);
 		font-family: inherit;
 		font-size: 0.75rem;
 		line-height: 1rem;

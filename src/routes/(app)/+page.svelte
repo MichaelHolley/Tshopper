@@ -86,10 +86,7 @@
 {/if}
 
 {#if activeItems.length > 0}
-	<div
-		class="flex items-center justify-between gap-3 border-b py-2"
-		style="border-color: var(--store-edge)"
-	>
+	<div class="border-border flex items-center justify-between gap-3 border-b py-2">
 		<div class="min-w-0">
 			{#if sortMode}
 				<div class="text-sm font-semibold">Reordering</div>

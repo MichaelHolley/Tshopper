@@ -211,12 +211,12 @@ The list's two states are the only place in the reading surface where a fill car
 
 ### Hierarchy
 
-| Token | Size | Weight | Line Height | Letter Spacing | Use |
-|---|---|---|---|---|---|
-| `{typography.title}` | 1.125rem | 600 | 1.75rem | -0.025em | The "Tshopper" wordmark. The only negative tracking in the app. |
-| `{typography.body}` | 1rem | 400 | 1.25 | 0 | Item names — the largest reading text, sized for arm's length. |
-| `{typography.label}` | 0.875rem | 500 | 1.25rem | 0 | Buttons, dialog titles, section counts. 600 for item-count and mode labels. |
-| `{typography.caption}` | 0.75rem | 400 | 1rem | 0 | Quantities, helper text, empty-state hints, store chips, `size="sm"` button text (0.8rem). |
+| Token                  | Size     | Weight | Line Height | Letter Spacing | Use                                                                                        |
+| ---------------------- | -------- | ------ | ----------- | -------------- | ------------------------------------------------------------------------------------------ |
+| `{typography.title}`   | 1.125rem | 600    | 1.75rem     | -0.025em       | The "Tshopper" wordmark. The only negative tracking in the app.                            |
+| `{typography.body}`    | 1rem     | 400    | 1.25        | 0              | Item names — the largest reading text, sized for arm's length.                             |
+| `{typography.label}`   | 0.875rem | 500    | 1.25rem     | 0              | Buttons, dialog titles, section counts. 600 for item-count and mode labels.                |
+| `{typography.caption}` | 0.75rem  | 400    | 1rem        | 0              | Quantities, helper text, empty-state hints, store chips, `size="sm"` button text (0.8rem). |
 
 Checked item names keep `{typography.body}` size but fall from 500 to 400, shift to `{colors.ink-muted}`, and take a line-through.
 
@@ -246,11 +246,11 @@ Checked item names keep `{typography.body}` size but fall from 500 to 400, shift
 
 #### Breakpoints
 
-| Name | Width | Key Changes |
-|---|---|---|
-| Phone | < 1024px | Single 42rem column; horizontally scrolling store chip strip; assistant opens as a sheet over the list. |
-| Desktop | ≥ 1024px | App frame at `h-svh`; store chips become the 14rem rail with counts; list may flow into columns. |
-| Wide | ≥ 1280px | Assistant docks as a flat 22rem column to the right of the list. |
+| Name    | Width    | Key Changes                                                                                             |
+| ------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| Phone   | < 1024px | Single 42rem column; horizontally scrolling store chip strip; assistant opens as a sheet over the list. |
+| Desktop | ≥ 1024px | App frame at `h-svh`; store chips become the 14rem rail with counts; list may flow into columns.        |
+| Wide    | ≥ 1280px | Assistant docks as a flat 22rem column to the right of the list.                                        |
 
 The header is a sticky 56px bar at every width — `{colors.paper}` at 80% with `backdrop-blur` and a bottom hairline, so content scrolls visibly beneath it rather than disappearing under an opaque bar.
 
@@ -266,13 +266,13 @@ There is no photography and no illustration. The only graphic elements are Lucid
 
 Two depth systems that say different things: **in the list, depth is state; above the page, depth is impermanence.**
 
-| Level | Treatment | Use |
-|---|---|---|
-| Level 0 — Flat | No shadow. A 1px `{colors.hairline}` ring where separation is needed. | Everything in the reading surface: cards, header, buttons, inputs, store chips, the rail. |
-| Level 1 — Row Raised | `{colors.row-raised}` fill, 1px hairline outline, a 1–2px offset with a short blur. In dark mode the fill lifts and takes a 1px top highlight. | An unchecked shopping item. |
-| Level −1 — Row Sunk | `{colors.row-sunk}` fill, inset shadow, no outline. | A checked shopping item. |
-| Level 2 — Menu lift | `box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)`, paired with a `ring-1`. | Context menus, dropdowns. |
-| Level 3 — Panel lift | `box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)` | The chat sheet, submenus, modal surfaces. |
+| Level                | Treatment                                                                                                                                      | Use                                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Level 0 — Flat       | No shadow. A 1px `{colors.hairline}` ring where separation is needed.                                                                          | Everything in the reading surface: cards, header, buttons, inputs, store chips, the rail. |
+| Level 1 — Row Raised | `{colors.row-raised}` fill, 1px hairline outline, a 1–2px offset with a short blur. In dark mode the fill lifts and takes a 1px top highlight. | An unchecked shopping item.                                                               |
+| Level −1 — Row Sunk  | `{colors.row-sunk}` fill, inset shadow, no outline.                                                                                            | A checked shopping item.                                                                  |
+| Level 2 — Menu lift  | `box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)`, paired with a `ring-1`.                                        | Context menus, dropdowns.                                                                 |
+| Level 3 — Panel lift | `box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)`                                                               | The chat sheet, submenus, modal surfaces.                                                 |
 
 Row lift is deliberately far smaller than any overlay's, so the two systems never compete: a row is seated on the page, an overlay floats over it. The light source is the same in both themes — from above.
 
@@ -288,13 +288,13 @@ Row lift is deliberately far smaller than any overlay's, so the two systems neve
 
 Every value derives from a single `--radius: 0.45rem` base by multiplier, never by hand.
 
-| Token | Value | Use |
-|---|---|---|
-| `{rounded.sm}` | 0.27rem (4.3px) | Smallest chrome, inline marks. |
-| `{rounded.md}` | 0.36rem (5.8px) | Small controls; clamped at `min(var(--radius-md), 12px)` so a 28px chip never approaches a pill. |
-| `{rounded.lg}` | 0.45rem (7.2px) | The default — buttons, inputs, menus, icon buttons. |
-| `{rounded.xl}` | 0.63rem (10.1px) | Cards, sheets, list rows. |
-| `{rounded.pill}` | 9999px | The store color dot and the empty-state store badge. Nothing else. |
+| Token            | Value            | Use                                                                                              |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------------------------ |
+| `{rounded.sm}`   | 0.27rem (4.3px)  | Smallest chrome, inline marks.                                                                   |
+| `{rounded.md}`   | 0.36rem (5.8px)  | Small controls; clamped at `min(var(--radius-md), 12px)` so a 28px chip never approaches a pill. |
+| `{rounded.lg}`   | 0.45rem (7.2px)  | The default — buttons, inputs, menus, icon buttons.                                              |
+| `{rounded.xl}`   | 0.63rem (10.1px) | Cards, sheets, list rows.                                                                        |
+| `{rounded.pill}` | 9999px           | The store color dot and the empty-state store badge. Nothing else.                               |
 
 Two shapes are fully round and only two: the `0.625rem` store dot and the 40px empty-state badge. Borders are always 1px and always `{colors.hairline}`. Containers use `ring-1` rather than `border`, so the outline sits outside the padding box and never shifts layout.
 
@@ -303,18 +303,23 @@ Two shapes are fully round and only two: the `0.625rem` store dot and the 40px e
 ### Buttons
 
 **`button-primary`** — the green action button. The only solid saturated fill in the app.
+
 - Background `{colors.grocery-green}`, text `{colors.grocery-green-foreground}`, label `{typography.label}`, height `2rem`, padding `0 0.625rem`, shape `{rounded.lg}`. Used for add and confirm — action only.
 
 **`button-outline`** — the resting state for inactive store chips and the reorder toggle.
+
 - Background `{colors.paper}`, text `{colors.ink}`, 1px `{colors.hairline}` border, hovers to `{colors.fill-quiet}`, same height / padding / shape.
 
 **`button-ghost`** — every header action (assistant, settings, sign out) and list-level action (show more, clear checked).
+
 - No fill, no border; hovers to `{colors.fill-quiet}`. Same height / shape.
 
 **`button-destructive`** — delete and clear checked.
+
 - Background `color-mix(in oklch, {colors.alert} 10%, transparent)` deepening to 20% on hover, text `{colors.alert}`. Never a solid fill.
 
 **`button-icon`** — the header and row icon button.
+
 - `2rem` square, shape `{rounded.lg}`. Never a circle.
 
 **States, all variants.** Press translates the button down 1px on `:active` (except menu triggers) — the system's only tactile feedback, and deliberate, because on a phone there is no hover. Focus is a 3px `{colors.focus-ring}` halo plus a border shift. Icons are Lucide at 1rem (0.875rem `sm`, 0.75rem `xs`) and always inherit text color.
@@ -322,11 +327,13 @@ Two shapes are fully round and only two: the `0.625rem` store dot and the 40px e
 ### Cards & Containers
 
 **`card`** — the default container.
+
 - Background `{colors.surface}`, text `{colors.ink}`, padding `1rem` (`0.75rem` at `size="sm"`), shape `{rounded.xl}`, a `ring-1` at `{colors.hairline}`, no shadow.
 
 ### Inputs & Forms
 
 **`input`** — the canonical field.
+
 - Transparent fill, 1px `{colors.hairline}` border, text `{colors.ink}`, height `2rem`, padding `0.25rem 0.625rem`, shape `{rounded.lg}`. In dark mode the fill lifts to `input/30` so the field is findable against the near-black page.
 - **Size:** 16px on mobile, dropping to `{typography.label}` at `md`. The 16px floor prevents iOS from zooming on focus and must not be reduced.
 - **Focus:** border shifts to `{colors.focus-ring}` with a 3px halo.
@@ -335,6 +342,7 @@ Two shapes are fully round and only two: the `0.625rem` store dot and the 40px e
 ### Navigation
 
 **`nav-bar`** — the sticky 56px header.
+
 - `{colors.paper}` at 80% with `backdrop-blur`, bottom hairline, wordmark left in `{typography.title}`, three ghost icon buttons right (assistant, settings, sign out). It never grows, never gains a menu, and holds the identical three actions at every width — only its inner column releases from `42rem` to full bleed once the rail appears beneath it. There is no bottom tab bar.
 - The assistant button is a toggle, not an opener: it reports state with `aria-pressed` and dismisses the panel it opened, because on desktop that panel stays on screen.
 
@@ -353,6 +361,7 @@ The one place in the reading surface where depth carries meaning: **an item stil
 - **Sort mode:** a `{colors.ink-muted}` grip handle appears at the leading edge with `cursor: grab`; the row keeps its raised surface but stops being tappable and only the handle drags.
 
 **`store-chip`** — the phone's store selector, a horizontally scrolling strip of 28px chips with `0.375rem` between them.
+
 - **Inactive:** `button-outline` chrome, label in `{typography.caption}` at weight 400.
 - **Active (`store-chip-active`):** `{colors.fill-quiet}` fill, 1px `{colors.hairline}` border, label at weight 600. Selection is marked by fill and weight, never by color — the dot already says which store this is.
 - **`store-dot`:** a `0.625rem` circle in `{colors.store-color}` leading the label, `aria-hidden`. "Unassigned" gets a hollow ring of the same size, so chips never resize when selection moves.
@@ -360,9 +369,11 @@ The one place in the reading surface where depth carries meaning: **an item stil
 - The strip never wraps and never collapses into a dropdown.
 
 **`store-rail`** — the same selector on desktop, given a column instead of a strip.
+
 - 36px rows in a `14rem` rail, the same `{colors.fill-quiet}` active fill and weight bump, the same `store-dot` leading the label. Each row carries its unchecked item count at the trailing edge, tabular, hidden at zero — `{colors.ink-muted}` at rest, full `{colors.ink}` on the active row. The count is the thing the strip had no room for, and the reason the rail earns its width.
 
 **`assistant-panel`** — one conversation, two containers.
+
 - Below 1280px it is a sheet over the list: Level 3 shadow, a border, sliding in 10 units on open. It overlays rather than replaces the list, because both paths act on the same live state and the user should watch the list update as the assistant works.
 - At 1280px and above it docks as a flat `22rem` column right of the list, separated by a hairline, with no shadow and no overlay — it is not temporary, so it does not lift. The conversation survives the switch between them; only its container changes.
 

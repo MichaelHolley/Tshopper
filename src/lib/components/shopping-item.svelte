@@ -138,10 +138,10 @@
 		min-height: 2.75rem;
 		padding: 0.5rem 0.75rem;
 		border-radius: var(--radius-xl);
-		background-color: var(--store-raised);
+		background-color: var(--row-raised);
 		box-shadow:
 			var(--row-lift),
-			0 0 0 1px var(--store-edge);
+			0 0 0 1px var(--color-border);
 		cursor: pointer;
 		user-select: none;
 		transition:
@@ -164,10 +164,10 @@
 
 	@media (hover: hover) {
 		.row:hover:not([data-checked]) {
-			background-color: var(--store-raised-hover);
+			background-color: var(--row-raised-hover);
 			box-shadow:
 				var(--row-lift-hover),
-				0 0 0 1px var(--store-edge);
+				0 0 0 1px var(--color-border);
 		}
 	}
 
@@ -175,12 +175,12 @@
 		transform: translateY(1px);
 		box-shadow:
 			var(--row-press),
-			0 0 0 1px var(--store-edge);
+			0 0 0 1px var(--color-border);
 		transition-duration: 60ms;
 	}
 
 	.row[data-checked] {
-		background-color: var(--store-sunk);
+		background-color: var(--row-sunk);
 		box-shadow:
 			var(--row-settle),
 			0 0 0 1px transparent;
@@ -226,22 +226,12 @@
 
 	.quantity {
 		flex-shrink: 0;
-		padding: 0.125rem 0.4rem;
-		border-radius: var(--radius-md);
-		background-color: var(--store-quiet);
 		font-size: 0.75rem;
-		font-weight: 500;
+		font-weight: 400;
 		line-height: 1rem;
 		font-variant-numeric: tabular-nums;
-		color: var(--color-foreground);
-		transition:
-			background-color 260ms ease-out,
-			color 260ms ease-out;
-	}
-
-	[data-checked] .quantity {
-		background-color: transparent;
 		color: var(--color-muted-foreground);
+		transition: color 260ms ease-out;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

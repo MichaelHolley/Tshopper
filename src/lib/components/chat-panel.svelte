@@ -94,7 +94,7 @@
 	const DESCRIPTION = 'Ask me to add, remove, or check off items.';
 </script>
 
-<div class="flex min-h-0 flex-1 flex-col bg-(--store-raised)">
+<div class="bg-card flex min-h-0 flex-1 flex-col">
 	<div class="flex flex-row items-start justify-between gap-2 p-4">
 		<div class="flex flex-col gap-0.5">
 			{#if variant === 'sheet'}

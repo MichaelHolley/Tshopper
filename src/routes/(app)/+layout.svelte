@@ -29,21 +29,6 @@
 	// list out from under someone who has since switched stores by hand.
 	const activeStore = setActiveStore(untrack(() => data.defaultStoreId));
 
-	// Read without awaiting: the shell paints before the stores land, and until then it just
-	// uses the neutral palette rather than suspending the whole app behind a colour.
-	const storesQuery = getStores();
-	const storeColor = $derived(
-		storesQuery.current?.find((s) => s.id === activeStore.current)?.color
-	);
-
-	// Sheets, dialogs and toasts portal to <body>, outside the shell, so the store color has to live
-	// on the document root as well for them to theme with the rest of the app.
-	$effect(() => {
-		const root = document.documentElement;
-		if (storeColor) root.style.setProperty('--store-color', storeColor);
-		else root.style.removeProperty('--store-color');
-	});
-
 	// A backgrounded/locked phone has its socket killed while frozen, but `navigator.onLine`
 	// never flips, so SvelteKit's active recovery misses it. Reconnect the live queries when the
 	// tab returns to the foreground.
@@ -85,13 +70,9 @@
 	</div>
 {/snippet}
 
-<div
-	class="app-shell flex min-h-svh flex-col lg:h-svh lg:overflow-hidden"
-	style={storeColor ? `--store-color: ${storeColor}` : undefined}
->
+<div class="flex min-h-svh flex-col lg:h-svh lg:overflow-hidden">
 	<header
-		class="sticky top-0 z-40 shrink-0 border-b pt-[env(safe-area-inset-top)] backdrop-blur lg:static"
-		style="background-color: color-mix(in oklab, var(--store-canvas) 82%, transparent); border-color: var(--store-edge)"
+		class="bg-background/80 border-border sticky top-0 z-40 shrink-0 border-b pt-[env(safe-area-inset-top)] backdrop-blur lg:static"
 	>
 		<div
 			class="gutter mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-2 lg:mx-0 lg:max-w-none"
@@ -126,10 +107,7 @@
 	</header>
 
 	<div class="flex min-h-0 flex-1">
-		<div
-			class="hidden w-56 shrink-0 overflow-y-auto border-r lg:block"
-			style="border-color: var(--store-edge)"
-		>
+		<div class="border-border hidden w-56 shrink-0 overflow-y-auto border-r lg:block">
 			<QueryBoundary message="Could not load stores." skeleton={railSkeleton}>
 				<StoreRail />
 			</QueryBoundary>
@@ -149,7 +127,7 @@
 		</main>
 
 		{#if wide.current && assistantOpen}
-			<aside class="flex w-88 shrink-0 flex-col border-l" style="border-color: var(--store-edge)">
+			<aside class="border-border flex w-88 shrink-0 flex-col border-l">
 				<ChatPanel variant="docked" onClose={() => (assistantOpen = false)} />
 			</aside>
 		{/if}

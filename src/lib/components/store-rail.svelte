@@ -28,11 +28,8 @@
 			aria-current={active ? 'true' : undefined}
 			class={[
 				'flex h-9 items-center gap-2.5 rounded-lg px-2 text-left text-sm transition-colors active:translate-y-px',
-				active ? 'font-semibold' : 'hover:bg-muted'
+				active ? 'bg-muted ring-border font-semibold ring-1 ring-inset' : 'hover:bg-muted'
 			]}
-			style={active
-				? 'background-color: var(--store-selected); box-shadow: inset 0 0 0 1px var(--store-edge)'
-				: undefined}
 			onclick={() => (activeStore.current = entry.id)}
 		>
 			<span

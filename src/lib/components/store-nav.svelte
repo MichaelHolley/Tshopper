@@ -24,10 +24,7 @@
 		<Button
 			variant="outline"
 			size="sm"
-			class={['shrink-0', active && 'font-semibold']}
-			style={active
-				? 'background-color: var(--store-selected); border-color: var(--store-edge)'
-				: undefined}
+			class={['shrink-0', active && 'bg-muted font-semibold']}
 			aria-current={active ? 'true' : undefined}
 			onclick={() => (activeStore.current = entry.id)}
 		>
