@@ -42,14 +42,6 @@
 	--row-raised: oklch(1 0 0);
 	--row-raised-hover: oklch(0.988 0 0);
 	--row-sunk: oklch(0.955 0 0);
-	--row-lift:
-		0 1px 1px oklch(0.22 0 0 / 6%), 0 2px 5px -2px oklch(0.22 0 0 / 9%),
-		inset 0 1px 0 oklch(1 0 0 / 60%);
-	--row-lift-hover:
-		0 2px 3px -1px oklch(0.22 0 0 / 8%), 0 6px 14px -4px oklch(0.22 0 0 / 12%),
-		inset 0 1px 0 oklch(1 0 0 / 60%);
-	--row-press: 0 0 0 0 oklch(0.22 0 0 / 0%), inset 0 1px 2px oklch(0.22 0 0 / 10%);
-	--row-settle: inset 0 1px 2px oklch(0.22 0 0 / 8%);
 }
 
 .dark {
@@ -88,13 +80,6 @@
 	--row-raised: oklch(0.224 0 0);
 	--row-raised-hover: oklch(0.256 0 0);
 	--row-sunk: oklch(0.122 0 0);
-	--row-lift:
-		0 1px 2px oklch(0 0 0 / 55%), 0 3px 8px -3px oklch(0 0 0 / 60%), inset 0 1px 0 oklch(1 0 0 / 7%);
-	--row-lift-hover:
-		0 2px 4px oklch(0 0 0 / 55%), 0 8px 18px -5px oklch(0 0 0 / 65%),
-		inset 0 1px 0 oklch(1 0 0 / 10%);
-	--row-press: 0 0 0 0 oklch(0 0 0 / 0%), inset 0 1px 3px oklch(0 0 0 / 60%);
-	--row-settle: inset 0 1px 2px oklch(0 0 0 / 50%);
 }
 
 @theme inline {

@@ -114,11 +114,6 @@
 </form>
 
 <style>
-	/**
-	 * The list is a field of raised rows; the composer is the slot they come out of. It runs the
-	 * inverse depth — pressed into the page, not lifted off it — because a drop shadow here would
-	 * claim the overlay layer and a raised fill would make it read as one more item.
-	 */
 	.composer {
 		display: flex;
 		align-items: stretch;
@@ -127,9 +122,7 @@
 		padding: 0.25rem;
 		border-radius: var(--radius-xl);
 		background-color: var(--row-raised);
-		box-shadow:
-			0 0 0 1px var(--color-border),
-			var(--row-settle);
+		box-shadow: 0 0 0 1px var(--color-border);
 		transition:
 			background-color 260ms ease-out,
 			box-shadow 200ms ease-out;
@@ -138,15 +131,12 @@
 	.composer:focus-within {
 		box-shadow:
 			0 0 0 1px var(--color-ring),
-			0 0 0 4px color-mix(in oklch, var(--color-ring) 35%, transparent),
-			var(--row-settle);
+			0 0 0 4px color-mix(in oklch, var(--color-ring) 35%, transparent);
 	}
 
 	.composer[data-editing] {
 		background-color: color-mix(in oklab, var(--color-ring) 12%, var(--row-raised));
-		box-shadow:
-			0 0 0 1px color-mix(in oklch, var(--color-ring) 55%, transparent),
-			var(--row-settle);
+		box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-ring) 55%, transparent);
 	}
 
 	.field {

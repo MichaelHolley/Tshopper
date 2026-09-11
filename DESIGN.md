@@ -139,7 +139,7 @@ components:
 
 Tshopper is designed for a person standing in a grocery aisle with one hand on a cart and the other on a phone, and every decision in the system answers to that scene. The field is a true neutral — `{colors.paper}` under `{colors.ink}`, every surface at chroma zero — and exactly one saturated color is allowed to sit on a surface: `{colors.grocery-green}`, spent only on the button that does the thing. Rows are tall enough to hit without looking twice, the list owns the full column, and nothing decorative earns its pixels.
 
-The system is deliberately flat in-page with one exception, and the exception is the list. Items you still need are raised off the page; items you have picked up are pressed into it — so the list's shape tells you how far along you are before you read a word. Containers stay a single 1px `{colors.hairline}` ring, and row lift is kept small so overlays still own the large drop shadow that marks a temporary layer. Type is one family, Inter Variable, worked through weight and size rather than contrast between faces. The interface is compact by intent: 32px controls, `{rounded.lg}` corners, tight gutters, and a 672px reading column.
+The system is flat in-page, with no exceptions. Items you still need sit a step lighter than the page; items you have picked up sit a step darker — the list tells you how far along you are through fill alone, before you read a word. Containers stay a single 1px `{colors.hairline}` ring, and shadows belong exclusively to overlays, where they mark a temporary layer. Type is one family, Inter Variable, worked through weight and size rather than contrast between faces. The interface is compact by intent: 32px controls, `{rounded.lg}` corners, tight gutters, and a 672px reading column.
 
 The desktop is the same companion at a different moment — not in the aisle but at the kitchen table, planning, with a mouse and a screen that holds the whole list at once. So the desktop earns a real frame: the stores that scrolled sideways on a phone stand still in a rail with their counts visible, the list that ran off the fold flows into ruled columns, and the assistant that had to cover the list sits beside it instead. Nothing is added that the phone does not have; what the phone had to hide, the desktop shows.
 
@@ -148,8 +148,8 @@ A store's color is identity, not atmosphere. The household picks a color per sto
 **Key Characteristics:**
 
 - Phone-shaped single column below 1024px; a rail-plus-list app frame above it
-- Raised item rows that sink when checked; hairlines elsewhere, never card grids
-- Flat in-page except the list, where depth is state; large shadows reserved for overlays
+- Item rows that darken one step when checked; hairlines elsewhere, never card grids
+- Flat in-page everywhere; state is fill, and shadows are reserved for overlays
 - One typeface (Inter Variable), hierarchy by weight and size
 - Neutrals are true grays at chroma zero — color in the field means the field is broken
 - `{colors.store-color}` lives in a 10px circle and nowhere else
@@ -169,7 +169,7 @@ A true-neutral gray field, one green accent reserved for action, one red reserve
 
 Every neutral is chroma 0. The field carries no hue at all, so the only color on screen is a color that means something: green for action, red for destruction, the store's own hue in its dot.
 
-- **Paper** (`{colors.paper}` / `{colors.paper-dark}`): the page. Dark Paper is a near-black gray; light Paper sits a step below Surface so a raised row reads as raised.
+- **Paper** (`{colors.paper}` / `{colors.paper-dark}`): the page. Dark Paper is a near-black gray; light Paper sits a step below Surface so an open row separates from the page.
 - **Surface** (`{colors.surface}` / `{colors.surface-dark}`): cards, popovers, sheets, dialogs.
 - **Ink** (`{colors.ink}` / `{colors.ink-dark}`): item names and headings.
 - **Muted Ink** (`{colors.ink-muted}` / `{colors.ink-muted-dark}`): quantities, counts, hints, icon-only affordances at rest. Both values clear 4.5:1 on Paper.
@@ -180,7 +180,7 @@ Every neutral is chroma 0. The field carries no hue at all, so the only color on
 
 The list's two states are the only place in the reading surface where a fill carries meaning.
 
-- **Row Raised** (`{colors.row-raised}` / `{colors.row-raised-dark}`): an item still to buy. Sits above Paper — visibly so in dark mode, where fill does the work a shadow cannot.
+- **Row Raised** (`{colors.row-raised}` / `{colors.row-raised-dark}`): an item still to buy. Sits a step above Paper; fill alone does the separating.
 - **Row Sunk** (`{colors.row-sunk}` / `{colors.row-sunk-dark}`): an item already in the cart. Sits below Paper in both themes.
 
 ### Alert
@@ -264,23 +264,23 @@ There is no photography and no illustration. The only graphic elements are Lucid
 
 ## Elevation & Depth
 
-Two depth systems that say different things: **in the list, depth is state; above the page, depth is impermanence.**
+The reading surface has no depth at all. **In the page, state is fill; above the page, depth is impermanence.**
 
-| Level                | Treatment                                                                                                                                      | Use                                                                                       |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Level 0 — Flat       | No shadow. A 1px `{colors.hairline}` ring where separation is needed.                                                                          | Everything in the reading surface: cards, header, buttons, inputs, store chips, the rail. |
-| Level 1 — Row Raised | `{colors.row-raised}` fill, 1px hairline outline, a 1–2px offset with a short blur. In dark mode the fill lifts and takes a 1px top highlight. | An unchecked shopping item.                                                               |
-| Level −1 — Row Sunk  | `{colors.row-sunk}` fill, inset shadow, no outline.                                                                                            | A checked shopping item.                                                                  |
-| Level 2 — Menu lift  | `box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)`, paired with a `ring-1`.                                        | Context menus, dropdowns.                                                                 |
-| Level 3 — Panel lift | `box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)`                                                               | The chat sheet, submenus, modal surfaces.                                                 |
+| Level                | Treatment                                                                                               | Use                                                                                                     |
+| -------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Level 0 — Flat       | No shadow. A 1px `{colors.hairline}` ring where separation is needed.                                   | Everything in the reading surface: cards, header, buttons, inputs, store chips, the rail, the composer. |
+| Level 0 — Row Open   | `{colors.row-raised}` fill, 1px hairline outline, no shadow. Sits a step off Paper.                     | An unchecked shopping item.                                                                             |
+| Level 0 — Row Done   | `{colors.row-sunk}` fill, no outline, no shadow. Sits a step under Paper.                               | A checked shopping item.                                                                                |
+| Level 2 — Menu lift  | `box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)`, paired with a `ring-1`. | Context menus, dropdowns.                                                                               |
+| Level 3 — Panel lift | `box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)`                        | The chat sheet, submenus, modal surfaces.                                                               |
 
-Row lift is deliberately far smaller than any overlay's, so the two systems never compete: a row is seated on the page, an overlay floats over it. The light source is the same in both themes — from above.
+Nothing in the reading surface casts or receives a shadow, so a shadow anywhere is unambiguous: it is an overlay. The light source is the same in both themes — from above.
 
 ### Named Rules
 
-**The Lift-Means-Temporary Rule.** Above the page, a shadow means exactly one thing: this layer is transient and dismissible. Never shadow a card, a header, or a button — if it stays when you tap elsewhere, it is flat.
+**The Lift-Means-Temporary Rule.** A shadow means exactly one thing: this layer is transient and dismissible. Never shadow a card, a header, a button, a row, or an input — if it stays when you tap elsewhere, it is flat.
 
-**The Depth-Is-State Rule.** The only in-page element allowed to leave the page is a shopping item row, and it leaves in order to say whether it has been bought. Depth is never decoration.
+**The State-Is-Fill Rule.** In-page state changes are carried by fill and weight, never by depth. No inset shadows, no top highlights, no press translate: a row says it has been bought by going darker and quieter, not by moving.
 
 ## Shapes
 
@@ -350,15 +350,15 @@ Two shapes are fully round and only two: the `0.625rem` store dot and the 40px e
 
 **`list-row`** — the shopping item row, and the system's defining element.
 
-The one place in the reading surface where depth carries meaning: **an item still to buy is raised off the page; a checked item is pressed into it.** Depth in the list is state, not decoration.
+The one place in the reading surface where fill carries meaning: **an item still to buy sits a step off the page; a checked item sits a step under it.** The row is flat in every state.
 
-- **Structure:** a single-line flex row, `2.75rem` minimum height, `0.5rem 0.75rem` padding, shape `{rounded.xl}`, `{colors.row-raised}` fill, a 1px `{colors.hairline}` outline, Level 1 lift. Rows are separated by a `{spacing.gap}` gap, not a divider.
+- **Structure:** a single-line flex row, `2.75rem` minimum height, `0.5rem 0.75rem` padding, shape `{rounded.xl}`, `{colors.row-raised}` fill, a 1px `{colors.hairline}` outline, no shadow. Rows are separated by a `{spacing.gap}` gap, not a divider.
 - **Name and quantity share one line.** The name takes the free space at weight 500 and truncates; the quantity sits at the trailing edge in `{typography.caption}` `{colors.ink-muted}`, tabular, absent when empty. That trailing column is what makes the list scannable at arm's length.
 - **The whole row is the control.** Tapping anywhere toggles checked; there is no checkbox element, though the row carries `role="checkbox"` and `aria-checked`. Long-press or right-click opens the context menu (edit, move to store, delete).
-- **Checked:** the row drops to `{colors.row-sunk}` with an inset shadow and no outline, the name falls from 500 to 400 and shifts to `{colors.ink-muted}`, and a 1px rule draws across it left to right over 300ms. The row does not move, indent, or resize. Unchecking reverses the same motion.
-- **Press:** the row translates down 1px and its shadow collapses to an inset in 60ms — the tap physically pushes the item toward the sunk state it is about to reach.
-- **Hover** (pointer only, unchecked only): fill lifts one step and the shadow deepens. A checked row never responds — it is finished.
-- **Sort mode:** a `{colors.ink-muted}` grip handle appears at the leading edge with `cursor: grab`; the row keeps its raised surface but stops being tappable and only the handle drags.
+- **Checked:** the row drops to `{colors.row-sunk}` and loses its outline, the name falls from 500 to 400 and shifts to `{colors.ink-muted}`, and a 1px rule draws across it left to right over 300ms. The row does not move, indent, or resize. Unchecking reverses the same motion.
+- **Press:** the fill snaps to `{colors.row-sunk}` in 60ms — the tap previews the state it is about to reach. Nothing moves.
+- **Hover** (pointer only, unchecked only): fill lifts one step. A checked row never responds — it is finished.
+- **Sort mode:** a `{colors.ink-muted}` grip handle appears at the leading edge with `cursor: grab`; the row keeps its fill but stops being tappable and only the handle drags.
 
 **`store-chip`** — the phone's store selector, a horizontally scrolling strip of 28px chips with `0.375rem` between them.
 
@@ -382,14 +382,14 @@ The one place in the reading surface where depth carries meaning: **an item stil
 ### Do
 
 - **Do** make the entire list row tappable rather than adding a checkbox or a chevron. The row is the control.
-- **Do** let a shopping item row be a raised surface that sinks when checked — the one place depth is allowed in-page, and allowed because it encodes state. Every other list (menus, store rows, settings) divides with a hairline.
-- **Do** keep the row's lift far smaller than any overlay's. A row is seated on the page; a sheet floats above it.
+- **Do** let a shopping item row carry its state in fill — one step above Paper when open, one step below when checked. Every other list (menus, store rows, settings) divides with a hairline.
+- **Do** keep the reading surface entirely shadow-free. A shadow is how the user recognizes an overlay; spending one on a row or an input spends that signal.
 - **Do** render `{colors.store-color}` as a `0.625rem` circle, and reserve the circle for exactly that.
 - **Do** mark the selected store with `{colors.fill-quiet}` and a 600-weight label. Neutral selection, colored identity.
 - **Do** keep every neutral at chroma 0. A tinted surface is a bug: hue in this app is reserved for meaning, never for atmosphere.
 - **Do** keep inputs at 16px on mobile so iOS does not zoom on focus.
 - **Do** drive desktop reflow from container width, not viewport width — the assistant panel changes how much room the list has without changing the viewport at all.
-- **Do** give pointer devices a row hover that lifts fill and shadow one step, on unchecked rows only. Touch has the 1px press translate; a mouse has nothing, and in two columns you need to know which row you are on.
+- **Do** give pointer devices a row hover that lifts fill one step, on unchecked rows only. In two columns you need to know which row you are on.
 - **Do** give the desktop its own affordances where the phone had none: `/` focuses the add field, Escape leaves edit mode, and the rail shows counts the chip strip had no room for.
 
 ### Don't
@@ -400,7 +400,8 @@ The one place in the reading surface where depth carries meaning: **an item stil
 - **Don't** use a solid red button. Destructive is `{colors.alert}` text on a 10% wash.
 - **Don't** introduce a second typeface. Inter Variable does every role.
 - **Don't** put item names below 1rem, or add a size step between `{typography.body}` and `{typography.caption}`.
-- **Don't** grow the row's depth into card chrome: no padding above `0.75rem`, no second line, no border beyond the 1px hairline, and no shadow large enough to be mistaken for an overlay.
-- **Don't** let a checked row keep any lift, outline, or hover response. Checked is sunk, and sunk is what makes raised mean something.
+- **Don't** grow the row into card chrome: no padding above `0.75rem`, no second line, and no border beyond the 1px hairline.
+- **Don't** reach for a drop shadow, an inset shadow, a top highlight, or a press translate anywhere in the reading surface. Rows and the composer are flat; depth there is the 3D look this system rejected.
+- **Don't** let a checked row keep its outline or hover response. Checked is sunk, and sunk is what makes open mean something.
 - **Don't** add an in-app theme toggle; light and dark follow `prefers-color-scheme` only.
 - **Don't** design for a named user — no avatars, initials, presence badges, or "added by" credits. The product knows a household, not people.

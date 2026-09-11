@@ -139,15 +139,12 @@
 		padding: 0.5rem 0.75rem;
 		border-radius: var(--radius-xl);
 		background-color: var(--row-raised);
-		box-shadow:
-			var(--row-lift),
-			0 0 0 1px var(--color-border);
+		box-shadow: 0 0 0 1px var(--color-border);
 		cursor: pointer;
 		user-select: none;
 		transition:
 			background-color 200ms ease-out,
-			box-shadow 320ms cubic-bezier(0.16, 1, 0.3, 1),
-			transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+			box-shadow 200ms ease-out;
 	}
 
 	.row[data-dragging] {
@@ -157,7 +154,6 @@
 	.row:focus-visible {
 		outline: none;
 		box-shadow:
-			var(--row-lift),
 			0 0 0 1px var(--color-ring),
 			0 0 0 4px color-mix(in oklch, var(--color-ring) 40%, transparent);
 	}
@@ -165,25 +161,17 @@
 	@media (hover: hover) {
 		.row:hover:not([data-checked]) {
 			background-color: var(--row-raised-hover);
-			box-shadow:
-				var(--row-lift-hover),
-				0 0 0 1px var(--color-border);
 		}
 	}
 
 	.row:active:not([data-checked], [data-dragging]) {
-		transform: translateY(1px);
-		box-shadow:
-			var(--row-press),
-			0 0 0 1px var(--color-border);
+		background-color: var(--row-sunk);
 		transition-duration: 60ms;
 	}
 
 	.row[data-checked] {
 		background-color: var(--row-sunk);
-		box-shadow:
-			var(--row-settle),
-			0 0 0 1px transparent;
+		box-shadow: 0 0 0 1px transparent;
 	}
 
 	.name {
