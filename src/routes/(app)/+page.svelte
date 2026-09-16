@@ -44,14 +44,14 @@
 	);
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
 	const progress = $derived({
-		listName: store?.name ?? 'Unassigned',
+		storeName: store?.name ?? 'Other items',
 		checked: checkedItems.length,
 		total: items.length
 	});
 
 	function syncProgressNotification() {
 		if (document.visibilityState === 'hidden') {
-			void showProgressNotification(progress.listName, progress.checked, progress.total);
+			void showProgressNotification(progress.storeName, progress.checked, progress.total);
 		} else {
 			void closeProgressNotification();
 		}
@@ -60,7 +60,7 @@
 	$effect(() => {
 		const current = progress;
 		if (document.visibilityState === 'hidden') {
-			void showProgressNotification(current.listName, current.checked, current.total);
+			void showProgressNotification(current.storeName, current.checked, current.total);
 		}
 	});
 

@@ -37,9 +37,18 @@ export async function disableProgressNotifications(): Promise<NotificationState>
 	await closeProgressNotification();
 	return { status: Notification.permission, enabled: false };
 }
+function progressBody(checked: number, total: number): string {
+	const itemLabel = total === 1 ? 'item' : 'items';
+	if (checked === total) return `All ${total} ${itemLabel} checked`;
+
+	const remaining = total - checked;
+	if (checked === 0) return `${remaining} ${itemLabel} left`;
+
+	return `${remaining} ${remaining === 1 ? 'item' : 'items'} left · ${checked} of ${total} checked`;
+}
 
 export async function showProgressNotification(
-	listName: string,
+	storeName: string,
 	checked: number,
 	total: number
 ): Promise<void> {
@@ -49,8 +58,8 @@ export async function showProgressNotification(
 
 	try {
 		const registration = await navigator.serviceWorker.ready;
-		await registration.showNotification(listName, {
-			body: `${checked} of ${total} items checked`,
+		await registration.showNotification(storeName, {
+			body: progressBody(checked, total),
 			icon: '/app-icon.svg',
 			tag: PROGRESS_TAG,
 			silent: true,
