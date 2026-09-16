@@ -2,6 +2,7 @@
 	import { getItems, clearChecked, reorderItems } from '$lib/items.remote';
 	import { getStores } from '$lib/stores.remote';
 	import { toastError } from '$lib/toast';
+	import { closeProgressNotification, showProgressNotification } from '$lib/notifications';
 	import ItemForm from '$lib/components/item-form.svelte';
 	import ShoppingItem from '$lib/components/shopping-item.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -42,6 +43,26 @@
 		checkedCollapsed ? checkedItems.slice(0, VISIBLE_CHECKED) : checkedItems
 	);
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
+	const progress = $derived({
+		listName: store?.name ?? 'Unassigned',
+		checked: checkedItems.length,
+		total: items.length
+	});
+
+	function syncProgressNotification() {
+		if (document.visibilityState === 'hidden') {
+			void showProgressNotification(progress.listName, progress.checked, progress.total);
+		} else {
+			void closeProgressNotification();
+		}
+	}
+
+	$effect(() => {
+		const current = progress;
+		if (document.visibilityState === 'hidden') {
+			void showProgressNotification(current.listName, current.checked, current.total);
+		}
+	});
 
 	// Mirror the live unchecked list into a mutable copy the dndzone can reorder. Runs on
 	// entering sort mode and whenever the live query changes (e.g. a remote reorder), but not
@@ -80,6 +101,7 @@
 </script>
 
 <svelte:head><title>Tshopper</title></svelte:head>
+<svelte:document onvisibilitychange={syncProgressNotification} />
 
 {#if !sortMode}
 	<ItemForm storeId={activeStore.current} bind:editing />

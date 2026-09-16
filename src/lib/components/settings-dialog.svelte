@@ -7,8 +7,15 @@
 	import { getPreferences, setDefaultStore } from '$lib/preferences.remote';
 	import { toast } from 'svelte-sonner';
 	import { toastError } from '$lib/toast';
+	import {
+		disableProgressNotifications,
+		enableProgressNotifications,
+		getNotificationState,
+		type NotificationState
+	} from '$lib/notifications';
 	import type { StoreEntry } from '$lib/store-entries';
 	import type { Store } from '$lib/server/db/schema';
+	import { onMount } from 'svelte';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import ShoppingCartIcon from '@lucide/svelte/icons/shopping-cart';
@@ -29,6 +36,22 @@
 	let editingId = $state<string | null>(null);
 	let editName = $state('');
 	let editColor = $state(DEFAULT_COLOR);
+	let notificationState = $state<NotificationState>({ status: 'unsupported' });
+
+	onMount(() => {
+		notificationState = getNotificationState();
+	});
+
+	async function toggleNotifications() {
+		try {
+			notificationState =
+				notificationState.status === 'granted' && notificationState.enabled
+					? await disableProgressNotifications()
+					: await enableProgressNotifications();
+		} catch {
+			toast.error('Could not change notification settings');
+		}
+	}
 
 	function defaultStoreOptions(stores: Store[]): StoreEntry[] {
 		return [
@@ -130,6 +153,30 @@
 					{/each}
 				</div>
 			</QueryBoundary>
+		</section>
+
+		<section class="flex flex-col gap-2 border-t pt-4">
+			<div>
+				<h3 class="text-sm font-medium">Shopping progress notifications</h3>
+				<p class="text-muted-foreground text-xs">
+					Shows the active list's checked-item count while Tshopper is running in the background.
+					Updates pause if your device suspends the app.
+				</p>
+			</div>
+
+			{#if notificationState.status === 'unsupported'}
+				<p class="text-muted-foreground text-sm">
+					Notifications are not available in this browser.
+				</p>
+			{:else if notificationState.status === 'denied'}
+				<p class="text-muted-foreground text-sm">
+					Notifications are blocked. Enable them in your browser or device settings.
+				</p>
+			{:else}
+				<Button variant="outline" onclick={toggleNotifications}>
+					{notificationState.enabled ? 'Disable notifications' : 'Enable notifications'}
+				</Button>
+			{/if}
 		</section>
 
 		<section class="flex flex-col gap-2 border-t pt-4">
