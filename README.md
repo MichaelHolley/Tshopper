@@ -26,3 +26,6 @@ docker compose up -d
 ```
 
 Migrations are applied on startup.
+
+`SESSION_SECRET` must be at least 32 characters. Changing `APP_PASSWORD` or `SESSION_SECRET` signs
+every device out. After 10 wrong passwords, an IP is locked out of signing in for 15 minutes.

@@ -12,6 +12,11 @@ const appPassword = APP_PASSWORD as string;
 
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 14; // 14 days
 
+const MAX_FAILED_LOGINS = 10;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+const failedLogins = new Map<string, { count: number; resetAt: number }>();
+
 function safeEqual(a: string, b: string): boolean {
 	const bufA = Buffer.from(a);
 	const bufB = Buffer.from(b);
@@ -19,8 +24,25 @@ function safeEqual(a: string, b: string): boolean {
 	return timingSafeEqual(bufA, bufB);
 }
 
-function sign(payload: string): string {
-	return createHmac('sha256', sessionSecret).update(payload).digest('base64url');
+// Mixing in the password means changing it signs every device out.
+function sign(issuedAt: string): string {
+	return createHmac('sha256', sessionSecret)
+		.update(`${issuedAt}.${appPassword}`)
+		.digest('base64url');
+}
+
+export function isLoginLocked(): boolean {
+	const entry = failedLogins.get(getRequestEvent().getClientAddress());
+	return entry != null && entry.count >= MAX_FAILED_LOGINS && entry.resetAt > Date.now();
+}
+
+export function recordFailedLogin(): void {
+	const ip = getRequestEvent().getClientAddress();
+	const now = Date.now();
+	for (const [key, { resetAt }] of failedLogins) if (resetAt <= now) failedLogins.delete(key);
+	const entry = failedLogins.get(ip) ?? { count: 0, resetAt: now + LOGIN_WINDOW_MS };
+	entry.count++;
+	failedLogins.set(ip, entry);
 }
 
 export function verifyPassword(input: string): boolean {

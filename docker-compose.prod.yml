@@ -11,7 +11,7 @@ services:
       - ORIGIN=https://tshopper.example.com
       - DATABASE_URL=http://libsql:8080
       - APP_PASSWORD=abc123
-      - SESSION_SECRET=MySecretKeyWithEnoughCharacters
+      - SESSION_SECRET=ReplaceWithAtLeast32RandomCharacters
       - OPENROUTER_API_KEY=your-api-key
       - OPENROUTER_MODEL=openai/gpt-5.6-luna
     depends_on:
