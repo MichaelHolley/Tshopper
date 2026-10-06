@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { getItems, clearChecked, reorderItems } from '$lib/items.remote';
-	import { getStores } from '$lib/stores.remote';
-	import { toastError } from '$lib/toast';
-	import { closeProgressNotification, showProgressNotification } from '$lib/notifications';
-	import ItemForm from '$lib/components/item-form.svelte';
-	import ShoppingItem from '$lib/components/shopping-item.svelte';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-	import type { ShoppingItem as Item } from '$lib/server/db/schema';
+	import { getItems, clearChecked, reorderItems } from '#lib/items.remote.js';
+	import { getStores } from '#lib/stores.remote.js';
+	import { toastError } from '#lib/toast.js';
+	import { closeProgressNotification, showProgressNotification } from '#lib/notifications.js';
+	import ItemForm from '#lib/components/item-form.svelte';
+	import ShoppingItem from '#lib/components/shopping-item.svelte';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import * as AlertDialog from '#lib/components/ui/alert-dialog/index.js';
+	import type { ShoppingItem as Item } from '#lib/server/db/schema.js';
 	import { dragHandleZone, type DndEvent } from 'svelte-dnd-action';
-	import { getActiveStore } from '$lib/active-store.svelte.js';
+	import { getActiveStore } from '#lib/active-store.svelte.js';
 	import { flip } from 'svelte/animate';
 	import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
 	import ChevronUpIcon from '@lucide/svelte/icons/chevron-up';

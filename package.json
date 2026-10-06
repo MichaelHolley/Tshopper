@@ -9,7 +9,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && tsc -p src/service-worker",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
@@ -26,9 +26,9 @@
 		"@libsql/client": "^0.17.4",
 		"@lucide/svelte": "^1.25.0",
 		"@openrouter/ai-sdk-provider": "^3.0.0",
-		"@sveltejs/adapter-node": "next",
-		"@sveltejs/kit": "next",
-		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"@sveltejs/adapter-node": "^6.0.0",
+		"@sveltejs/kit": "^3.0.0",
+		"@sveltejs/vite-plugin-svelte": "^7.3.1",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/node": "^24",
 		"ai": "^7.0.26",
@@ -44,9 +44,9 @@
 		"prettier-plugin-svelte": "^4.1.0",
 		"prettier-plugin-tailwindcss": "^0.8.0",
 		"runed": "^0.37.1",
-		"shadcn-svelte": "^1.4.2",
-		"svelte": "^5.56.1",
-		"svelte-check": "^4.6.0",
+		"shadcn-svelte": "^1.7.0",
+		"svelte": "^5.57.1",
+		"svelte-check": "^4.7.6",
 		"svelte-dnd-action": "^0.9.74",
 		"svelte-sonner": "^1.1.1",
 		"tailwind-merge": "^3.6.0",
@@ -57,5 +57,8 @@
 		"typescript-eslint": "^8.60.1",
 		"vite": "^8.0.16",
 		"zod": "^4.4.3"
+	},
+	"imports": {
+		"#lib/*": "./src/lib/*"
 	}
 }

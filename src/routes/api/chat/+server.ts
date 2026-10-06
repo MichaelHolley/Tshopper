@@ -3,8 +3,8 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { error } from '@sveltejs/kit';
 import { z } from 'zod';
 import { OPENROUTER_API_KEY, OPENROUTER_MODEL } from '$app/env/private';
-import { shoppingTools, systemPrompt } from '$lib/server/ai';
-import * as shopping from '$lib/server/shopping';
+import { shoppingTools, systemPrompt } from '#lib/server/ai.js';
+import * as shopping from '#lib/server/shopping.js';
 import type { RequestHandler } from './$types';
 
 const MAX_STEPS = 25;

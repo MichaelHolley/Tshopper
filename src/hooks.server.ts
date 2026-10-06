@@ -1,7 +1,7 @@
-import type { Handle, ServerInit } from '@sveltejs/kit';
+import type { Handle, ServerInit } from '@sveltejs/kit/hooks';
 import { building, dev } from '$app/env';
-import { SESSION_COOKIE, isAuthenticated } from '$lib/server/auth';
-import { runMigrations } from '$lib/server/db/migrate';
+import { SESSION_COOKIE, isAuthenticated } from '#lib/server/auth.js';
+import { runMigrations } from '#lib/server/db/migrate.js';
 
 /** Dev keeps migrations manual (`pnpm db:migrate`) so a local database is never touched by surprise. */
 export const init: ServerInit = async () => {

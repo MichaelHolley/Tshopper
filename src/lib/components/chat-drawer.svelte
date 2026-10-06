@@ -1,6 +1,6 @@
 <script lang="ts">
-	import * as Sheet from '$lib/components/ui/sheet/index.js';
-	import ChatPanel from '$lib/components/chat-panel.svelte';
+	import * as Sheet from '#lib/components/ui/sheet/index.js';
+	import ChatPanel from '#lib/components/chat-panel.svelte';
 
 	let { open = $bindable(false) }: { open?: boolean } = $props();
 </script>

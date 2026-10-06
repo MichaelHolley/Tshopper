@@ -1,8 +1,8 @@
 <script lang="ts">
-	import * as ContextMenu from '$lib/components/ui/context-menu/index.js';
-	import { checkItem, uncheckItem, deleteItem, moveItem } from '$lib/items.remote';
-	import { toastError } from '$lib/toast';
-	import type { ShoppingItem, Store } from '$lib/server/db/schema';
+	import * as ContextMenu from '#lib/components/ui/context-menu/index.js';
+	import { checkItem, uncheckItem, deleteItem, moveItem } from '#lib/items.remote.js';
+	import { toastError } from '#lib/toast.js';
+	import type { ShoppingItem, Store } from '#lib/server/db/schema.js';
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import StoreIcon from '@lucide/svelte/icons/store';

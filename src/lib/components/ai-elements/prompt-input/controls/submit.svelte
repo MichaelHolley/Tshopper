@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { cn } from '$lib/utils';
+	import { cn } from '#lib/utils.js';
 	import type { ChatStatus } from '../context/types.js';
 	import LoaderIcon from '@lucide/svelte/icons/loader';
 	import SendIcon from '@lucide/svelte/icons/send';
@@ -10,7 +10,7 @@
 		buttonVariants,
 		type ButtonSize,
 		type ButtonVariant
-	} from '$lib/components/ui/button/index.js';
+	} from '#lib/components/ui/button/index.js';
 
 	import type { HTMLButtonAttributes } from 'svelte/elements';
 

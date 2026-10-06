@@ -1,20 +1,20 @@
 <script lang="ts">
-	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
-	import QueryBoundary from '$lib/components/query-boundary.svelte';
-	import { addStore, deleteStore, getStores, updateStore } from '$lib/stores.remote';
-	import { getPreferences, setDefaultStore } from '$lib/preferences.remote';
+	import * as Dialog from '#lib/components/ui/dialog/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Input } from '#lib/components/ui/input/index.js';
+	import QueryBoundary from '#lib/components/query-boundary.svelte';
+	import { addStore, deleteStore, getStores, updateStore } from '#lib/stores.remote.js';
+	import { getPreferences, setDefaultStore } from '#lib/preferences.remote.js';
 	import { toast } from 'svelte-sonner';
-	import { toastError } from '$lib/toast';
+	import { toastError } from '#lib/toast.js';
 	import {
 		disableProgressNotifications,
 		enableProgressNotifications,
 		getNotificationState,
 		type NotificationState
-	} from '$lib/notifications';
-	import type { StoreEntry } from '$lib/store-entries';
-	import type { Store } from '$lib/server/db/schema';
+	} from '#lib/notifications.js';
+	import type { StoreEntry } from '#lib/store-entries.js';
+	import type { Store } from '#lib/server/db/schema.js';
 	import { onMount } from 'svelte';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import PencilIcon from '@lucide/svelte/icons/pencil';

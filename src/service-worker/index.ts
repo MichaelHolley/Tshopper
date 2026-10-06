@@ -1,8 +1,4 @@
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext" />
-/// <reference lib="webworker" />
-
-const worker = globalThis.self as unknown as ServiceWorkerGlobalScope;
+import { self as worker } from '$app/service-worker';
 
 worker.addEventListener('notificationclick', (event) => {
 	event.notification.close();

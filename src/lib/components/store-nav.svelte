@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { getActiveStore } from '$lib/active-store.svelte.js';
-	import { getPreferences } from '$lib/preferences.remote';
-	import { getStores } from '$lib/stores.remote';
-	import { orderStoreEntries } from '$lib/store-entries';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { getActiveStore } from '#lib/active-store.svelte.js';
+	import { getPreferences } from '#lib/preferences.remote.js';
+	import { getStores } from '#lib/stores.remote.js';
+	import { orderStoreEntries } from '#lib/store-entries.js';
 
 	let { class: className }: { class?: string } = $props();
 

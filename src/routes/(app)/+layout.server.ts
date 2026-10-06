@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import * as preferences from '$lib/server/preferences';
+import * as preferences from '#lib/server/preferences.js';
 import type { LayoutServerLoad } from './$types';
 
 /** Resolves the opening list before first paint, so the app never flashes Unassigned first. */

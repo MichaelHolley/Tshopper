@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { getActiveStore } from '$lib/active-store.svelte.js';
-	import { getItemCounts } from '$lib/items.remote';
-	import { getPreferences } from '$lib/preferences.remote';
-	import { getStores } from '$lib/stores.remote';
-	import { orderStoreEntries } from '$lib/store-entries';
+	import { getActiveStore } from '#lib/active-store.svelte.js';
+	import { getItemCounts } from '#lib/items.remote.js';
+	import { getPreferences } from '#lib/preferences.remote.js';
+	import { getStores } from '#lib/stores.remote.js';
+	import { orderStoreEntries } from '#lib/store-entries.js';
 
 	const activeStore = getActiveStore();
 

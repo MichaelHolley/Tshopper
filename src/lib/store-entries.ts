@@ -1,4 +1,4 @@
-import type { Store } from '$lib/server/db/schema';
+import type { Store } from '#lib/server/db/schema.js';
 
 export type StoreEntry = { id: string | null; name: string; color: string | null };
 
