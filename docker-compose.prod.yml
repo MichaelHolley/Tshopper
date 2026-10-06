@@ -8,7 +8,6 @@ services:
     ports:
       - '6000:3000'
     environment:
-      - ORIGIN=https://tshopper.example.com
       - DATABASE_URL=http://libsql:8080
       - APP_PASSWORD=abc123
       - SESSION_SECRET=ReplaceWithAtLeast32RandomCharacters

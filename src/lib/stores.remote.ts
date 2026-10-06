@@ -1,8 +1,8 @@
 import { query, command } from '$app/server';
 import { z } from 'zod';
-import { requireAuth } from '$lib/server/auth';
-import { changes } from '$lib/server/events';
-import * as shopping from '$lib/server/shopping';
+import { requireAuth } from '#lib/server/auth.js';
+import { changes } from '#lib/server/events.js';
+import * as shopping from '#lib/server/shopping.js';
 
 export const getStores = query.live(async function* () {
 	requireAuth();

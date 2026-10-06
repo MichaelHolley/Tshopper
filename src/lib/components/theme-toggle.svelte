@@ -1,7 +1,7 @@
 <script lang="ts">
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { theme, type ThemeMode } from '$lib/theme.svelte';
+	import * as DropdownMenu from '#lib/components/ui/dropdown-menu/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { theme, type ThemeMode } from '#lib/theme.svelte.js';
 	import MonitorIcon from '@lucide/svelte/icons/monitor';
 	import MoonIcon from '@lucide/svelte/icons/moon';
 	import SunIcon from '@lucide/svelte/icons/sun';

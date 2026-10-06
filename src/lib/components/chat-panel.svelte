@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { getToolName, isFileUIPart, isToolUIPart } from 'ai';
-	import * as Conversation from '$lib/components/ai-elements/conversation/index.js';
-	import * as PromptInput from '$lib/components/ai-elements/prompt-input/index.js';
+	import * as Conversation from '#lib/components/ai-elements/conversation/index.js';
+	import * as PromptInput from '#lib/components/ai-elements/prompt-input/index.js';
 	import type {
 		AttachmentError,
 		PromptInputMessage
-	} from '$lib/components/ai-elements/prompt-input/index.js';
-	import { Loader } from '$lib/components/ai-elements/loader/index.js';
-	import * as Suggestion from '$lib/components/ai-elements/suggestion/index.js';
-	import * as Sheet from '$lib/components/ui/sheet/index.js';
-	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
-	import { getActiveStore } from '$lib/active-store.svelte.js';
-	import { getChat } from '$lib/assistant.svelte.js';
+	} from '#lib/components/ai-elements/prompt-input/index.js';
+	import { Loader } from '#lib/components/ai-elements/loader/index.js';
+	import * as Suggestion from '#lib/components/ai-elements/suggestion/index.js';
+	import * as Sheet from '#lib/components/ui/sheet/index.js';
+	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { Separator } from '#lib/components/ui/separator/index.js';
+	import { getActiveStore } from '#lib/active-store.svelte.js';
+	import { getChat } from '#lib/assistant.svelte.js';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import WrenchIcon from '@lucide/svelte/icons/wrench';

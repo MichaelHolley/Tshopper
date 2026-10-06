@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
-	import { addItem, updateItem } from '$lib/items.remote';
+	import { Button } from '#lib/components/ui/button/index.js';
+	import { addItem, updateItem } from '#lib/items.remote.js';
 	import { toast } from 'svelte-sonner';
-	import type { ShoppingItem } from '$lib/server/db/schema';
+	import type { ShoppingItem } from '#lib/server/db/schema.js';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import XIcon from '@lucide/svelte/icons/x';

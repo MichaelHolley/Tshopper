@@ -7,7 +7,7 @@ import {
 	endSession,
 	isLoginLocked,
 	recordFailedLogin
-} from '$lib/server/auth';
+} from '#lib/server/auth.js';
 
 export const login = form(z.object({ _password: z.string() }), async ({ _password }) => {
 	if (isLoginLocked()) {

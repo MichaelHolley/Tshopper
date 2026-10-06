@@ -1,8 +1,8 @@
 import { query, command } from '$app/server';
 import { z } from 'zod';
-import { requireAuth } from '$lib/server/auth';
-import { changes } from '$lib/server/events';
-import * as preferences from '$lib/server/preferences';
+import { requireAuth } from '#lib/server/auth.js';
+import { changes } from '#lib/server/events.js';
+import * as preferences from '#lib/server/preferences.js';
 
 export const getPreferences = query.live(async function* () {
 	requireAuth();
