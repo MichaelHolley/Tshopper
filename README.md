@@ -18,11 +18,11 @@ pnpm run dev
 
 ## Hosting
 
-`docker-compose.yml` runs the app and a libsql server that keeps the data in a volume. Fill in
+`docker-compose.prod.yml` runs the app and a libsql server that keeps the data in a volume. Fill in
 the environment values — `ORIGIN` must be the public URL, or logins are rejected — then:
 
 ```sh
-docker compose up -d
+docker compose -f docker-compose.prod.yml up -d
 ```
 
 Migrations are applied on startup.
