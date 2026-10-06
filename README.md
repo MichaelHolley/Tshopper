@@ -27,9 +27,5 @@ docker compose -f docker-compose.prod.yml up -d
 
 Migrations are applied on startup.
 
-The app expects to be served over https and takes its public origin from the request's `Host`
-header. If your reverse proxy rewrites `Host`, set `HOST_HEADER=x-forwarded-host` (and
-`PROTOCOL_HEADER=x-forwarded-proto` when not on https), or logins are rejected.
-
 `SESSION_SECRET` must be at least 32 characters. Changing `APP_PASSWORD` or `SESSION_SECRET` signs
 every device out. After 10 wrong passwords, an IP is locked out of signing in for 15 minutes.
