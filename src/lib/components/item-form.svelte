@@ -25,16 +25,15 @@
 	let inputRef = $state<HTMLInputElement | null>(null);
 	let qtyRef = $state<HTMLInputElement | null>(null);
 	let suggesting = $state(false);
-	let highlighted = $state(-1);
+	let highlightedName = $state<string | null>(null);
 
 	const suggestionNames = $derived(storeId ? (getSuggestions(storeId).current ?? []) : []);
 	const suggestions = $derived(filterSuggestions(suggestionNames, item, openItemNames));
 	const listOpen = $derived(suggesting && !editing && suggestions.length > 0);
-	const activeOption = $derived(
-		listOpen && highlighted >= 0 && highlighted < suggestions.length
-			? optionId(highlighted)
-			: undefined
+	const highlighted = $derived(
+		highlightedName === null ? -1 : suggestions.indexOf(highlightedName)
 	);
+	const activeOption = $derived(listOpen && highlighted >= 0 ? optionId(highlighted) : undefined);
 
 	$effect(() => {
 		item = editing?.item ?? '';
@@ -65,7 +64,7 @@
 
 	function closeSuggestions() {
 		suggesting = false;
-		highlighted = -1;
+		highlightedName = null;
 	}
 
 	function chooseSuggestion(name: string) {
@@ -76,17 +75,14 @@
 
 	function moveHighlight(step: 1 | -1) {
 		const count = suggestions.length;
-		highlighted =
-			highlighted < 0 || highlighted >= count
-				? step === 1
-					? 0
-					: count - 1
-				: (highlighted + step + count) % count;
+		const next =
+			highlighted < 0 ? (step === 1 ? 0 : count - 1) : (highlighted + step + count) % count;
+		highlightedName = suggestions[next];
 	}
 
 	function handleItemInput() {
 		suggesting = true;
-		highlighted = -1;
+		highlightedName = null;
 	}
 
 	function handleItemKeydown(event: KeyboardEvent) {
@@ -103,9 +99,8 @@
 				moveHighlight(-1);
 				break;
 			case 'Enter': {
-				const name = suggestions[highlighted];
-				if (name === undefined) return;
-				chooseSuggestion(name);
+				if (highlighted < 0 || highlightedName === null) return;
+				chooseSuggestion(highlightedName);
 				break;
 			}
 			case 'Escape':
@@ -208,15 +203,14 @@
 		class="bg-popover text-popover-foreground ring-border absolute inset-x-0 top-full z-30 mt-1.5 rounded-xl p-1 shadow-md ring-1"
 	>
 		{#each suggestions as name, index (name)}
+			<!-- svelte-ignore a11y_click_events_have_key_events -->
 			<li
 				id={optionId(index)}
 				role="option"
 				aria-selected={index === highlighted}
 				class="hover:bg-muted aria-selected:bg-muted aria-selected:ring-border h-9 cursor-default truncate rounded-lg px-2 text-sm leading-9 select-none aria-selected:font-semibold aria-selected:ring-1 aria-selected:ring-inset"
-				onpointerdown={(event) => {
-					event.preventDefault();
-					chooseSuggestion(name);
-				}}
+				onmousedown={(event) => event.preventDefault()}
+				onclick={() => chooseSuggestion(name)}
 			>
 				{name}
 			</li>
