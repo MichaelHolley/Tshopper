@@ -1,7 +1,15 @@
 import { and, asc, count, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
 import { db } from './db';
-import { shoppingItem, store, type ShoppingItem, type Store } from './db/schema';
+import {
+	basicItem,
+	shoppingItem,
+	store,
+	type BasicItem,
+	type ShoppingItem,
+	type Store
+} from './db/schema';
 import { notifyChange } from './events';
+import { normalizeItemName } from '../item-name';
 
 const CHECKED_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
@@ -195,5 +203,27 @@ export async function updateStore(id: string, name: string, color: string): Prom
 
 export async function deleteStore(id: string): Promise<void> {
 	await db.delete(store).where(eq(store.id, id));
+	notifyChange();
+}
+
+export async function listBasicItems(storeId: string): Promise<BasicItem[]> {
+	const items = await db.select().from(basicItem).where(eq(basicItem.storeId, storeId));
+	// SQLite orders by byte value, which would sort `Äpfel` after `Zucchini`.
+	return items.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function addBasicItem(storeId: string, name: string): Promise<void> {
+	const trimmed = name.trim();
+	if (!trimmed) throw new Error('Item name cannot be empty');
+
+	await db
+		.insert(basicItem)
+		.values({ storeId, name: trimmed, normalizedName: normalizeItemName(trimmed) })
+		.onConflictDoNothing();
+	notifyChange();
+}
+
+export async function deleteBasicItem(id: string): Promise<void> {
+	await db.delete(basicItem).where(eq(basicItem.id, id));
 	notifyChange();
 }
