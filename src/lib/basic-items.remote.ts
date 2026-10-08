@@ -12,6 +12,15 @@ export const getBasicItems = query.live(z.string(), async function* (storeId) {
 	}
 });
 
+export const getSuggestions = query.live(z.string(), async function* (storeId) {
+	requireAuth();
+	const listNames = async () => (await shopping.listBasicItems(storeId)).map((i) => i.name);
+	yield await listNames();
+	for await (const _ of changes()) {
+		yield await listNames();
+	}
+});
+
 export const addBasicItem = command(
 	z.object({ storeId: z.string(), name: z.string() }),
 	async ({ storeId, name }) => {
