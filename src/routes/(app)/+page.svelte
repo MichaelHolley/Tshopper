@@ -91,13 +91,6 @@
 			sortMode = false;
 		}
 	});
-
-	// If the active store is deleted (here or in another session), fall back to Unassigned.
-	$effect(() => {
-		if (activeStore.current !== null && !stores.some((s) => s.id === activeStore.current)) {
-			activeStore.current = null;
-		}
-	});
 </script>
 
 <svelte:head><title>Tshopper</title></svelte:head>

@@ -8,10 +8,13 @@
 	import StoreNav from '#lib/components/store-nav.svelte';
 	import ThemeToggle from '#lib/components/theme-toggle.svelte';
 	import StoreRail from '#lib/components/store-rail.svelte';
+	import ViewSwitch from '#lib/components/view-switch.svelte';
 	import { setActiveStore } from '#lib/active-store.svelte.js';
 	import { getItems, getItemCounts } from '#lib/items.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
 	import { getPreferences } from '#lib/preferences.remote.js';
+	import { getBasicItems } from '#lib/basic-items.remote.js';
+	import { page } from '$app/state';
 	import { untrack } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
@@ -29,16 +32,34 @@
 	// list out from under someone who has since switched stores by hand.
 	const activeStore = setActiveStore(untrack(() => data.defaultStoreId));
 
+	const storesQuery = getStores();
+
+	// If the active store is deleted (here or in another session), fall back to Unassigned.
+	$effect(() => {
+		const stores = storesQuery.current;
+		if (
+			stores &&
+			activeStore.current !== null &&
+			!stores.some((s) => s.id === activeStore.current)
+		) {
+			activeStore.current = null;
+		}
+	});
+
 	// A backgrounded/locked phone has its socket killed while frozen, but `navigator.onLine`
 	// never flips, so SvelteKit's active recovery misses it. Reconnect the live queries when the
 	// tab returns to the foreground.
 	function recoverLiveQueries() {
 		if (document.visibilityState !== 'visible') return;
-		getStores().reconnect();
-		getItems(activeStore.current).reconnect();
+		storesQuery.reconnect();
 		getItemCounts().reconnect();
-		// Only active while the settings dialog is mounted; reconnecting it otherwise would open a
-		// connection nothing consumes.
+		// Each of these is only consumed by one view or dialog; reconnecting it elsewhere would open
+		// a connection nothing consumes.
+		if (page.url.pathname === '/') getItems(activeStore.current).reconnect();
+		if (page.url.pathname === '/basics' && activeStore.current !== null) {
+			getItems(activeStore.current).reconnect();
+			getBasicItems(activeStore.current).reconnect();
+		}
 		if (settingsOpen) getPreferences().reconnect();
 	}
 </script>
@@ -117,6 +138,7 @@
 			<div
 				class="gutter mx-auto flex w-full max-w-2xl flex-col gap-2 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] @3xl:max-w-6xl"
 			>
+				<ViewSwitch />
 				<QueryBoundary message="Could not load stores." skeleton={navSkeleton}>
 					<StoreNav class="lg:hidden" />
 				</QueryBoundary>
