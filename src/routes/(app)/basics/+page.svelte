@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { addBasicItem, deleteBasicItem, getBasicItems } from '#lib/basic-items.remote.js';
+	import { addItem, getItems } from '#lib/items.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
 	import { getActiveStore } from '#lib/active-store.svelte.js';
 	import { normalizeItemName } from '#lib/item-name.js';
@@ -7,10 +8,12 @@
 	import { toast } from 'svelte-sonner';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
+	import CheckIcon from '@lucide/svelte/icons/check';
 	import ListChecksIcon from '@lucide/svelte/icons/list-checks';
 	import PlusIcon from '@lucide/svelte/icons/plus';
 	import StoreIcon from '@lucide/svelte/icons/store';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import { SvelteSet } from 'svelte/reactivity';
 
 	const activeStore = getActiveStore();
 
@@ -20,6 +23,14 @@
 	const stores = $derived(await getStores());
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
 	const items = $derived(store ? await getBasicItems(store.id) : []);
+	const openNames = $derived(
+		new Set(
+			(store ? await getItems(store.id) : [])
+				.filter((i) => i.checked === null)
+				.map((i) => normalizeItemName(i.item))
+		)
+	);
+	const adding = new SvelteSet<string>();
 	const duplicate = $derived(
 		name.trim() !== '' && items.some((i) => i.normalizedName === normalizeItemName(name))
 	);
@@ -35,6 +46,17 @@
 			toast.error('Could not add basic item');
 		} finally {
 			pending = false;
+		}
+	}
+
+	async function addToList(storeId: string, item: { id: string; name: string }) {
+		adding.add(item.id);
+		try {
+			await addItem({ item: item.name, quantity: '', storeId });
+		} catch {
+			toast.error('Could not add item to list');
+		} finally {
+			adding.delete(item.id);
 		}
 	}
 </script>
@@ -89,10 +111,29 @@
 		</div>
 		<ul class="mt-3 @3xl:columns-[22rem] @3xl:gap-x-6">
 			{#each items as item (item.id)}
+				{@const onList = openNames.has(item.normalizedName)}
 				<li
 					class="mb-2 flex min-h-11 break-inside-avoid items-center gap-3 rounded-xl bg-(--row-raised) py-1 pr-1 pl-3 shadow-[0_0_0_1px_var(--color-border)]"
 				>
 					<span class="min-w-0 flex-1 truncate font-medium">{item.name}</span>
+					{#if onList}
+						<span class="text-muted-foreground flex shrink-0 items-center gap-1 px-2 text-xs">
+							<CheckIcon class="size-3.5" />
+							On list
+						</span>
+					{:else}
+						<Button
+							variant="outline"
+							size="sm"
+							class="shrink-0"
+							aria-label={`Add ${item.name} to the ${store.name} list`}
+							disabled={adding.has(item.id)}
+							onclick={() => addToList(store.id, item)}
+						>
+							<PlusIcon />
+							List
+						</Button>
+					{/if}
 					<Button
 						variant="ghost"
 						size="icon"

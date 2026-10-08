@@ -57,6 +57,7 @@
 		// a connection nothing consumes.
 		if (page.url.pathname === '/') getItems(activeStore.current).reconnect();
 		if (page.url.pathname === '/basics' && activeStore.current !== null) {
+			getItems(activeStore.current).reconnect();
 			getBasicItems(activeStore.current).reconnect();
 		}
 		if (settingsOpen) getPreferences().reconnect();
