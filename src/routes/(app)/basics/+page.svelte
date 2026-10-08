@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { addBasicItem, deleteBasicItem, getBasicItems } from '#lib/basic-items.remote.js';
+	import {
+		addBasicItem,
+		deleteBasicItem,
+		deleteHistoryEntry,
+		getBasicItems,
+		getItemHistory
+	} from '#lib/basic-items.remote.js';
 	import { addItem, getItems } from '#lib/items.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
 	import { getActiveStore } from '#lib/active-store.svelte.js';
@@ -9,8 +15,10 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import CheckIcon from '@lucide/svelte/icons/check';
+	import HistoryIcon from '@lucide/svelte/icons/history';
 	import ListChecksIcon from '@lucide/svelte/icons/list-checks';
 	import PlusIcon from '@lucide/svelte/icons/plus';
+	import StarIcon from '@lucide/svelte/icons/star';
 	import StoreIcon from '@lucide/svelte/icons/store';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import { SvelteSet } from 'svelte/reactivity';
@@ -23,6 +31,7 @@
 	const stores = $derived(await getStores());
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
 	const items = $derived(store ? await getBasicItems(store.id) : []);
+	const history = $derived(store ? await getItemHistory(store.id) : []);
 	const openNames = $derived(
 		new Set(
 			(store ? await getItems(store.id) : [])
@@ -31,6 +40,7 @@
 		)
 	);
 	const adding = new SvelteSet<string>();
+	const promoting = new SvelteSet<string>();
 	const duplicate = $derived(
 		name.trim() !== '' && items.some((i) => i.normalizedName === normalizeItemName(name))
 	);
@@ -57,6 +67,17 @@
 			toast.error('Could not add item to list');
 		} finally {
 			adding.delete(item.id);
+		}
+	}
+
+	async function promote(storeId: string, entry: { id: string; name: string }) {
+		promoting.add(entry.id);
+		try {
+			await addBasicItem({ storeId, name: entry.name });
+		} catch {
+			toast.error('Could not add basic item');
+		} finally {
+			promoting.delete(entry.id);
 		}
 	}
 </script>
@@ -148,4 +169,47 @@
 			{/each}
 		</ul>
 	{/if}
+
+	<section class="mt-8" aria-labelledby="history-heading">
+		<div class="border-border text-muted-foreground flex items-center gap-2 border-b py-2">
+			<HistoryIcon class="size-4" />
+			<h2 id="history-heading" class="text-sm font-semibold">Recently used</h2>
+		</div>
+		{#if history.length === 0}
+			<p class="text-muted-foreground py-6 text-center text-xs">
+				Items you add to {store.name} show up here.
+			</p>
+		{:else}
+			<ul class="mt-3 @3xl:columns-[22rem] @3xl:gap-x-6">
+				{#each history as entry (entry.id)}
+					<li
+						class="mb-2 flex min-h-11 break-inside-avoid items-center gap-3 rounded-xl bg-(--row-raised) py-1 pr-1 pl-3 shadow-[0_0_0_1px_var(--color-border)]"
+					>
+						<span class="min-w-0 flex-1 truncate font-medium">{entry.name}</span>
+						<Button
+							variant="outline"
+							size="sm"
+							class="shrink-0"
+							aria-label={`Make ${entry.name} a basic item of ${store.name}`}
+							disabled={promoting.has(entry.id)}
+							onclick={() => promote(store.id, entry)}
+						>
+							<StarIcon />
+							Basic
+						</Button>
+						<Button
+							variant="ghost"
+							size="icon"
+							class="text-muted-foreground shrink-0"
+							aria-label={`Remove ${entry.name} from recently used`}
+							onclick={() =>
+								deleteHistoryEntry(entry.id).catch(toastError('Could not remove entry'))}
+						>
+							<Trash2Icon />
+						</Button>
+					</li>
+				{/each}
+			</ul>
+		{/if}
+	</section>
 {/if}

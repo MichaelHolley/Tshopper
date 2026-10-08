@@ -15,6 +15,13 @@
       "when": 1791478336190,
       "tag": "0001_dapper_frog_thor",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1791482107439,
+      "tag": "0002_dazzling_venus",
+      "breakpoints": true
     }
   ]
 }

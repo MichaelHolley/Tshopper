@@ -13,7 +13,7 @@
 	import { getItems, getItemCounts } from '#lib/items.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
 	import { getPreferences } from '#lib/preferences.remote.js';
-	import { getBasicItems } from '#lib/basic-items.remote.js';
+	import { getBasicItems, getItemHistory } from '#lib/basic-items.remote.js';
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
@@ -59,6 +59,7 @@
 		if (page.url.pathname === '/basics' && activeStore.current !== null) {
 			getItems(activeStore.current).reconnect();
 			getBasicItems(activeStore.current).reconnect();
+			getItemHistory(activeStore.current).reconnect();
 		}
 		if (settingsOpen) getPreferences().reconnect();
 	}

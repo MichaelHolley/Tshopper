@@ -34,6 +34,22 @@ export const basicItem = sqliteTable(
 	(table) => [uniqueIndex('basic_item_store_name_idx').on(table.storeId, table.normalizedName)]
 );
 
+export const itemHistory = sqliteTable(
+	'item_history',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		storeId: text('store_id')
+			.notNull()
+			.references(() => store.id, { onDelete: 'cascade' }),
+		name: text('name').notNull(),
+		normalizedName: text('normalized_name').notNull(),
+		lastUsedAt: integer('last_used_at', { mode: 'timestamp' }).notNull()
+	},
+	(table) => [uniqueIndex('item_history_store_name_idx').on(table.storeId, table.normalizedName)]
+);
+
 /** Global singleton — one household, one preferences row. */
 export const preferences = sqliteTable('preferences', {
 	id: text('id').primaryKey().default('global'),
@@ -45,4 +61,5 @@ export const PREFERENCES_ID = 'global';
 export type Store = typeof store.$inferSelect;
 export type ShoppingItem = typeof shoppingItem.$inferSelect;
 export type BasicItem = typeof basicItem.$inferSelect;
+export type ItemHistoryEntry = typeof itemHistory.$inferSelect;
 export type Preferences = typeof preferences.$inferSelect;

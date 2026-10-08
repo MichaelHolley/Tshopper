@@ -14,10 +14,17 @@ export const getBasicItems = query.live(z.string(), async function* (storeId) {
 
 export const getSuggestions = query.live(z.string(), async function* (storeId) {
 	requireAuth();
-	const listNames = async () => (await shopping.listBasicItems(storeId)).map((i) => i.name);
-	yield await listNames();
+	yield await shopping.listSuggestions(storeId);
 	for await (const _ of changes()) {
-		yield await listNames();
+		yield await shopping.listSuggestions(storeId);
+	}
+});
+
+export const getItemHistory = query.live(z.string(), async function* (storeId) {
+	requireAuth();
+	yield await shopping.listItemHistory(storeId);
+	for await (const _ of changes()) {
+		yield await shopping.listItemHistory(storeId);
 	}
 });
 
@@ -32,4 +39,9 @@ export const addBasicItem = command(
 export const deleteBasicItem = command(z.string(), async (id) => {
 	requireAuth();
 	await shopping.deleteBasicItem(id);
+});
+
+export const deleteHistoryEntry = command(z.string(), async (id) => {
+	requireAuth();
+	await shopping.deleteHistoryEntry(id);
 });
