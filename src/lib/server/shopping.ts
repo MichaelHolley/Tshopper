@@ -97,10 +97,10 @@ export async function addItems(
 		if (storeId !== null) {
 			const lastUsedAt = new Date();
 			const history = new Map(
-				normalized.map(({ item }) => [
-					normalizeItemName(item),
-					{ storeId, name: item, normalizedName: normalizeItemName(item), lastUsedAt }
-				])
+				normalized.map(({ item }) => {
+					const normalizedName = normalizeItemName(item);
+					return [normalizedName, { storeId, name: item, normalizedName, lastUsedAt }];
+				})
 			);
 			await tx
 				.insert(itemHistory)
