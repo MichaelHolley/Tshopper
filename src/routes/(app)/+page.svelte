@@ -97,7 +97,11 @@
 <svelte:document onvisibilitychange={syncProgressNotification} />
 
 {#if !sortMode}
-	<ItemForm storeId={activeStore.current} bind:editing />
+	<ItemForm
+		storeId={activeStore.current}
+		openItemNames={activeItems.map((i) => i.item)}
+		bind:editing
+	/>
 {/if}
 
 {#if activeItems.length > 0}

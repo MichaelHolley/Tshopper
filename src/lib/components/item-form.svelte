@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { addItem, updateItem } from '#lib/items.remote.js';
+	import { getSuggestions } from '#lib/basic-items.remote.js';
+	import { filterSuggestions } from '#lib/suggestions.js';
 	import { toast } from 'svelte-sonner';
 	import type { ShoppingItem } from '#lib/server/db/schema.js';
 	import PlusIcon from '@lucide/svelte/icons/plus';
@@ -9,13 +11,30 @@
 
 	let {
 		storeId,
+		openItemNames,
 		editing = $bindable(null)
-	}: { storeId: string | null; editing?: ShoppingItem | null } = $props();
+	}: { storeId: string | null; openItemNames: string[]; editing?: ShoppingItem | null } = $props();
+
+	const id = $props.id();
+	const listboxId = `${id}-suggestions`;
+	const optionId = (index: number) => `${id}-suggestion-${index}`;
 
 	let item = $state('');
 	let quantity = $state('');
 	let pending = $state(false);
 	let inputRef = $state<HTMLInputElement | null>(null);
+	let qtyRef = $state<HTMLInputElement | null>(null);
+	let suggesting = $state(false);
+	let highlighted = $state(-1);
+
+	const suggestionNames = $derived(storeId ? (getSuggestions(storeId).current ?? []) : []);
+	const suggestions = $derived(filterSuggestions(suggestionNames, item, openItemNames));
+	const listOpen = $derived(suggesting && !editing && suggestions.length > 0);
+	const activeOption = $derived(
+		listOpen && highlighted >= 0 && highlighted < suggestions.length
+			? optionId(highlighted)
+			: undefined
+	);
 
 	$effect(() => {
 		item = editing?.item ?? '';
@@ -42,6 +61,61 @@
 		} finally {
 			pending = false;
 		}
+	}
+
+	function closeSuggestions() {
+		suggesting = false;
+		highlighted = -1;
+	}
+
+	function chooseSuggestion(name: string) {
+		item = name;
+		closeSuggestions();
+		qtyRef?.focus();
+	}
+
+	function moveHighlight(step: 1 | -1) {
+		const count = suggestions.length;
+		highlighted =
+			highlighted < 0 || highlighted >= count
+				? step === 1
+					? 0
+					: count - 1
+				: (highlighted + step + count) % count;
+	}
+
+	function handleItemInput() {
+		suggesting = true;
+		highlighted = -1;
+	}
+
+	function handleItemKeydown(event: KeyboardEvent) {
+		if (!listOpen || event.isComposing || event.metaKey || event.ctrlKey || event.altKey) return;
+
+		switch (event.key) {
+			case 'Tab':
+				moveHighlight(event.shiftKey ? -1 : 1);
+				break;
+			case 'ArrowDown':
+				moveHighlight(1);
+				break;
+			case 'ArrowUp':
+				moveHighlight(-1);
+				break;
+			case 'Enter': {
+				const name = suggestions[highlighted];
+				if (name === undefined) return;
+				chooseSuggestion(name);
+				break;
+			}
+			case 'Escape':
+				closeSuggestions();
+				break;
+			default:
+				return;
+		}
+		event.preventDefault();
+		event.stopPropagation();
 	}
 
 	function cancel() {
@@ -78,6 +152,14 @@
 			placeholder="Add an item"
 			autocomplete="off"
 			aria-label={editing ? 'Edit item' : 'Add an item'}
+			role="combobox"
+			aria-autocomplete="list"
+			aria-expanded={listOpen}
+			aria-controls={listboxId}
+			aria-activedescendant={activeOption}
+			oninput={handleItemInput}
+			onkeydown={handleItemKeydown}
+			onblur={closeSuggestions}
 		/>
 		{#if !item}
 			<kbd aria-hidden="true">/</kbd>
@@ -85,7 +167,13 @@
 	</div>
 
 	<div class="qty">
-		<input bind:value={quantity} placeholder="Qty" autocomplete="off" aria-label="Quantity" />
+		<input
+			bind:this={qtyRef}
+			bind:value={quantity}
+			placeholder="Qty"
+			autocomplete="off"
+			aria-label="Quantity"
+		/>
 	</div>
 
 	<div class="actions">
@@ -111,10 +199,34 @@
 			{#if editing}<CheckIcon />{:else}<PlusIcon />{/if}
 		</Button>
 	</div>
+
+	<ul
+		id={listboxId}
+		role="listbox"
+		aria-label="Suggestions"
+		hidden={!listOpen}
+		class="bg-popover text-popover-foreground ring-border absolute inset-x-0 top-full z-30 mt-1.5 rounded-xl p-1 shadow-md ring-1"
+	>
+		{#each suggestions as name, index (name)}
+			<li
+				id={optionId(index)}
+				role="option"
+				aria-selected={index === highlighted}
+				class="hover:bg-muted aria-selected:bg-muted aria-selected:ring-border h-9 cursor-default truncate rounded-lg px-2 text-sm leading-9 select-none aria-selected:font-semibold aria-selected:ring-1 aria-selected:ring-inset"
+				onpointerdown={(event) => {
+					event.preventDefault();
+					chooseSuggestion(name);
+				}}
+			>
+				{name}
+			</li>
+		{/each}
+	</ul>
 </form>
 
 <style>
 	.composer {
+		position: relative;
 		display: flex;
 		align-items: stretch;
 		gap: 0.25rem;
