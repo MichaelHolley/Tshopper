@@ -15,7 +15,7 @@ const itemInputSchema = z.object({
 
 /**
  * Tools run through the same service layer as the UI commands, so every mutation the
- * assistant makes calls `notifyChange()` and lands in the live queries on its own.
+ * assistant makes calls `notifyChange()` and lands in the live list on its own.
  * Each tool is bound to the caller's active store — the model never picks a store.
  */
 export function shoppingTools(storeId: string | null) {

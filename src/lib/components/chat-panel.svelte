@@ -14,6 +14,7 @@
 	import { Separator } from '#lib/components/ui/separator/index.js';
 	import { getActiveStore } from '#lib/active-store.svelte.js';
 	import { getChat } from '#lib/assistant.svelte.js';
+	import { refreshStoreData } from '#lib/stores.remote.js';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
 	import WrenchIcon from '@lucide/svelte/icons/wrench';
@@ -53,21 +54,33 @@
 
 	// The tools are store-scoped server-side, so the active store has to ride along with each
 	// request rather than being baked into the transport at construction.
+	async function request(run: (options: { body: { storeId: string | null } }) => Promise<void>) {
+		const storeId = activeStore.current;
+		await run({ body: { storeId } });
+		// The assistant writes through /api/chat rather than a command, so nothing else refreshes
+		// the suggestions it just added to.
+		if (storeId !== null) refreshStoreData(storeId).catch(() => {});
+	}
+
+	const send = (message: Parameters<typeof chat.sendMessage>[0]) =>
+		request((options) => chat.sendMessage(message, options));
+
+	const retry = () => request((options) => chat.regenerate(options));
+
 	function handleSubmit(message: PromptInputMessage) {
 		attachmentError = null;
 
 		const text = message.text.trim();
 		const files = message.files;
-		const body = { storeId: activeStore.current };
 
 		// An image on its own is a valid prompt, but sending text: '' would add an empty text part.
 		if (!text) {
 			if (!files?.length) return;
-			chat.sendMessage({ files }, { body });
+			void send({ files });
 			return;
 		}
 
-		chat.sendMessage({ text, files }, { body });
+		void send({ text, files });
 	}
 
 	const SUGGESTIONS = [
@@ -80,7 +93,7 @@
 
 	function sendSuggestion(prompt: string) {
 		attachmentError = null;
-		chat.sendMessage({ text: prompt }, { body: { storeId: activeStore.current } });
+		void send({ text: prompt });
 	}
 
 	const busy = $derived(chat.status === 'submitted' || chat.status === 'streaming');
@@ -191,7 +204,7 @@
 			{#if chat.error}
 				<div class="text-destructive self-start text-xs">
 					Something went wrong.
-					<button class="underline" onclick={() => chat.regenerate()}>Retry</button>
+					<button class="underline" onclick={retry}>Retry</button>
 				</div>
 			{/if}
 		</Conversation.Content>

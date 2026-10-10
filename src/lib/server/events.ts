@@ -1,7 +1,7 @@
 /**
- * In-process change notifier that drives `query.live` streams. Every mutation calls
- * `notifyChange()`; each live-query generator waits on `changes()` and re-reads the
- * database when woken. Single node process, so a shared in-memory signal is enough — no
+ * In-process change notifier that drives the live item list. Every mutation that touches
+ * items calls `notifyChange()`; the live-query generator waits on `changes()` and re-reads
+ * the database when woken. Single node process, so a shared in-memory signal is enough — no
  * broadcasting between clients is needed.
  */
 

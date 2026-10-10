@@ -10,11 +10,8 @@
 	import StoreRail from '#lib/components/store-rail.svelte';
 	import ViewSwitch from '#lib/components/view-switch.svelte';
 	import { setActiveStore } from '#lib/active-store.svelte.js';
-	import { getItems, getItemCounts } from '#lib/items.remote.js';
-	import { getStores } from '#lib/stores.remote.js';
-	import { getPreferences } from '#lib/preferences.remote.js';
-	import { getStoreCatalog } from '#lib/basic-items.remote.js';
-	import { page } from '$app/state';
+	import { getItems } from '#lib/items.remote.js';
+	import { getStores, refreshStoreData } from '#lib/stores.remote.js';
 	import { untrack } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
@@ -47,23 +44,16 @@
 	});
 
 	// A backgrounded/locked phone has its socket killed while frozen, but `navigator.onLine`
-	// never flips, so SvelteKit's active recovery misses it. Reconnect the live queries when the
-	// tab returns to the foreground.
-	function recoverLiveQueries() {
+	// never flips, so SvelteKit's active recovery misses it. Reconnect the live list when the
+	// tab returns to the foreground, and catch up on what other sessions changed meanwhile.
+	function recoverQueries() {
 		if (document.visibilityState !== 'visible') return;
-		storesQuery.reconnect();
-		getItemCounts().reconnect();
-		// Each of these is only consumed in some states; reconnecting it elsewhere would open a
-		// connection nothing consumes.
-		if (page.url.pathname === '/' || activeStore.current !== null) {
-			getItems(activeStore.current).reconnect();
-		}
-		if (activeStore.current !== null) getStoreCatalog(activeStore.current).reconnect();
-		if (settingsOpen) getPreferences().reconnect();
+		getItems().reconnect();
+		refreshStoreData(activeStore.current).catch(() => {});
 	}
 </script>
 
-<svelte:document onvisibilitychange={recoverLiveQueries} />
+<svelte:document onvisibilitychange={recoverQueries} />
 
 {#snippet railSkeleton()}
 	<div class="flex animate-pulse flex-col gap-1.5 p-3 pt-8" aria-hidden="true">
