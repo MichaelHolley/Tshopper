@@ -54,13 +54,18 @@
 
 	// The tools are store-scoped server-side, so the active store has to ride along with each
 	// request rather than being baked into the transport at construction.
-	async function send(message: Parameters<typeof chat.sendMessage>[0]) {
+	async function request(run: (options: { body: { storeId: string | null } }) => Promise<void>) {
 		const storeId = activeStore.current;
-		await chat.sendMessage(message, { body: { storeId } });
+		await run({ body: { storeId } });
 		// The assistant writes through /api/chat rather than a command, so nothing else refreshes
 		// the suggestions it just added to.
 		if (storeId !== null) refreshStoreData(storeId).catch(() => {});
 	}
+
+	const send = (message: Parameters<typeof chat.sendMessage>[0]) =>
+		request((options) => chat.sendMessage(message, options));
+
+	const retry = () => request((options) => chat.regenerate(options));
 
 	function handleSubmit(message: PromptInputMessage) {
 		attachmentError = null;
@@ -199,7 +204,7 @@
 			{#if chat.error}
 				<div class="text-destructive self-start text-xs">
 					Something went wrong.
-					<button class="underline" onclick={() => chat.regenerate()}>Retry</button>
+					<button class="underline" onclick={retry}>Retry</button>
 				</div>
 			{/if}
 		</Conversation.Content>
