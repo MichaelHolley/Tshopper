@@ -13,7 +13,7 @@
 	import { getItems, getItemCounts } from '#lib/items.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
 	import { getPreferences } from '#lib/preferences.remote.js';
-	import { getBasicItems } from '#lib/basic-items.remote.js';
+	import { getStoreCatalog } from '#lib/basic-items.remote.js';
 	import { page } from '$app/state';
 	import { untrack } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
@@ -53,13 +53,12 @@
 		if (document.visibilityState !== 'visible') return;
 		storesQuery.reconnect();
 		getItemCounts().reconnect();
-		// Each of these is only consumed by one view or dialog; reconnecting it elsewhere would open
-		// a connection nothing consumes.
-		if (page.url.pathname === '/') getItems(activeStore.current).reconnect();
-		if (page.url.pathname === '/basics' && activeStore.current !== null) {
+		// Each of these is only consumed in some states; reconnecting it elsewhere would open a
+		// connection nothing consumes.
+		if (page.url.pathname === '/' || activeStore.current !== null) {
 			getItems(activeStore.current).reconnect();
-			getBasicItems(activeStore.current).reconnect();
 		}
+		if (activeStore.current !== null) getStoreCatalog(activeStore.current).reconnect();
 		if (settingsOpen) getPreferences().reconnect();
 	}
 </script>

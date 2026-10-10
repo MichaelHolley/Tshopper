@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { addItem, updateItem } from '#lib/items.remote.js';
-	import { getSuggestions } from '#lib/basic-items.remote.js';
+	import { getStoreCatalog } from '#lib/basic-items.remote.js';
 	import { filterSuggestions } from '#lib/suggestions.js';
 	import { toast } from 'svelte-sonner';
 	import type { ShoppingItem } from '#lib/server/db/schema.js';
@@ -27,7 +27,12 @@
 	let suggesting = $state(false);
 	let highlightedName = $state<string | null>(null);
 
-	const suggestionNames = $derived(storeId ? (getSuggestions(storeId).current ?? []) : []);
+	// Held in its own derived: SvelteKit closes a live query once its handle is garbage collected.
+	const catalogQuery = $derived(storeId ? getStoreCatalog(storeId) : null);
+	const catalog = $derived(catalogQuery?.current);
+	const suggestionNames = $derived(
+		catalog ? [...catalog.basicItems, ...catalog.history].map((i) => i.name) : []
+	);
 	const suggestions = $derived(filterSuggestions(suggestionNames, item, openItemNames));
 	const listOpen = $derived(suggesting && !editing && suggestions.length > 0);
 	const highlighted = $derived(

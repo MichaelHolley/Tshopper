@@ -1,10 +1,25 @@
-import { and, asc, count, eq, inArray, isNotNull, isNull, max, ne } from 'drizzle-orm';
+import {
+	and,
+	asc,
+	count,
+	desc,
+	eq,
+	inArray,
+	isNotNull,
+	isNull,
+	max,
+	ne,
+	notExists,
+	sql
+} from 'drizzle-orm';
 import { db } from './db';
 import {
 	basicItem,
+	itemHistory,
 	shoppingItem,
 	store,
 	type BasicItem,
+	type ItemHistoryEntry,
 	type ShoppingItem,
 	type Store
 } from './db/schema';
@@ -72,12 +87,31 @@ export async function addItems(
 	if (normalized.length === 0) return [];
 
 	const sortOrder = await maxUncheckedSortOrder(storeId);
-	const created = await db
-		.insert(shoppingItem)
-		.values(
-			normalized.map((item, index) => ({ ...item, storeId, sortOrder: sortOrder + index + 1 }))
-		)
-		.returning();
+	const created = await db.transaction(async (tx) => {
+		const inserted = await tx
+			.insert(shoppingItem)
+			.values(
+				normalized.map((item, index) => ({ ...item, storeId, sortOrder: sortOrder + index + 1 }))
+			)
+			.returning();
+		if (storeId !== null) {
+			const lastUsedAt = new Date();
+			const history = new Map(
+				normalized.map(({ item }) => {
+					const normalizedName = normalizeItemName(item);
+					return [normalizedName, { storeId, name: item, normalizedName, lastUsedAt }];
+				})
+			);
+			await tx
+				.insert(itemHistory)
+				.values([...history.values()])
+				.onConflictDoUpdate({
+					target: [itemHistory.storeId, itemHistory.normalizedName],
+					set: { name: sql`excluded.name`, lastUsedAt: sql`excluded.last_used_at` }
+				});
+		}
+		return inserted;
+	});
 	notifyChange();
 	return created.sort((a, b) => a.sortOrder - b.sortOrder);
 }
@@ -226,4 +260,42 @@ export async function addBasicItem(storeId: string, name: string): Promise<void>
 export async function deleteBasicItem(id: string): Promise<void> {
 	await db.delete(basicItem).where(eq(basicItem.id, id));
 	notifyChange();
+}
+
+export async function listItemHistory(storeId: string): Promise<ItemHistoryEntry[]> {
+	return db
+		.select()
+		.from(itemHistory)
+		.where(
+			and(
+				eq(itemHistory.storeId, storeId),
+				notExists(
+					db
+						.select()
+						.from(basicItem)
+						.where(
+							and(
+								eq(basicItem.storeId, itemHistory.storeId),
+								eq(basicItem.normalizedName, itemHistory.normalizedName)
+							)
+						)
+				)
+			)
+		)
+		.orderBy(desc(itemHistory.lastUsedAt));
+}
+
+export async function deleteHistoryEntry(id: string): Promise<void> {
+	await db.delete(itemHistory).where(eq(itemHistory.id, id));
+	notifyChange();
+}
+
+export type StoreCatalog = { basicItems: BasicItem[]; history: ItemHistoryEntry[] };
+
+export async function getStoreCatalog(storeId: string): Promise<StoreCatalog> {
+	const [basicItems, history] = await Promise.all([
+		listBasicItems(storeId),
+		listItemHistory(storeId)
+	]);
+	return { basicItems, history };
 }
