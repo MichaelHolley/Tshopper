@@ -34,7 +34,8 @@
 	}
 
 	// A single await: separate `$derived(await …)` declarations would load one after another.
-	const [stores, items] = $derived(await Promise.all([getStores(), getItems(activeStore.current)]));
+	const [stores, allItems] = $derived(await Promise.all([getStores(), getItems()]));
+	const items = $derived(allItems.filter((i) => i.storeId === activeStore.current));
 	const activeItems = $derived(items.filter((i) => i.checked === null));
 	const checkedItems = $derived(items.filter((i) => i.checked !== null));
 	const visibleChecked = $derived(

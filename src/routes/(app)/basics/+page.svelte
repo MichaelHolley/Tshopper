@@ -30,13 +30,17 @@
 	const stores = $derived(await getStores());
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
 	// A single await: separate `$derived(await …)` declarations would load one after another.
-	const [catalog, listItems] = $derived(
-		store ? await Promise.all([getStoreCatalog(store.id), getItems(store.id)]) : [null, []]
+	const [catalog, allItems] = $derived(
+		await Promise.all([store ? getStoreCatalog(store.id) : null, getItems()])
 	);
 	const items = $derived(catalog?.basicItems ?? []);
 	const history = $derived(catalog?.history ?? []);
 	const openNames = $derived(
-		new Set(listItems.filter((i) => i.checked === null).map((i) => normalizeItemName(i.item)))
+		new Set(
+			allItems
+				.filter((i) => i.storeId === store?.id && i.checked === null)
+				.map((i) => normalizeItemName(i.item))
+		)
 	);
 	const adding = new SvelteSet<string>();
 	const promoting = new SvelteSet<string>();
