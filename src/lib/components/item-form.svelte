@@ -27,7 +27,9 @@
 	let suggesting = $state(false);
 	let highlightedName = $state<string | null>(null);
 
-	const catalog = $derived(storeId ? getStoreCatalog(storeId).current : undefined);
+	// Held in its own derived: SvelteKit closes a live query once its handle is garbage collected.
+	const catalogQuery = $derived(storeId ? getStoreCatalog(storeId) : null);
+	const catalog = $derived(catalogQuery?.current);
 	const suggestionNames = $derived(
 		catalog ? [...catalog.basicItems, ...catalog.history].map((i) => i.name) : []
 	);
