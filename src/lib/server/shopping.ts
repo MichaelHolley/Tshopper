@@ -1,7 +1,6 @@
 import {
 	and,
 	asc,
-	count,
 	desc,
 	eq,
 	inArray,
@@ -10,7 +9,8 @@ import {
 	max,
 	ne,
 	notExists,
-	sql
+	sql,
+	type SQL
 } from 'drizzle-orm';
 import { db } from './db';
 import {
@@ -41,11 +41,12 @@ async function maxUncheckedSortOrder(storeId: string | null, excludeId?: string)
 		.where(and(...conditions));
 	return row?.value ?? 0;
 }
-export async function listItems(storeId: string | null): Promise<ShoppingItem[]> {
+
+async function listVisibleItems(where?: SQL): Promise<ShoppingItem[]> {
 	const items = await db
 		.select()
 		.from(shoppingItem)
-		.where(storeFilter(storeId))
+		.where(where)
 		.orderBy(asc(shoppingItem.sortOrder));
 
 	const cutoff = Date.now() - CHECKED_TTL_MS;
@@ -56,14 +57,12 @@ export async function listItems(storeId: string | null): Promise<ShoppingItem[]>
 	return [...unchecked, ...checked];
 }
 
-export type StoreItemCount = { storeId: string | null; count: number };
+export async function listItems(storeId: string | null): Promise<ShoppingItem[]> {
+	return listVisibleItems(storeFilter(storeId));
+}
 
-export async function listUncheckedCounts(): Promise<StoreItemCount[]> {
-	return db
-		.select({ storeId: shoppingItem.storeId, count: count() })
-		.from(shoppingItem)
-		.where(isNull(shoppingItem.checked))
-		.groupBy(shoppingItem.storeId);
+export async function listAllItems(): Promise<ShoppingItem[]> {
+	return listVisibleItems();
 }
 
 export async function addItem(
@@ -216,7 +215,6 @@ export async function addStore(name: string, color: string): Promise<Store> {
 	if (!color.trim()) throw new Error('Store color cannot be empty');
 
 	const [created] = await db.insert(store).values({ name: trimmed, color }).returning();
-	notifyChange();
 	return created;
 }
 
@@ -231,7 +229,6 @@ export async function updateStore(id: string, name: string, color: string): Prom
 		.where(eq(store.id, id))
 		.returning();
 	if (!updated) throw new Error('Store not found');
-	notifyChange();
 	return updated;
 }
 
@@ -254,12 +251,15 @@ export async function addBasicItem(storeId: string, name: string): Promise<void>
 		.insert(basicItem)
 		.values({ storeId, name: trimmed, normalizedName: normalizeItemName(trimmed) })
 		.onConflictDoNothing();
-	notifyChange();
 }
 
-export async function deleteBasicItem(id: string): Promise<void> {
-	await db.delete(basicItem).where(eq(basicItem.id, id));
-	notifyChange();
+/** Resolves to the store the item belonged to, or `null` if it was already gone. */
+export async function deleteBasicItem(id: string): Promise<string | null> {
+	const [deleted] = await db
+		.delete(basicItem)
+		.where(eq(basicItem.id, id))
+		.returning({ storeId: basicItem.storeId });
+	return deleted?.storeId ?? null;
 }
 
 export async function listItemHistory(storeId: string): Promise<ItemHistoryEntry[]> {
@@ -285,9 +285,13 @@ export async function listItemHistory(storeId: string): Promise<ItemHistoryEntry
 		.orderBy(desc(itemHistory.lastUsedAt));
 }
 
-export async function deleteHistoryEntry(id: string): Promise<void> {
-	await db.delete(itemHistory).where(eq(itemHistory.id, id));
-	notifyChange();
+/** Resolves to the store the entry belonged to, or `null` if it was already gone. */
+export async function deleteHistoryEntry(id: string): Promise<string | null> {
+	const [deleted] = await db
+		.delete(itemHistory)
+		.where(eq(itemHistory.id, id))
+		.returning({ storeId: itemHistory.storeId });
+	return deleted?.storeId ?? null;
 }
 
 export type StoreCatalog = { basicItems: BasicItem[]; history: ItemHistoryEntry[] };
