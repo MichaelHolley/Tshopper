@@ -1,10 +1,13 @@
 <script lang="ts">
 	import * as ContextMenu from '#lib/components/ui/context-menu/index.js';
+	import { addBasicItem } from '#lib/basic-items.remote.js';
 	import { checkItem, uncheckItem, deleteItem, moveItem } from '#lib/items.remote.js';
 	import { toastError } from '#lib/toast.js';
+	import { toast } from 'svelte-sonner';
 	import type { ShoppingItem, Store } from '#lib/server/db/schema.js';
 	import PencilIcon from '@lucide/svelte/icons/pencil';
 	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import ListChecksIcon from '@lucide/svelte/icons/list-checks';
 	import StoreIcon from '@lucide/svelte/icons/store';
 	import GripVerticalIcon from '@lucide/svelte/icons/grip-vertical';
 	import { dragHandle } from 'svelte-dnd-action';
@@ -31,6 +34,15 @@
 
 		if (!checked) checkItem(item.id).catch(toastError('Could not check item'));
 		else uncheckItem(item.id).catch(toastError('Could not uncheck item'));
+	}
+
+	async function addToBasics(storeId: string) {
+		try {
+			await addBasicItem({ storeId, name: item.item });
+			toast.success(`${item.item} is in the basics`);
+		} catch {
+			toast.error('Could not add item to basics');
+		}
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -118,6 +130,13 @@
 					{/if}
 				</ContextMenu.SubContent>
 			</ContextMenu.Sub>
+			{#if item.storeId !== null}
+				{@const storeId = item.storeId}
+				<ContextMenu.Item onSelect={() => addToBasics(storeId)}>
+					<ListChecksIcon />
+					Add to basics
+				</ContextMenu.Item>
+			{/if}
 			<ContextMenu.Separator />
 			<ContextMenu.Item
 				variant="destructive"
