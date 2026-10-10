@@ -4,27 +4,15 @@ import { requireAuth } from '#lib/server/auth.js';
 import { changes } from '#lib/server/events.js';
 import * as shopping from '#lib/server/shopping.js';
 
-export const getBasicItems = query.live(z.string(), async function* (storeId) {
+/**
+ * Basic items and history share one live query: each one holds a connection open, and browsers
+ * cap HTTP/1.1 at six per origin, so a seventh stalls every later request.
+ */
+export const getStoreCatalog = query.live(z.string(), async function* (storeId) {
 	requireAuth();
-	yield await shopping.listBasicItems(storeId);
+	yield await shopping.getStoreCatalog(storeId);
 	for await (const _ of changes()) {
-		yield await shopping.listBasicItems(storeId);
-	}
-});
-
-export const getSuggestions = query.live(z.string(), async function* (storeId) {
-	requireAuth();
-	yield await shopping.listSuggestions(storeId);
-	for await (const _ of changes()) {
-		yield await shopping.listSuggestions(storeId);
-	}
-});
-
-export const getItemHistory = query.live(z.string(), async function* (storeId) {
-	requireAuth();
-	yield await shopping.listItemHistory(storeId);
-	for await (const _ of changes()) {
-		yield await shopping.listItemHistory(storeId);
+		yield await shopping.getStoreCatalog(storeId);
 	}
 });
 

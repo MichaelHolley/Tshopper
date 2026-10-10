@@ -290,7 +290,12 @@ export async function deleteHistoryEntry(id: string): Promise<void> {
 	notifyChange();
 }
 
-export async function listSuggestions(storeId: string): Promise<string[]> {
-	const [basics, history] = await Promise.all([listBasicItems(storeId), listItemHistory(storeId)]);
-	return [...basics, ...history].map((i) => i.name);
+export type StoreCatalog = { basicItems: BasicItem[]; history: ItemHistoryEntry[] };
+
+export async function getStoreCatalog(storeId: string): Promise<StoreCatalog> {
+	const [basicItems, history] = await Promise.all([
+		listBasicItems(storeId),
+		listItemHistory(storeId)
+	]);
+	return { basicItems, history };
 }

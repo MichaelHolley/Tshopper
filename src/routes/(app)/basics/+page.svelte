@@ -3,8 +3,7 @@
 		addBasicItem,
 		deleteBasicItem,
 		deleteHistoryEntry,
-		getBasicItems,
-		getItemHistory
+		getStoreCatalog
 	} from '#lib/basic-items.remote.js';
 	import { addItem, getItems } from '#lib/items.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
@@ -30,14 +29,14 @@
 
 	const stores = $derived(await getStores());
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
-	const items = $derived(store ? await getBasicItems(store.id) : []);
-	const history = $derived(store ? await getItemHistory(store.id) : []);
+	// A single await: separate `$derived(await …)` declarations would load one after another.
+	const [catalog, listItems] = $derived(
+		store ? await Promise.all([getStoreCatalog(store.id), getItems(store.id)]) : [null, []]
+	);
+	const items = $derived(catalog?.basicItems ?? []);
+	const history = $derived(catalog?.history ?? []);
 	const openNames = $derived(
-		new Set(
-			(store ? await getItems(store.id) : [])
-				.filter((i) => i.checked === null)
-				.map((i) => normalizeItemName(i.item))
-		)
+		new Set(listItems.filter((i) => i.checked === null).map((i) => normalizeItemName(i.item)))
 	);
 	const adding = new SvelteSet<string>();
 	const promoting = new SvelteSet<string>();
