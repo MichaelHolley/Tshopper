@@ -25,6 +25,14 @@ Tools in `src/lib/server/ai.ts` take their arguments from a model, so treat the 
 - This matters most for tools that act on a batch: one invalid entry throws and aborts the whole operation, and the error text does not say which entry was bad.
 - Keep the service-layer checks in `src/lib/server/shopping.ts` as they are — the UI's remote functions call the same code and do not go through the tool schema.
 
+## Queries
+
+Live query usage is limited: every `query.live` holds a connection open, and browsers allow only a few per origin, shared across all tabs.
+
+- `getItems` is the prioritized live query. The item list is the data that has to sync in real time, and its connection must never have to compete with another one.
+- Default to a plain `query`. Reach for `query.live` only when data truly has to be live, and prefer extending an existing live query over adding a new one.
+- Keep plain queries fresh from the mutation that changes them, by refreshing them in the command's own response, instead of making them live.
+
 ## Feedback Loop
 
 Use `package.json` scripts over `pnpx` and `npx` commands.
