@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { getItems, clearChecked, reorderItems } from '#lib/items.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
+	import { UNASSIGNED } from '#lib/store-entries.js';
+	import { openItems, storeItems } from '#lib/store-items.js';
 	import { toastError } from '#lib/toast.js';
 	import { closeProgressNotification, showProgressNotification } from '#lib/notifications.js';
 	import ItemForm from '#lib/components/item-form.svelte';
@@ -33,17 +35,22 @@
 		deleteAllOpen = false;
 	}
 
-	// A single await: separate `$derived(await …)` declarations would load one after another.
-	const [stores, allItems] = $derived(await Promise.all([getStores(), getItems()]));
-	const items = $derived(allItems.filter((i) => i.storeId === activeStore.current));
-	const activeItems = $derived(items.filter((i) => i.checked === null));
+	// Kick both queries off before awaiting either, so they load side by side.
+	const storesQuery = getStores();
+	const itemsQuery = getItems();
+
+	const stores = $derived(await storesQuery);
+	const allItems = $derived(await itemsQuery);
+	const items = $derived(storeItems(allItems, activeStore.current));
+	const activeItems = $derived(openItems(allItems, activeStore.current));
 	const checkedItems = $derived(items.filter((i) => i.checked !== null));
 	const visibleChecked = $derived(
 		checkedCollapsed ? checkedItems.slice(0, VISIBLE_CHECKED) : checkedItems
 	);
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
+	const storeName = $derived(store?.name ?? UNASSIGNED.name);
 	const progress = $derived({
-		storeName: store?.name ?? 'Other items',
+		storeName,
 		checked: checkedItems.length,
 		total: items.length
 	});
@@ -158,7 +165,7 @@
 		{/if}
 		<p class="text-sm">
 			No items in
-			<span class="text-foreground font-semibold">{store ? store.name : 'Unassigned'}</span>
+			<span class="text-foreground font-semibold">{storeName}</span>
 		</p>
 		<p class="text-xs">Add one using the form above.</p>
 	</div>
@@ -202,8 +209,7 @@
 			<AlertDialog.Title>Clear checked items?</AlertDialog.Title>
 			<AlertDialog.Description>
 				This permanently deletes all checked items in
-				<span class="font-semibold">{store ? store.name : 'Unassigned'}</span>. This cannot be
-				undone.
+				<span class="font-semibold">{storeName}</span>. This cannot be undone.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>

@@ -2,6 +2,7 @@
 	import * as ContextMenu from '#lib/components/ui/context-menu/index.js';
 	import { addBasicItem } from '#lib/basic-items.remote.js';
 	import { checkItem, uncheckItem, deleteItem, moveItem } from '#lib/items.remote.js';
+	import { UNASSIGNED } from '#lib/store-entries.js';
 	import { toastError } from '#lib/toast.js';
 	import { toast } from 'svelte-sonner';
 	import type { ShoppingItem, Store } from '#lib/server/db/schema.js';
@@ -114,7 +115,7 @@
 									toastError('Could not move item')
 								)}
 						>
-							Unassigned
+							{UNASSIGNED.name}
 						</ContextMenu.Item>
 					{/if}
 					{#each otherStores as store (store.id)}

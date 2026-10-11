@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { OPENROUTER_API_KEY, OPENROUTER_MODEL } from '$app/env/private';
 import { shoppingTools, systemPrompt } from '#lib/server/ai.js';
 import * as shopping from '#lib/server/shopping.js';
+import { UNASSIGNED } from '#lib/store-entries.js';
 import type { RequestHandler } from './$types';
 
 const MAX_STEPS = 25;
@@ -52,7 +53,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	const stores = await shopping.listStores();
 	if (storeId !== null && !stores.some((s) => s.id === storeId)) error(400, 'Unknown store');
-	const storeName = stores.find((s) => s.id === storeId)?.name ?? 'Unassigned';
+	const storeName = stores.find((s) => s.id === storeId)?.name ?? UNASSIGNED.name;
 
 	const openrouter = createOpenRouter({ apiKey: OPENROUTER_API_KEY });
 

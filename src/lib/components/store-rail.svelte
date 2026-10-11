@@ -4,6 +4,7 @@
 	import { getPreferences } from '#lib/preferences.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
 	import { orderStoreEntries } from '#lib/store-entries.js';
+	import { openItems } from '#lib/store-items.js';
 
 	const activeStore = getActiveStore();
 
@@ -15,14 +16,14 @@
 	const entries = $derived(
 		orderStoreEntries(await storesQuery, (await preferencesQuery).defaultStoreId)
 	);
-	const openItems = $derived((await itemsQuery).filter((i) => i.checked === null));
+	const items = $derived(await itemsQuery);
 </script>
 
 <nav aria-label="Stores" class="flex flex-col gap-0.5 p-3">
 	<h2 class="text-muted-foreground px-2 pt-1 pb-2 text-xs font-medium">Stores</h2>
 	{#each entries as entry (entry.id)}
 		{@const active = activeStore.current === entry.id}
-		{@const open = openItems.filter((i) => i.storeId === entry.id).length}
+		{@const open = openItems(items, entry.id).length}
 		<button
 			type="button"
 			aria-current={active ? 'true' : undefined}

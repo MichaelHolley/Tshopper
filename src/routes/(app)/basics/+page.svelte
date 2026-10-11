@@ -9,6 +9,7 @@
 	import { getStores } from '#lib/stores.remote.js';
 	import { getActiveStore } from '#lib/active-store.svelte.js';
 	import { normalizeItemName } from '#lib/item-name.js';
+	import { openItems } from '#lib/store-items.js';
 	import { toastError } from '#lib/toast.js';
 	import { toast } from 'svelte-sonner';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -27,20 +28,19 @@
 	let name = $state('');
 	let pending = $state(false);
 
-	const stores = $derived(await getStores());
+	// Kick both queries off before awaiting either, so they load side by side.
+	const storesQuery = getStores();
+	const itemsQuery = getItems();
+
+	const stores = $derived(await storesQuery);
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
-	// A single await: separate `$derived(await …)` declarations would load one after another.
-	const [catalog, allItems] = $derived(
-		await Promise.all([store ? getStoreCatalog(store.id) : null, getItems()])
-	);
+	const catalogQuery = $derived(store ? getStoreCatalog(store.id) : null);
+	const catalog = $derived(await catalogQuery);
+	const allItems = $derived(await itemsQuery);
 	const items = $derived(catalog?.basicItems ?? []);
 	const history = $derived(catalog?.history ?? []);
 	const openNames = $derived(
-		new Set(
-			allItems
-				.filter((i) => i.storeId === store?.id && i.checked === null)
-				.map((i) => normalizeItemName(i.item))
-		)
+		new Set(openItems(allItems, activeStore.current).map((i) => normalizeItemName(i.item)))
 	);
 	const adding = new SvelteSet<string>();
 	const promoting = new SvelteSet<string>();

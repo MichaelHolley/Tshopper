@@ -13,7 +13,7 @@
 		getNotificationState,
 		type NotificationState
 	} from '#lib/notifications.js';
-	import type { StoreEntry } from '#lib/store-entries.js';
+	import { UNASSIGNED, type StoreEntry } from '#lib/store-entries.js';
 	import type { Store } from '#lib/server/db/schema.js';
 	import { onMount } from 'svelte';
 	import CheckIcon from '@lucide/svelte/icons/check';
@@ -51,17 +51,6 @@
 		} catch {
 			toast.error('Could not change notification settings');
 		}
-	}
-
-	function defaultStoreOptions(stores: Store[]): StoreEntry[] {
-		return [
-			{ id: null, name: 'Unassigned', color: null },
-			...stores.map((s) => ({
-				id: s.id as string | null,
-				name: s.name,
-				color: s.color as string | null
-			}))
-		];
 	}
 
 	async function create(event: SubmitEvent) {
@@ -121,10 +110,10 @@
 			<p class="text-muted-foreground pb-1 text-xs">The list Tshopper opens on.</p>
 
 			<QueryBoundary message="Could not load the default store." skeleton={optionsSkeleton}>
-				{@const options = defaultStoreOptions(await storesQuery)}
+				{@const options: StoreEntry[] = [UNASSIGNED, ...(await storesQuery)]}
 				{@const defaultStoreId = (await preferencesQuery).defaultStoreId}
 				<div role="radiogroup" aria-label="Default store" class="flex flex-col">
-					{#each options as option (option.id ?? 'unassigned')}
+					{#each options as option (option.id)}
 						<button
 							type="button"
 							role="radio"
@@ -182,7 +171,9 @@
 		<section class="flex flex-col gap-2 border-t pt-4">
 			<div>
 				<h3 class="text-sm font-medium">Stores</h3>
-				<p class="text-muted-foreground text-xs">Deleting a store moves its items to Unassigned.</p>
+				<p class="text-muted-foreground text-xs">
+					Deleting a store moves its items to {UNASSIGNED.name}.
+				</p>
 			</div>
 
 			<QueryBoundary message="Could not load stores." skeleton={storesSkeleton}>
