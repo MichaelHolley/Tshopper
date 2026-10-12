@@ -8,15 +8,11 @@
 
 	const activeStore = getActiveStore();
 
-	// Kick all three queries off before awaiting any, so they load side by side.
-	const storesQuery = getStores();
-	const preferencesQuery = getPreferences();
-	const itemsQuery = getItems();
-
-	const entries = $derived(
-		orderStoreEntries(await storesQuery, (await preferencesQuery).defaultStoreId)
+	// A single await: separate `$derived(await …)` declarations would load one after another.
+	const [stores, preferences, items] = $derived(
+		await Promise.all([getStores(), getPreferences(), getItems()])
 	);
-	const items = $derived(await itemsQuery);
+	const entries = $derived(orderStoreEntries(stores, preferences.defaultStoreId));
 </script>
 
 <nav aria-label="Stores" class="flex flex-col gap-0.5 p-3">

@@ -28,15 +28,12 @@
 	let name = $state('');
 	let pending = $state(false);
 
-	// Kick both queries off before awaiting either, so they load side by side.
-	const storesQuery = getStores();
-	const itemsQuery = getItems();
-
-	const stores = $derived(await storesQuery);
+	const stores = $derived(await getStores());
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
-	const catalogQuery = $derived(store ? getStoreCatalog(store.id) : null);
-	const catalog = $derived(await catalogQuery);
-	const allItems = $derived(await itemsQuery);
+	// A single await: separate `$derived(await …)` declarations would load one after another.
+	const [catalog, allItems] = $derived(
+		await Promise.all([store ? getStoreCatalog(store.id) : null, getItems()])
+	);
 	const items = $derived(catalog?.basicItems ?? []);
 	const history = $derived(catalog?.history ?? []);
 	const openNames = $derived(
@@ -164,7 +161,9 @@
 						class="text-muted-foreground shrink-0"
 						aria-label={`Delete ${item.name}`}
 						onclick={() =>
-							deleteBasicItem(item.id).catch(toastError('Could not delete basic item'))}
+							deleteBasicItem({ id: item.id, storeId: store.id }).catch(
+								toastError('Could not delete basic item')
+							)}
 					>
 						<Trash2Icon />
 					</Button>
@@ -206,7 +205,9 @@
 							class="text-muted-foreground shrink-0"
 							aria-label={`Remove ${entry.name} from recently used`}
 							onclick={() =>
-								deleteHistoryEntry(entry.id).catch(toastError('Could not remove entry'))}
+								deleteHistoryEntry({ id: entry.id, storeId: store.id }).catch(
+									toastError('Could not remove entry')
+								)}
 						>
 							<Trash2Icon />
 						</Button>

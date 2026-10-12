@@ -17,14 +17,20 @@ export const addBasicItem = command(
 	}
 );
 
-export const deleteBasicItem = command(z.string(), async (id) => {
-	requireAuth();
-	const storeId = await shopping.deleteBasicItem(id);
-	if (storeId !== null) void getStoreCatalog(storeId).refresh();
-});
+export const deleteBasicItem = command(
+	z.object({ id: z.string(), storeId: z.string() }),
+	async ({ id, storeId }) => {
+		requireAuth();
+		await shopping.deleteBasicItem(id);
+		void getStoreCatalog(storeId).refresh();
+	}
+);
 
-export const deleteHistoryEntry = command(z.string(), async (id) => {
-	requireAuth();
-	const storeId = await shopping.deleteHistoryEntry(id);
-	if (storeId !== null) void getStoreCatalog(storeId).refresh();
-});
+export const deleteHistoryEntry = command(
+	z.object({ id: z.string(), storeId: z.string() }),
+	async ({ id, storeId }) => {
+		requireAuth();
+		await shopping.deleteHistoryEntry(id);
+		void getStoreCatalog(storeId).refresh();
+	}
+);

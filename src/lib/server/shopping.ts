@@ -234,6 +234,7 @@ export async function updateStore(id: string, name: string, color: string): Prom
 
 export async function deleteStore(id: string): Promise<void> {
 	await db.delete(store).where(eq(store.id, id));
+	// The foreign key moves the store's items to Unassigned, so the live list changes too.
 	notifyChange();
 }
 
@@ -253,13 +254,8 @@ export async function addBasicItem(storeId: string, name: string): Promise<void>
 		.onConflictDoNothing();
 }
 
-/** Resolves to the store the item belonged to, or `null` if it was already gone. */
-export async function deleteBasicItem(id: string): Promise<string | null> {
-	const [deleted] = await db
-		.delete(basicItem)
-		.where(eq(basicItem.id, id))
-		.returning({ storeId: basicItem.storeId });
-	return deleted?.storeId ?? null;
+export async function deleteBasicItem(id: string): Promise<void> {
+	await db.delete(basicItem).where(eq(basicItem.id, id));
 }
 
 export async function listItemHistory(storeId: string): Promise<ItemHistoryEntry[]> {
@@ -285,13 +281,8 @@ export async function listItemHistory(storeId: string): Promise<ItemHistoryEntry
 		.orderBy(desc(itemHistory.lastUsedAt));
 }
 
-/** Resolves to the store the entry belonged to, or `null` if it was already gone. */
-export async function deleteHistoryEntry(id: string): Promise<string | null> {
-	const [deleted] = await db
-		.delete(itemHistory)
-		.where(eq(itemHistory.id, id))
-		.returning({ storeId: itemHistory.storeId });
-	return deleted?.storeId ?? null;
+export async function deleteHistoryEntry(id: string): Promise<void> {
+	await db.delete(itemHistory).where(eq(itemHistory.id, id));
 }
 
 export type StoreCatalog = { basicItems: BasicItem[]; history: ItemHistoryEntry[] };

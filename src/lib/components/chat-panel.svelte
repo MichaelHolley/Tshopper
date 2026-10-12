@@ -59,7 +59,7 @@
 		await run({ body: { storeId } });
 		// The assistant writes through /api/chat rather than a command, so nothing else refreshes
 		// the suggestions it just added to.
-		if (storeId !== null) refreshStoreData(storeId).catch(() => {});
+		refreshStoreData(storeId).catch(() => {});
 	}
 
 	const send = (message: Parameters<typeof chat.sendMessage>[0]) =>

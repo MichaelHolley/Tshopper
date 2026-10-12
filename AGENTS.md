@@ -32,6 +32,7 @@ Live query usage is limited: every `query.live` holds a connection open, and bro
 - `getItems` is the prioritized live query. The item list is the data that has to sync in real time, and its connection must never have to compete with another one.
 - Default to a plain `query`. Reach for `query.live` only when data truly has to be live, and prefer extending an existing live query over adding a new one.
 - Keep plain queries fresh from the mutation that changes them, by refreshing them in the command's own response, instead of making them live.
+- `refreshStoreData` is the one command that refreshes without mutating. Use it to catch up on changes made elsewhere (another session, the assistant) instead of calling `refresh()` on the client, which swaps the last good data for an error when the request fails.
 
 ## Feedback Loop
 

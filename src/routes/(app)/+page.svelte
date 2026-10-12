@@ -35,12 +35,8 @@
 		deleteAllOpen = false;
 	}
 
-	// Kick both queries off before awaiting either, so they load side by side.
-	const storesQuery = getStores();
-	const itemsQuery = getItems();
-
-	const stores = $derived(await storesQuery);
-	const allItems = $derived(await itemsQuery);
+	// A single await: separate `$derived(await …)` declarations would load one after another.
+	const [stores, allItems] = $derived(await Promise.all([getStores(), getItems()]));
 	const items = $derived(storeItems(allItems, activeStore.current));
 	const activeItems = $derived(openItems(allItems, activeStore.current));
 	const checkedItems = $derived(items.filter((i) => i.checked !== null));
