@@ -26,6 +26,9 @@
 
 	const checked = $derived(item.checked !== null);
 	const otherStores = $derived(stores.filter((s) => s.id !== item.storeId));
+	const quantityLabel = $derived(
+		/^\d+([.,]\d+)?$/.test(item.quantity) ? `${item.quantity}x` : item.quantity
+	);
 
 	let contextMenuOpen = $state(false);
 
@@ -57,8 +60,8 @@
 	<div class="min-w-0 flex-1">
 		<span class="name">{item.item}</span>
 	</div>
-	{#if item.quantity}
-		<span class="quantity">{item.quantity}</span>
+	{#if quantityLabel}
+		<span class="quantity">{quantityLabel}</span>
 	{/if}
 {/snippet}
 
