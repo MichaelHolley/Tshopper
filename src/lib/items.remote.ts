@@ -3,22 +3,19 @@ import { z } from 'zod';
 import { requireAuth } from '#lib/server/auth.js';
 import { changes } from '#lib/server/events.js';
 import * as shopping from '#lib/server/shopping.js';
+import { getStoreCatalog } from '#lib/basic-items.remote.js';
 
 const storeId = z.string().nullable();
 
-export const getItems = query.live(storeId, async function* (storeId) {
+/**
+ * The app's only live query, covering every store: each one holds a connection open, and
+ * browsers cap HTTP/1.1 at six per origin across all tabs.
+ */
+export const getItems = query.live(async function* () {
 	requireAuth();
-	yield await shopping.listItems(storeId);
+	yield await shopping.listAllItems();
 	for await (const _ of changes()) {
-		yield await shopping.listItems(storeId);
-	}
-});
-
-export const getItemCounts = query.live(async function* () {
-	requireAuth();
-	yield await shopping.listUncheckedCounts();
-	for await (const _ of changes()) {
-		yield await shopping.listUncheckedCounts();
+		yield await shopping.listAllItems();
 	}
 });
 
@@ -27,6 +24,7 @@ export const addItem = command(
 	async ({ item, quantity, storeId }) => {
 		requireAuth();
 		await shopping.addItem(item, quantity, storeId);
+		if (storeId !== null) void getStoreCatalog(storeId).refresh();
 	}
 );
 

@@ -3,9 +3,13 @@ import { z } from 'zod';
 import * as shopping from './shopping';
 
 const MAX_ITEMS_PER_ADD = 50;
+const MAX_IDS_PER_CALL = 200;
+
+const itemName = z.string().trim().min(1);
+const itemIds = z.array(z.string()).min(1).max(MAX_IDS_PER_CALL);
 
 const itemInputSchema = z.object({
-	name: z.string().min(1).describe('Item name'),
+	name: itemName.describe('Item name'),
 	quantity: z
 		.string()
 		.describe(
@@ -15,7 +19,7 @@ const itemInputSchema = z.object({
 
 /**
  * Tools run through the same service layer as the UI commands, so every mutation the
- * assistant makes calls `notifyChange()` and lands in the live queries on its own.
+ * assistant makes calls `notifyChange()` and lands in the live list on its own.
  * Each tool is bound to the caller's active store — the model never picks a store.
  */
 export function shoppingTools(storeId: string | null) {
@@ -61,7 +65,7 @@ export function shoppingTools(storeId: string | null) {
 				"Update an existing item's name or quantity. Call list_items first to get the correct item id.",
 			inputSchema: z.object({
 				id: z.string().describe('Item id from list_items'),
-				name: z.string().describe('New item name'),
+				name: itemName.describe('New item name'),
 				quantity: z.string().describe('New quantity')
 			}),
 			execute: async ({ id, name, quantity }) => {
@@ -87,7 +91,7 @@ export function shoppingTools(storeId: string | null) {
 			description:
 				'Remove one or more items from the shopping list. Call list_items first to get the correct item ids.',
 			inputSchema: z.object({
-				ids: z.array(z.string()).describe('Item ids from list_items')
+				ids: itemIds.describe('Item ids from list_items')
 			}),
 			execute: async ({ ids }) => {
 				for (const id of ids) await shopping.deleteItem(id);
@@ -109,7 +113,7 @@ export function shoppingTools(storeId: string | null) {
 			description:
 				'Reorder the unchecked items on the shopping list, e.g. to group related items together. The array must contain exactly the current unchecked item ids, just rearranged.',
 			inputSchema: z.object({
-				orderedIds: z.array(z.string()).describe('Ids of all unchecked items, in the desired order')
+				orderedIds: itemIds.describe('Ids of all unchecked items, in the desired order')
 			}),
 			execute: async ({ orderedIds }) => {
 				await shopping.reorderItems(orderedIds, storeId);

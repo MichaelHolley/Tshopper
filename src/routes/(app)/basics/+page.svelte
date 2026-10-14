@@ -9,6 +9,7 @@
 	import { getStores } from '#lib/stores.remote.js';
 	import { getActiveStore } from '#lib/active-store.svelte.js';
 	import { normalizeItemName } from '#lib/item-name.js';
+	import { openItems } from '#lib/store-items.js';
 	import { toastError } from '#lib/toast.js';
 	import { toast } from 'svelte-sonner';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -30,13 +31,13 @@
 	const stores = $derived(await getStores());
 	const store = $derived(stores.find((s) => s.id === activeStore.current) ?? null);
 	// A single await: separate `$derived(await …)` declarations would load one after another.
-	const [catalog, listItems] = $derived(
-		store ? await Promise.all([getStoreCatalog(store.id), getItems(store.id)]) : [null, []]
+	const [catalog, allItems] = $derived(
+		await Promise.all([store ? getStoreCatalog(store.id) : null, getItems()])
 	);
 	const items = $derived(catalog?.basicItems ?? []);
 	const history = $derived(catalog?.history ?? []);
 	const openNames = $derived(
-		new Set(listItems.filter((i) => i.checked === null).map((i) => normalizeItemName(i.item)))
+		new Set(openItems(allItems, activeStore.current).map((i) => normalizeItemName(i.item)))
 	);
 	const adding = new SvelteSet<string>();
 	const promoting = new SvelteSet<string>();
@@ -160,7 +161,9 @@
 						class="text-muted-foreground shrink-0"
 						aria-label={`Delete ${item.name}`}
 						onclick={() =>
-							deleteBasicItem(item.id).catch(toastError('Could not delete basic item'))}
+							deleteBasicItem({ id: item.id, storeId: store.id }).catch(
+								toastError('Could not delete basic item')
+							)}
 					>
 						<Trash2Icon />
 					</Button>
@@ -202,7 +205,9 @@
 							class="text-muted-foreground shrink-0"
 							aria-label={`Remove ${entry.name} from recently used`}
 							onclick={() =>
-								deleteHistoryEntry(entry.id).catch(toastError('Could not remove entry'))}
+								deleteHistoryEntry({ id: entry.id, storeId: store.id }).catch(
+									toastError('Could not remove entry')
+								)}
 						>
 							<Trash2Icon />
 						</Button>

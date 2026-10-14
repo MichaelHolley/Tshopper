@@ -9,13 +9,9 @@
 
 	const activeStore = getActiveStore();
 
-	// Kick both queries off before awaiting either, so they load side by side.
-	const storesQuery = getStores();
-	const preferencesQuery = getPreferences();
-
-	const entries = $derived(
-		orderStoreEntries(await storesQuery, (await preferencesQuery).defaultStoreId)
-	);
+	// A single await: separate `$derived(await …)` declarations would load one after another.
+	const [stores, preferences] = $derived(await Promise.all([getStores(), getPreferences()]));
+	const entries = $derived(orderStoreEntries(stores, preferences.defaultStoreId));
 </script>
 
 <div class={['flex gap-1.5 overflow-x-auto pb-1', className]}>

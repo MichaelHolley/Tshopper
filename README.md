@@ -2,7 +2,7 @@
 
 A shopping list app for a single household, with per-store lists and an AI chat assistant that
 manages the list in natural language (e.g. "add milk and eggs", "remove all checked items").
-Changes sync live between sessions.
+The list syncs live between sessions.
 
 Built with SvelteKit, Drizzle on libsql, and the AI SDK on OpenRouter.
 

@@ -1,7 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from './db';
 import { preferences, store, PREFERENCES_ID, type Preferences } from './db/schema';
-import { notifyChange } from './events';
 
 const EMPTY: Preferences = { id: PREFERENCES_ID, defaultStoreId: null };
 
@@ -22,6 +21,5 @@ export async function setDefaultStore(storeId: string | null): Promise<Preferenc
 		.values({ id: PREFERENCES_ID, defaultStoreId: storeId })
 		.onConflictDoUpdate({ target: preferences.id, set: { defaultStoreId: storeId } })
 		.returning();
-	notifyChange();
 	return saved;
 }
