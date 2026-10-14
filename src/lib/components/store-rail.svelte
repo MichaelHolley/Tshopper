@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getActiveStore } from '#lib/active-store.svelte.js';
+	import { getActiveStore, selectStore } from '#lib/active-store.svelte.js';
 	import { getItems } from '#lib/items.remote.js';
 	import { getPreferences } from '#lib/preferences.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
@@ -27,7 +27,7 @@
 				'flex h-9 items-center gap-2.5 rounded-lg px-2 text-left text-sm transition-colors active:translate-y-px',
 				active ? 'bg-muted ring-border font-semibold ring-1 ring-inset' : 'hover:bg-muted'
 			]}
-			onclick={() => (activeStore.current = entry.id)}
+			onclick={() => selectStore(activeStore, entry.id)}
 		>
 			<span
 				aria-hidden="true"
