@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '#lib/components/ui/button/index.js';
-	import { getActiveStore } from '#lib/active-store.svelte.js';
+	import { getActiveStore, selectStore } from '#lib/active-store.svelte.js';
 	import { getPreferences } from '#lib/preferences.remote.js';
 	import { getStores } from '#lib/stores.remote.js';
 	import { orderStoreEntries } from '#lib/store-entries.js';
@@ -22,7 +22,7 @@
 			size="sm"
 			class={['shrink-0', active && 'bg-muted font-semibold']}
 			aria-current={active ? 'true' : undefined}
-			onclick={() => (activeStore.current = entry.id)}
+			onclick={() => selectStore(activeStore, entry.id)}
 		>
 			<span
 				aria-hidden="true"
