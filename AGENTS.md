@@ -4,7 +4,7 @@
 
 - SvelteKit using Runes, Remote-Functions and Async expiremental features
 - shadcn-svelte (huntabyte/shadcn-svelte)
-- svelte-ai-elements (SikandarJODD/ai-elements)
+- shadcn-svelte AI Elements (https://www.shadcn-svelte.com/docs/ai-elements)
 - ai-sdk + openrouter/ai-sdk-provider
 - Drizzle with libsql (a `file:` DB in dev, the libsql container in production)
 

@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { getToolName, isFileUIPart, isToolUIPart } from 'ai';
-	import * as Conversation from '#lib/components/ai-elements/conversation/index.js';
-	import * as PromptInput from '#lib/components/ai-elements/prompt-input/index.js';
-	import type {
-		AttachmentError,
-		PromptInputMessage
-	} from '#lib/components/ai-elements/prompt-input/index.js';
-	import { Loader } from '#lib/components/ai-elements/loader/index.js';
-	import * as Suggestion from '#lib/components/ai-elements/suggestion/index.js';
+	import { getToolName, isFileUIPart, isToolUIPart, type ToolUIPart } from 'ai';
+	import * as MessageScroller from '#lib/components/ui/message-scroller/index.js';
+	import * as Message from '#lib/components/ui/message/index.js';
+	import * as Bubble from '#lib/components/ui/bubble/index.js';
+	import * as Empty from '#lib/components/ui/empty/index.js';
+	import * as Trace from '#lib/components/ui/trace/index.js';
+	import * as InputGroup from '#lib/components/ui/input-group/index.js';
+	import * as Attachment from '#lib/components/ui/attachment/index.js';
 	import * as Sheet from '#lib/components/ui/sheet/index.js';
-	import * as Tooltip from '#lib/components/ui/tooltip/index.js';
+	import { Spinner } from '#lib/components/ui/spinner/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Separator } from '#lib/components/ui/separator/index.js';
 	import { getActiveStore } from '#lib/active-store.svelte.js';
@@ -21,6 +20,9 @@
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
 	import XIcon from '@lucide/svelte/icons/x';
+	import PaperclipIcon from '@lucide/svelte/icons/paperclip';
+	import ArrowUpIcon from '@lucide/svelte/icons/arrow-up';
+	import SquareIcon from '@lucide/svelte/icons/square';
 
 	const TOOL_LABELS: Record<string, string> = {
 		list_items: 'Reading the list',
@@ -40,17 +42,19 @@
 	const activeStore = getActiveStore();
 	const chat = getChat();
 
+	let text = $state('');
+	let image = $state<File | null>(null);
 	let attachmentError = $state<string | null>(null);
+	let fileInput = $state<HTMLInputElement | null>(null);
 
-	// The library's own messages are file-generic and plural, which reads wrong for a one-image flow.
-	function handleAttachmentError(err: AttachmentError) {
-		attachmentError =
-			err.code === 'accept'
-				? 'Only image files can be attached.'
-				: err.code === 'max_file_size'
-					? 'Images must be smaller than 4 MB.'
-					: 'Only one image can be attached.';
-	}
+	const imagePreview = $derived(image ? URL.createObjectURL(image) : null);
+
+	$effect(() => {
+		const url = imagePreview;
+		return () => {
+			if (url) URL.revokeObjectURL(url);
+		};
+	});
 
 	// The tools are store-scoped server-side, so the active store has to ride along with each
 	// request rather than being baked into the transport at construction.
@@ -67,20 +71,54 @@
 
 	const retry = () => request((options) => chat.regenerate(options));
 
-	function handleSubmit(message: PromptInputMessage) {
-		attachmentError = null;
+	const busy = $derived(chat.status === 'submitted' || chat.status === 'streaming');
+	const canSend = $derived(text.trim().length > 0 || image !== null);
 
-		const text = message.text.trim();
-		const files = message.files;
+	function handleFileChange(event: Event & { currentTarget: HTMLInputElement }) {
+		const picked = event.currentTarget.files?.[0];
+		event.currentTarget.value = '';
+		if (!picked) return;
 
-		// An image on its own is a valid prompt, but sending text: '' would add an empty text part.
-		if (!text) {
-			if (!files?.length) return;
-			void send({ files });
-			return;
+		if (image) {
+			attachmentError = 'Only one image can be attached.';
+		} else if (!picked.type.startsWith('image/')) {
+			attachmentError = 'Only image files can be attached.';
+		} else if (picked.size > MAX_IMAGE_BYTES) {
+			attachmentError = 'Images must be smaller than 4 MB.';
+		} else {
+			attachmentError = null;
+			image = picked;
+		}
+	}
+
+	function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
+		if (busy) return;
+
+		const trimmed = text.trim();
+		let files: FileList | undefined;
+		if (image) {
+			// sendMessage takes a FileList, which can only be built through DataTransfer.
+			const transfer = new DataTransfer();
+			transfer.items.add(image);
+			files = transfer.files;
 		}
 
-		void send({ text, files });
+		// An image on its own is a valid prompt, but sending text: '' would add an empty text part.
+		const message = trimmed ? { text: trimmed, files } : files ? { files } : null;
+		if (!message) return;
+
+		text = '';
+		image = null;
+		attachmentError = null;
+		void send(message);
+	}
+
+	function handleKeydown(event: KeyboardEvent & { currentTarget: HTMLTextAreaElement }) {
+		if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+			event.preventDefault();
+			event.currentTarget.form?.requestSubmit();
+		}
 	}
 
 	const SUGGESTIONS = [
@@ -96,7 +134,11 @@
 		void send({ text: prompt });
 	}
 
-	const busy = $derived(chat.status === 'submitted' || chat.status === 'streaming');
+	function toolStatus(part: Pick<ToolUIPart, 'state'>): Trace.TraceLineStatus | undefined {
+		if (part.state === 'output-available') return undefined;
+		if (part.state === 'output-error' || part.state === 'output-denied') return 'error';
+		return busy ? 'running' : 'error';
+	}
 
 	// A turn that is only tool calls so far has no text to show; keep the spinner up until
 	// the model actually starts answering.
@@ -136,124 +178,161 @@
 	</div>
 	<Separator />
 
-	<Conversation.Root class="min-h-0 flex-1">
-		<Conversation.Content class="min-h-0 flex-1 gap-4 overflow-y-auto">
-			{#if chat.messages.length === 0}
-				<Conversation.EmptyState
-					title="No messages yet"
-					description="Ask me to add, update, or remove items from your list."
-				>
-					{#snippet icon()}
-						<SparklesIcon class="size-8" />
-					{/snippet}
-				</Conversation.EmptyState>
-				<Suggestion.Root class="justify-center px-4">
-					{#each SUGGESTIONS as { label, prompt } (prompt)}
-						<Suggestion.Item suggestion={prompt} onclick={sendSuggestion}>
-							{label}
-						</Suggestion.Item>
-					{/each}
-				</Suggestion.Root>
-			{/if}
+	<MessageScroller.Provider autoScroll>
+		<MessageScroller.Root class="min-h-0 flex-1">
+			<MessageScroller.Viewport>
+				<MessageScroller.Content class="gap-4 p-4" role="log" aria-live="polite" aria-busy={busy}>
+					{#if chat.messages.length === 0}
+						<Empty.Root class="flex-1">
+							<Empty.Header>
+								<Empty.Media variant="icon">
+									<SparklesIcon />
+								</Empty.Media>
+								<Empty.Title>No messages yet</Empty.Title>
+								<Empty.Description>
+									Ask me to add, update, or remove items from your list.
+								</Empty.Description>
+							</Empty.Header>
+							<Empty.Content class="flex-row flex-wrap justify-center">
+								{#each SUGGESTIONS as { label, prompt } (prompt)}
+									<Button variant="outline" size="sm" onclick={() => sendSuggestion(prompt)}>
+										{label}
+									</Button>
+								{/each}
+							</Empty.Content>
+						</Empty.Root>
+					{/if}
 
-			{#each chat.messages as message (message.id)}
-				{#each message.parts as part, i (i)}
-					{#if part.type === 'text'}
-						<div
-							class={[
-								'max-w-[85%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap',
-								message.role === 'user'
-									? 'bg-primary text-primary-foreground self-end'
-									: 'bg-muted self-start'
-							]}
-						>
-							{part.text}
-						</div>
-					{:else if isFileUIPart(part) && part.mediaType.startsWith('image/')}
-						<img
-							src={part.url}
-							alt={part.filename ?? 'Attached image'}
-							class={[
-								'max-h-64 max-w-[85%] rounded-lg border object-contain',
-								message.role === 'user' ? 'self-end' : 'self-start'
-							]}
-						/>
-					{:else if isToolUIPart(part)}
-						{@const name = getToolName(part)}
-						<div class="text-muted-foreground flex items-center gap-2 self-start text-xs">
-							{#if part.state === 'output-error'}
-								<TriangleAlertIcon class="text-destructive size-3.5" />
-							{:else if part.state === 'output-available'}
-								<CheckIcon class="text-primary size-3.5" />
-							{:else}
-								<WrenchIcon class="size-3.5 animate-pulse" />
-							{/if}
-							{TOOL_LABELS[name] ?? name}
+					{#each chat.messages as message (message.id)}
+						{@const isUser = message.role === 'user'}
+						<MessageScroller.Item messageId={message.id} scrollAnchor={isUser}>
+							<Message.Root align={isUser ? 'end' : 'start'}>
+								<Message.Content>
+									{#each message.parts as part, i (i)}
+										{#if part.type === 'text'}
+											<Bubble.Root
+												align={isUser ? 'end' : 'start'}
+												variant={isUser ? 'default' : 'muted'}
+											>
+												<Bubble.Content class="whitespace-pre-wrap">{part.text}</Bubble.Content>
+											</Bubble.Root>
+										{:else if isFileUIPart(part) && part.mediaType.startsWith('image/')}
+											<img
+												src={part.url}
+												alt={part.filename ?? 'Attached image'}
+												class="max-h-64 max-w-[80%] rounded-xl border object-contain"
+											/>
+										{:else if isToolUIPart(part)}
+											{@const name = getToolName(part)}
+											{@const status = toolStatus(part)}
+											<Trace.Line {status}>
+												<Trace.Icon>
+													{#if status === 'error'}
+														<TriangleAlertIcon />
+													{:else if status === 'running'}
+														<WrenchIcon />
+													{:else}
+														<CheckIcon class="text-primary" />
+													{/if}
+												</Trace.Icon>
+												<Trace.Title>{TOOL_LABELS[name] ?? name}</Trace.Title>
+											</Trace.Line>
+										{/if}
+									{/each}
+								</Message.Content>
+							</Message.Root>
+						</MessageScroller.Item>
+					{/each}
+
+					{#if awaitingReply}
+						<div class="text-muted-foreground flex items-center gap-2 text-sm">
+							<Spinner aria-hidden="true" />
+							Thinking…
 						</div>
 					{/if}
-				{/each}
-			{/each}
 
-			{#if awaitingReply}
-				<div class="text-muted-foreground flex items-center gap-2 self-start text-xs">
-					<Loader size={14} />
-					Thinking…
-				</div>
-			{/if}
-
-			{#if chat.error}
-				<div class="text-destructive self-start text-xs">
-					Something went wrong.
-					<button class="underline" onclick={retry}>Retry</button>
-				</div>
-			{/if}
-		</Conversation.Content>
-		<Conversation.ScrollButton />
-	</Conversation.Root>
+					{#if chat.error}
+						<div class="text-destructive flex items-center gap-2 text-sm">
+							Something went wrong.
+							<Button variant="link" size="xs" class="text-destructive px-0" onclick={retry}>
+								Retry
+							</Button>
+						</div>
+					{/if}
+				</MessageScroller.Content>
+			</MessageScroller.Viewport>
+			<MessageScroller.Button />
+		</MessageScroller.Root>
+	</MessageScroller.Provider>
 
 	<div class="border-t p-4">
-		<Tooltip.Provider>
-			<PromptInput.Root
-				onSubmit={handleSubmit}
+		<form onsubmit={handleSubmit}>
+			<input
+				bind:this={fileInput}
+				type="file"
 				accept="image/*"
-				multiple={false}
-				maxFiles={1}
-				maxFileSize={MAX_IMAGE_BYTES}
-				onError={handleAttachmentError}
-				onFileAdd={() => (attachmentError = null)}
-				class="w-full"
-			>
-				<PromptInput.Body>
-					<div class="attachment-list">
-						<PromptInput.Attachments>
-							{#snippet children(attachment)}
-								<PromptInput.Attachment data={attachment} />
-							{/snippet}
-						</PromptInput.Attachments>
-					</div>
-					<PromptInput.Textarea placeholder="Add milk and eggs…" />
-				</PromptInput.Body>
-				<PromptInput.Toolbar>
-					<PromptInput.Tools>
-						<PromptInput.ActionMenu>
-							<PromptInput.ActionMenuTrigger />
-							<PromptInput.ActionMenuContent>
-								<PromptInput.ActionAddAttachments label="Add an image" />
-							</PromptInput.ActionMenuContent>
-						</PromptInput.ActionMenu>
-					</PromptInput.Tools>
-					<PromptInput.Submit status={chat.status} onStop={() => chat.stop()} />
-				</PromptInput.Toolbar>
-			</PromptInput.Root>
-		</Tooltip.Provider>
+				class="sr-only"
+				tabindex={-1}
+				aria-hidden="true"
+				onchange={handleFileChange}
+			/>
+			<InputGroup.Root>
+				{#if image && imagePreview}
+					<InputGroup.Addon align="block-start">
+						<Attachment.Root size="xs">
+							<Attachment.Media variant="image">
+								<img src={imagePreview} alt={image.name} />
+							</Attachment.Media>
+							<Attachment.Content>
+								<Attachment.Title class="max-w-40">{image.name}</Attachment.Title>
+							</Attachment.Content>
+							<Attachment.Actions>
+								<Attachment.Action aria-label="Remove image" onclick={() => (image = null)}>
+									<XIcon />
+								</Attachment.Action>
+							</Attachment.Actions>
+						</Attachment.Root>
+					</InputGroup.Addon>
+				{/if}
+				<InputGroup.Textarea
+					bind:value={text}
+					placeholder="Add milk and eggs…"
+					aria-label="Message the assistant"
+					onkeydown={handleKeydown}
+				/>
+				<InputGroup.Addon align="block-end" class="justify-between">
+					<InputGroup.Button
+						size="icon-sm"
+						aria-label="Add an image"
+						onclick={() => fileInput?.click()}
+					>
+						<PaperclipIcon />
+					</InputGroup.Button>
+					{#if busy}
+						<InputGroup.Button
+							variant="default"
+							size="icon-sm"
+							aria-label="Stop"
+							onclick={() => chat.stop()}
+						>
+							<SquareIcon />
+						</InputGroup.Button>
+					{:else}
+						<InputGroup.Button
+							type="submit"
+							variant="default"
+							size="icon-sm"
+							aria-label="Send"
+							disabled={!canSend}
+						>
+							<ArrowUpIcon />
+						</InputGroup.Button>
+					{/if}
+				</InputGroup.Addon>
+			</InputGroup.Root>
+		</form>
 		{#if attachmentError}
 			<p class="text-destructive mt-2 text-xs">{attachmentError}</p>
 		{/if}
 	</div>
 </div>
-
-<style>
-	.attachment-list :global(button[aria-label='Remove image']) {
-		opacity: 1;
-	}
-</style>
