@@ -25,7 +25,7 @@
 		onError?: (err: { code: 'max_files' | 'max_file_size' | 'accept'; message: string }) => void;
 		onFileAdd?: (added: PromptInputAttachment[], attachments: PromptInputAttachment[]) => void;
 		onFileRemove?: (removed: PromptInputAttachment[], attachments: PromptInputAttachment[]) => void;
-		onSubmit: (message: Message, event: SubmitEvent) => void | Promise<void>;
+		onSubmit: (message: Message, event: SubmitEvent) => boolean | void | Promise<boolean | void>;
 		children?: import('svelte').Snippet;
 	}
 	// indexing
@@ -219,20 +219,24 @@
 		return files.length > 0 ? files : undefined;
 	};
 
+	let submitting = false;
+
 	let handleSubmit = async (event: SubmitEvent) => {
 		event.preventDefault();
-
-		let form = event.currentTarget as HTMLFormElement;
-		let text = usingProvider
-			? (controller?.textInput.value ?? '')
-			: (promptTextHandle?.getValue() ?? ((new FormData(form).get('message') as string) || ''));
-		let submittedAttachments = attachmentsContext.attachments.map((attachment) => ({
-			...attachment
-		}));
-		let files = await createFiles(attachmentsContext.attachments);
+		if (submitting) return;
+		submitting = true;
 
 		try {
-			let result = onSubmit(
+			let form = event.currentTarget as HTMLFormElement;
+			let text = usingProvider
+				? (controller?.textInput.value ?? '')
+				: (promptTextHandle?.getValue() ?? ((new FormData(form).get('message') as string) || ''));
+			let submittedAttachments = attachmentsContext.attachments.map((attachment) => ({
+				...attachment
+			}));
+			let files = await createFiles(attachmentsContext.attachments);
+
+			let result = await onSubmit(
 				{
 					text,
 					files,
@@ -241,10 +245,7 @@
 				event
 			);
 
-			// Handle both sync and async onSubmit
-			if (result && typeof result === 'object' && 'then' in result) {
-				await result;
-			}
+			if (result === false) return;
 
 			// Only clear if submission was successful
 			if (clearOnSubmit) {
@@ -262,6 +263,8 @@
 		} catch (error) {
 			// Don't clear on error - user may want to retry
 			console.error('Submit failed:', error);
+		} finally {
+			submitting = false;
 		}
 	};
 

@@ -87,6 +87,7 @@
 	aria-label={ariaLabel}
 	class={cn(buttonVariants({ variant, size }), 'gap-1.5 rounded-lg', className)}
 	data-slot="button"
+	data-prompt-input-submit
 	type={buttonType}
 	onclick={handleClick}
 	{...props}

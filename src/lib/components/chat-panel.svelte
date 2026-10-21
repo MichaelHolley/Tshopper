@@ -41,6 +41,7 @@
 	const chat = getChat();
 
 	let attachmentError = $state<string | null>(null);
+	let requesting = $state(false);
 
 	// The library's own messages are file-generic and plural, which reads wrong for a one-image flow.
 	function handleAttachmentError(err: AttachmentError) {
@@ -55,11 +56,17 @@
 	// The tools are store-scoped server-side, so the active store has to ride along with each
 	// request rather than being baked into the transport at construction.
 	async function request(run: (options: { body: { storeId: string | null } }) => Promise<void>) {
+		if (busy) return;
+		requesting = true;
 		const storeId = activeStore.current;
-		await run({ body: { storeId } });
-		// The assistant writes through /api/chat rather than a command, so nothing else refreshes
-		// the suggestions it just added to.
-		refreshStoreData(storeId).catch(() => {});
+		try {
+			await run({ body: { storeId } });
+			// The assistant writes through /api/chat rather than a command, so nothing else refreshes
+			// the suggestions it just added to.
+			refreshStoreData(storeId).catch(() => {});
+		} finally {
+			requesting = false;
+		}
 	}
 
 	const send = (message: Parameters<typeof chat.sendMessage>[0]) =>
@@ -68,6 +75,7 @@
 	const retry = () => request((options) => chat.regenerate(options));
 
 	function handleSubmit(message: PromptInputMessage) {
+		if (busy) return false;
 		attachmentError = null;
 
 		const text = message.text.trim();
@@ -96,7 +104,7 @@
 		void send({ text: prompt });
 	}
 
-	const busy = $derived(chat.status === 'submitted' || chat.status === 'streaming');
+	const busy = $derived(requesting || chat.status === 'submitted' || chat.status === 'streaming');
 
 	// A turn that is only tool calls so far has no text to show; keep the spinner up until
 	// the model actually starts answering.
@@ -124,6 +132,7 @@
 					variant="ghost"
 					size="icon-sm"
 					aria-label="Clear chat history"
+					disabled={busy}
 					onclick={() => (chat.messages = [])}
 				>
 					<Trash2Icon />
@@ -204,7 +213,7 @@
 			{#if chat.error}
 				<div class="text-destructive self-start text-xs">
 					Something went wrong.
-					<button class="underline" onclick={retry}>Retry</button>
+					<button class="underline" disabled={busy} onclick={retry}>Retry</button>
 				</div>
 			{/if}
 		</Conversation.Content>
@@ -242,7 +251,10 @@
 							</PromptInput.ActionMenuContent>
 						</PromptInput.ActionMenu>
 					</PromptInput.Tools>
-					<PromptInput.Submit status={chat.status} onStop={() => chat.stop()} />
+					<PromptInput.Submit
+						status={busy && chat.status !== 'streaming' ? 'submitted' : chat.status}
+						onStop={() => chat.stop()}
+					/>
 				</PromptInput.Toolbar>
 			</PromptInput.Root>
 		</Tooltip.Provider>
