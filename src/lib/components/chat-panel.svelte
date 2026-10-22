@@ -74,11 +74,7 @@
 	const busy = $derived(chat.status === 'submitted' || chat.status === 'streaming');
 	const canSend = $derived(text.trim().length > 0 || image !== null);
 
-	function handleFileChange(event: Event & { currentTarget: HTMLInputElement }) {
-		const picked = event.currentTarget.files?.[0];
-		event.currentTarget.value = '';
-		if (!picked) return;
-
+	function attachImage(picked: File) {
 		if (image) {
 			attachmentError = 'Only one image can be attached.';
 		} else if (!picked.type.startsWith('image/')) {
@@ -89,6 +85,23 @@
 			attachmentError = null;
 			image = picked;
 		}
+	}
+
+	function handleFileChange(event: Event & { currentTarget: HTMLInputElement }) {
+		const picked = event.currentTarget.files?.[0];
+		event.currentTarget.value = '';
+		if (picked) attachImage(picked);
+	}
+
+	// Text pastes fall through to the textarea; only a pasted file is taken over.
+	function handlePaste(event: ClipboardEvent & { currentTarget: HTMLTextAreaElement }) {
+		const pasted = Array.from(event.clipboardData?.items ?? [])
+			.find((item) => item.kind === 'file' && item.type.startsWith('image/'))
+			?.getAsFile();
+		if (!pasted) return;
+
+		event.preventDefault();
+		attachImage(pasted);
 	}
 
 	function handleSubmit(event: SubmitEvent) {
@@ -299,6 +312,7 @@
 					placeholder="Add milk and eggs…"
 					aria-label="Message the assistant"
 					onkeydown={handleKeydown}
+					onpaste={handlePaste}
 				/>
 				<InputGroup.Addon align="block-end" class="justify-between">
 					<InputGroup.Button
