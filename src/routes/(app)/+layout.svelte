@@ -84,7 +84,7 @@
 		class="bg-background/80 border-border sticky top-0 z-40 shrink-0 border-b pt-[env(safe-area-inset-top)] backdrop-blur lg:static"
 	>
 		<div
-			class="gutter mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-2 lg:mx-0 lg:max-w-none"
+			class="gutter mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-2 md:max-w-6xl lg:mx-0 lg:max-w-none"
 		>
 			<a
 				href="/"
