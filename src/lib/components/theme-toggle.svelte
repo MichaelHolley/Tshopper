@@ -31,7 +31,7 @@
 			onValueChange={(value) => theme.set(value as ThemeMode)}
 		>
 			{#each modes as { value, label, icon: Icon } (value)}
-				<DropdownMenu.RadioItem {value}>
+				<DropdownMenu.RadioItem {value} closeOnSelect>
 					<Icon />
 					{label}
 				</DropdownMenu.RadioItem>
