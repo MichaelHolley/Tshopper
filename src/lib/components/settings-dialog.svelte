@@ -1,264 +1,126 @@
 <script lang="ts">
 	import * as Dialog from '#lib/components/ui/dialog/index.js';
-	import { Button } from '#lib/components/ui/button/index.js';
-	import { Input } from '#lib/components/ui/input/index.js';
+	import { Switch } from '#lib/components/ui/switch/index.js';
 	import QueryBoundary from '#lib/components/query-boundary.svelte';
-	import { addStore, deleteStore, getStores, updateStore } from '#lib/stores.remote.js';
-	import { getPreferences, setDefaultStore } from '#lib/preferences.remote.js';
-	import { toast } from 'svelte-sonner';
-	import { toastError } from '#lib/toast.js';
+	import StoreSettings from '#lib/components/store-settings.svelte';
+	import { theme, type ThemeMode } from '#lib/theme.svelte.js';
 	import {
 		disableProgressNotifications,
 		enableProgressNotifications,
 		getNotificationState,
 		type NotificationState
 	} from '#lib/notifications.js';
-	import { UNASSIGNED, type StoreEntry } from '#lib/store-entries.js';
-	import type { Store } from '#lib/server/db/schema.js';
+	import { RadioGroup } from 'bits-ui';
+	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
-	import CheckIcon from '@lucide/svelte/icons/check';
-	import PencilIcon from '@lucide/svelte/icons/pencil';
-	import ShoppingCartIcon from '@lucide/svelte/icons/shopping-cart';
-	import Trash2Icon from '@lucide/svelte/icons/trash-2';
-	import XIcon from '@lucide/svelte/icons/x';
+	import MonitorIcon from '@lucide/svelte/icons/monitor';
+	import MoonIcon from '@lucide/svelte/icons/moon';
+	import SunIcon from '@lucide/svelte/icons/sun';
 
 	let { open = $bindable(false) }: { open?: boolean } = $props();
 
-	const DEFAULT_COLOR = '#22c55e';
+	const themeModes: { value: ThemeMode; label: string; icon: typeof SunIcon }[] = [
+		{ value: 'light', label: 'Light', icon: SunIcon },
+		{ value: 'dark', label: 'Dark', icon: MoonIcon },
+		{ value: 'system', label: 'System', icon: MonitorIcon }
+	];
 
-	// Awaited in the markup rather than the script: the dialog itself must stay mounted and
-	// openable, so only the two data-backed sections suspend behind their boundaries.
-	const storesQuery = getStores();
-	const preferencesQuery = getPreferences();
-
-	let newName = $state('');
-	let newColor = $state(DEFAULT_COLOR);
-	let editingId = $state<string | null>(null);
-	let editName = $state('');
-	let editColor = $state(DEFAULT_COLOR);
 	let notificationState = $state<NotificationState>({ status: 'unsupported' });
+	const notificationsOn = $derived(
+		notificationState.status === 'granted' && notificationState.enabled
+	);
+	const notificationHint = $derived(
+		notificationState.status === 'unsupported'
+			? 'Not available in this browser.'
+			: notificationState.status === 'denied'
+				? 'Blocked. Allow notifications for Tshopper in your browser or device settings.'
+				: 'Shows how many items are left while Tshopper runs in the background.'
+	);
 
 	onMount(() => {
 		notificationState = getNotificationState();
 	});
 
-	async function toggleNotifications() {
+	async function setNotifications(on: boolean) {
 		try {
-			notificationState =
-				notificationState.status === 'granted' && notificationState.enabled
-					? await disableProgressNotifications()
-					: await enableProgressNotifications();
+			notificationState = on
+				? await enableProgressNotifications()
+				: await disableProgressNotifications();
 		} catch {
-			toast.error('Could not change notification settings');
-		}
-	}
-
-	async function create(event: SubmitEvent) {
-		event.preventDefault();
-		if (!newName.trim()) return;
-		try {
-			await addStore({ name: newName, color: newColor });
-			newName = '';
-			newColor = DEFAULT_COLOR;
-		} catch {
-			toast.error('Could not create store');
-		}
-	}
-
-	function startEdit(store: Store) {
-		editingId = store.id;
-		editName = store.name;
-		editColor = store.color;
-	}
-
-	async function saveEdit() {
-		if (!editName.trim() || !editingId) return;
-		try {
-			await updateStore({ id: editingId, name: editName, color: editColor });
-			editingId = null;
-		} catch {
-			toast.error('Could not save store');
+			toast.error('Could not change notifications');
 		}
 	}
 </script>
 
-{#snippet rowsSkeleton(count: number)}
-	<div class="flex animate-pulse flex-col gap-2 py-2" aria-hidden="true">
-		{#each { length: count }, i (i)}
-			<div class="bg-muted h-8 rounded-md"></div>
+{#snippet storesSkeleton()}
+	<div class="flex animate-pulse flex-col gap-px overflow-hidden rounded-lg" aria-hidden="true">
+		{#each { length: 3 }, i (i)}
+			<div class="bg-muted h-11"></div>
 		{/each}
 	</div>
 {/snippet}
 
-{#snippet optionsSkeleton()}
-	{@render rowsSkeleton(3)}
-{/snippet}
-
-{#snippet storesSkeleton()}
-	{@render rowsSkeleton(2)}
-{/snippet}
-
 <Dialog.Root bind:open>
-	<Dialog.Content class="max-h-[calc(100svh-2rem)] overflow-y-auto sm:max-w-md">
-		<Dialog.Header>
-			<Dialog.Title>Settings</Dialog.Title>
-			<Dialog.Description>Shared by everyone in the household.</Dialog.Description>
+	<Dialog.Content
+		class="flex max-h-[calc(100svh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-md"
+	>
+		<Dialog.Header class="border-b px-5 pt-5 pb-4">
+			<Dialog.Title class="text-base">Settings</Dialog.Title>
 		</Dialog.Header>
 
-		<section class="flex flex-col gap-1">
-			<h3 class="text-sm font-medium">Default store</h3>
-			<p class="text-muted-foreground pb-1 text-xs">The list Tshopper opens on.</p>
-
-			<QueryBoundary message="Could not load the default store." skeleton={optionsSkeleton}>
-				{@const options: StoreEntry[] = [UNASSIGNED, ...(await storesQuery)]}
-				{@const defaultStoreId = (await preferencesQuery).defaultStoreId}
-				<div role="radiogroup" aria-label="Default store" class="flex flex-col">
-					{#each options as option (option.id)}
-						<button
-							type="button"
-							role="radio"
-							aria-checked={defaultStoreId === option.id}
-							class="hover:bg-accent flex w-full items-center gap-2 rounded-md px-2 py-2 text-left"
-							onclick={() =>
-								setDefaultStore(option.id).catch(toastError('Could not set default store'))}
-						>
-							{#if option.color}
-								<span
-									aria-hidden="true"
-									class="size-3 shrink-0 rounded-full"
-									style={`background-color: ${option.color}`}
-								></span>
-							{:else}
-								<ShoppingCartIcon
-									aria-hidden="true"
-									class="text-muted-foreground size-3 shrink-0"
-								/>
-							{/if}
-							<span class="flex-1 truncate">{option.name}</span>
-							{#if defaultStoreId === option.id}
-								<CheckIcon aria-hidden="true" class="size-4 shrink-0" />
-							{/if}
-						</button>
-					{/each}
+		<div class="flex flex-col gap-8 overflow-y-auto px-5 pt-5 pb-6">
+			<section aria-labelledby="settings-stores" class="flex flex-col gap-3">
+				<div class="flex flex-col gap-0.5">
+					<h3 id="settings-stores" class="font-semibold">Stores</h3>
+					<p class="text-muted-foreground text-xs">Shared with everyone in your household.</p>
 				</div>
-			</QueryBoundary>
-		</section>
+				<QueryBoundary message="Could not load stores." skeleton={storesSkeleton}>
+					<StoreSettings />
+				</QueryBoundary>
+			</section>
 
-		<section class="flex flex-col gap-2 border-t pt-4">
-			<div>
-				<h3 class="text-sm font-medium">Shopping progress notifications</h3>
-				<p class="text-muted-foreground text-xs">
-					Shows the active list's checked-item count while Tshopper is running in the background.
-					Updates pause if your device suspends the app.
-				</p>
-			</div>
+			<section aria-labelledby="settings-device" class="flex flex-col gap-3">
+				<div class="flex flex-col gap-0.5">
+					<h3 id="settings-device" class="font-semibold">This device</h3>
+					<p class="text-muted-foreground text-xs">Only changes Tshopper here.</p>
+				</div>
 
-			{#if notificationState.status === 'unsupported'}
-				<p class="text-muted-foreground text-sm">
-					Notifications are not available in this browser.
-				</p>
-			{:else if notificationState.status === 'denied'}
-				<p class="text-muted-foreground text-sm">
-					Notifications are blocked. Enable them in your browser or device settings.
-				</p>
-			{:else}
-				<Button variant="outline" onclick={toggleNotifications}>
-					{notificationState.enabled ? 'Disable notifications' : 'Enable notifications'}
-				</Button>
-			{/if}
-		</section>
-
-		<section class="flex flex-col gap-2 border-t pt-4">
-			<div>
-				<h3 class="text-sm font-medium">Stores</h3>
-				<p class="text-muted-foreground text-xs">
-					Deleting a store moves its items to {UNASSIGNED.name}.
-				</p>
-			</div>
-
-			<QueryBoundary message="Could not load stores." skeleton={storesSkeleton}>
-				<ul class="flex flex-col">
-					{#each await storesQuery as store (store.id)}
-						<li class="flex items-center gap-2 border-b py-2">
-							{#if editingId === store.id}
-								<input
-									type="color"
-									bind:value={editColor}
-									class="size-8 shrink-0 rounded"
-									aria-label={`Color for ${store.name}`}
-								/>
-								<Input
-									bind:value={editName}
-									class="h-8"
-									autocomplete="off"
-									aria-label="Store name"
-								/>
-								<Button
-									size="icon"
-									class="size-8 shrink-0"
-									aria-label="Save store changes"
-									disabled={!editName.trim()}
-									onclick={saveEdit}
+				<div class="flex flex-col divide-y">
+					<div class="flex items-center justify-between gap-4 pb-3">
+						<span id="settings-appearance">Appearance</span>
+						<RadioGroup.Root
+							value={theme.mode}
+							onValueChange={(value) => theme.set(value as ThemeMode)}
+							orientation="horizontal"
+							aria-labelledby="settings-appearance"
+							class="bg-muted flex rounded-lg p-0.5"
+						>
+							{#each themeModes as { value, label, icon: Icon } (value)}
+								<RadioGroup.Item
+									{value}
+									class="text-muted-foreground hover:text-foreground data-[state=checked]:bg-background data-[state=checked]:text-foreground focus-visible:ring-ring/50 flex h-7 items-center gap-1.5 rounded-md px-2.5 text-xs font-medium outline-none focus-visible:ring-2 data-[state=checked]:shadow-xs"
 								>
-									<CheckIcon />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									class="size-8 shrink-0"
-									aria-label="Cancel editing store"
-									onclick={() => (editingId = null)}
-								>
-									<XIcon />
-								</Button>
-							{:else}
-								<span
-									aria-hidden="true"
-									class="size-4 shrink-0 rounded-full"
-									style={`background-color: ${store.color}`}
-								></span>
-								<span class="flex-1 truncate">{store.name}</span>
-								<Button
-									variant="ghost"
-									size="icon"
-									class="size-8 shrink-0"
-									aria-label={`Edit ${store.name}`}
-									onclick={() => startEdit(store)}
-								>
-									<PencilIcon />
-								</Button>
-								<Button
-									variant="ghost"
-									size="icon"
-									class="text-destructive size-8 shrink-0"
-									aria-label={`Delete ${store.name}`}
-									onclick={() => deleteStore(store.id).catch(toastError('Could not delete store'))}
-								>
-									<Trash2Icon />
-								</Button>
-							{/if}
-						</li>
-					{:else}
-						<li class="text-muted-foreground py-2 text-sm">No stores yet.</li>
-					{/each}
-				</ul>
-			</QueryBoundary>
+									<Icon aria-hidden="true" class="size-3.5" />
+									{label}
+								</RadioGroup.Item>
+							{/each}
+						</RadioGroup.Root>
+					</div>
 
-			<form onsubmit={create} class="flex items-center gap-2 pt-1">
-				<input
-					type="color"
-					bind:value={newColor}
-					class="size-9 shrink-0 rounded"
-					aria-label="New store color"
-				/>
-				<Input
-					bind:value={newName}
-					placeholder="New store name"
-					autocomplete="off"
-					aria-label="New store name"
-				/>
-				<Button type="submit" class="shrink-0" disabled={!newName.trim()}>Add</Button>
-			</form>
-		</section>
+					<label class="flex items-start justify-between gap-4 pt-3">
+						<span class="flex flex-col gap-0.5">
+							<span>Shopping progress notifications</span>
+							<span class="text-muted-foreground text-xs">{notificationHint}</span>
+						</span>
+						<Switch
+							class="mt-0.5"
+							disabled={notificationState.status === 'unsupported' ||
+								notificationState.status === 'denied'}
+							bind:checked={() => notificationsOn, setNotifications}
+						/>
+					</label>
+				</div>
+			</section>
+		</div>
 	</Dialog.Content>
 </Dialog.Root>
