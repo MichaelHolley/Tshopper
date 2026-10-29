@@ -86,7 +86,11 @@
 		<div
 			class="gutter mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-2 lg:mx-0 lg:max-w-none"
 		>
-			<a href="/" class="text-lg font-semibold tracking-tight">Tshopper</a>
+			<a
+				href="/"
+				class="bg-secondary text-primary rounded-lg px-2.5 py-1 text-lg leading-none font-extrabold tracking-tight shadow-[0_3px_0_0_var(--primary)]"
+				>Tshopper</a
+			>
 			<div class="flex items-center gap-1">
 				<Button
 					variant="ghost"
