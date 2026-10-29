@@ -6,7 +6,6 @@
 	import ChatPanel from '#lib/components/chat-panel.svelte';
 	import QueryBoundary from '#lib/components/query-boundary.svelte';
 	import StoreNav from '#lib/components/store-nav.svelte';
-	import ThemeToggle from '#lib/components/theme-toggle.svelte';
 	import StoreRail from '#lib/components/store-rail.svelte';
 	import ViewSwitch from '#lib/components/view-switch.svelte';
 	import { setActiveStore } from '#lib/active-store.svelte.js';
@@ -98,7 +97,6 @@
 				>
 					<SparklesIcon />
 				</Button>
-				<ThemeToggle />
 				<Button
 					variant="ghost"
 					size="icon"

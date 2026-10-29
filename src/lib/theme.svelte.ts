@@ -43,10 +43,6 @@ class Theme {
 		this.#apply();
 	}
 
-	toggle() {
-		this.set(this.isDark ? 'light' : 'dark');
-	}
-
 	#apply() {
 		const root = document.documentElement;
 		root.classList.toggle('dark', this.isDark);
