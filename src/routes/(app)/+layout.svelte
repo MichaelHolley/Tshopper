@@ -22,6 +22,9 @@
 	let assistantOpen = $state(false);
 	let settingsOpen = $state(false);
 
+	const headerButtonClass =
+		'text-primary hover:bg-primary/15 hover:text-primary dark:hover:bg-primary/15 aria-pressed:bg-primary/15';
+
 	const wide = new MediaQuery('(min-width: 80rem)');
 
 	// Seeded once from the default-store preference; later preference edits must not yank the
@@ -80,21 +83,18 @@
 {/snippet}
 
 <div class="flex min-h-svh flex-col lg:h-svh lg:overflow-hidden">
-	<header
-		class="bg-background/80 border-border sticky top-0 z-40 shrink-0 border-b pt-[env(safe-area-inset-top)] backdrop-blur lg:static"
-	>
+	<header class="bg-secondary sticky top-0 z-40 shrink-0 pt-[env(safe-area-inset-top)] lg:static">
 		<div
 			class="gutter mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-2 md:max-w-6xl lg:mx-0 lg:max-w-none"
 		>
-			<a
-				href="/"
-				class="bg-secondary text-primary rounded-lg px-2.5 py-1 text-lg leading-none font-extrabold tracking-tight shadow-[0_3px_0_0_var(--primary)]"
+			<a href="/" class="text-primary text-lg leading-none font-extrabold tracking-tight"
 				>Tshopper</a
 			>
 			<div class="flex items-center gap-1">
 				<Button
 					variant="ghost"
 					size="icon"
+					class={headerButtonClass}
 					aria-label="Toggle assistant"
 					aria-pressed={assistantOpen}
 					onclick={() => (assistantOpen = !assistantOpen)}
@@ -104,13 +104,20 @@
 				<Button
 					variant="ghost"
 					size="icon"
+					class={headerButtonClass}
 					aria-label="Open settings"
 					onclick={() => (settingsOpen = true)}
 				>
 					<SettingsIcon />
 				</Button>
 				<form {...logout}>
-					<Button type="submit" variant="ghost" size="icon" aria-label="Sign out">
+					<Button
+						type="submit"
+						variant="ghost"
+						size="icon"
+						class={headerButtonClass}
+						aria-label="Sign out"
+					>
 						<LogOutIcon />
 					</Button>
 				</form>
