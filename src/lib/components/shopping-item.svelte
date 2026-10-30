@@ -58,7 +58,7 @@
 </script>
 
 {#snippet itemDetails()}
-	<div class="min-w-0 flex-1">
+	<div class="flex min-w-0 flex-1 items-center">
 		<span class="name">{item.item}</span>
 	</div>
 	{#if quantityLabel}
