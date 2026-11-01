@@ -4,10 +4,6 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 
 const STORAGE_KEY = 'theme';
 
-// Hex mirrors of --background in layout.css; theme-color needs a literal, not a var().
-const LIGHT_BACKGROUND = '#fafafa';
-const DARK_BACKGROUND = '#0b0b0b';
-
 function stored(): ThemeMode {
 	const value = localStorage.getItem(STORAGE_KEY);
 	return value === 'light' || value === 'dark' ? value : 'system';
@@ -47,9 +43,6 @@ class Theme {
 		const root = document.documentElement;
 		root.classList.toggle('dark', this.isDark);
 		root.style.colorScheme = this.isDark ? 'dark' : 'light';
-		document
-			.querySelector('meta[name="theme-color"]')
-			?.setAttribute('content', this.isDark ? DARK_BACKGROUND : LIGHT_BACKGROUND);
 	}
 }
 
