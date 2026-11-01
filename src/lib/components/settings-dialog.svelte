@@ -63,6 +63,7 @@
 <Dialog.Root bind:open>
 	<Dialog.Content
 		class="flex max-h-[calc(100svh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-md"
+		closeButtonClass="top-3.5"
 	>
 		<Dialog.Header class="border-b px-5 pt-5 pb-4">
 			<Dialog.Title class="text-base">Settings</Dialog.Title>
