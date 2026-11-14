@@ -14,7 +14,7 @@
 	bind:this={ref}
 	data-slot="message-content"
 	class={cn(
-		'gap-2.5 group-data-[align=end]/message:*:data-slot:self-end flex w-full min-w-0 flex-col wrap-break-word',
+		'gap-2.5 group-data-[align=end]/message:*:self-end flex w-full min-w-0 flex-col wrap-break-word',
 		className
 	)}
 	{...restProps}
