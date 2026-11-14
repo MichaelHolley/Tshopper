@@ -15,7 +15,7 @@
 	import { getChat } from '#lib/assistant.svelte.js';
 	import { refreshStoreData } from '#lib/stores.remote.js';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
-	import Trash2Icon from '@lucide/svelte/icons/trash-2';
+	import SquarePenIcon from '@lucide/svelte/icons/square-pen';
 	import WrenchIcon from '@lucide/svelte/icons/wrench';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import TriangleAlertIcon from '@lucide/svelte/icons/triangle-alert';
@@ -181,7 +181,7 @@
 					aria-label="Clear chat history"
 					onclick={() => (chat.messages = [])}
 				>
-					<Trash2Icon />
+					<SquarePenIcon />
 				</Button>
 			{/if}
 			<Button variant="ghost" size="icon-sm" aria-label="Close assistant" onclick={onClose}>
