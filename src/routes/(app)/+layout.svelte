@@ -118,7 +118,7 @@
 						class={headerButtonClass}
 						aria-label="Sign out"
 					>
-						<LogOutIcon />
+						<LogOutIcon class="text-white" />
 					</Button>
 				</form>
 			</div>
