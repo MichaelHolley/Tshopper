@@ -210,9 +210,9 @@
 							<Empty.Content class="flex-row flex-wrap justify-center">
 								{#each SUGGESTIONS as { label, prompt } (prompt)}
 									<Button
-										variant="secondary"
+										variant="outline"
 										size="sm"
-										class="text-primary h-auto min-h-9 max-w-full gap-2 px-3 py-2 whitespace-normal"
+										class="text-muted-foreground h-auto min-h-7 max-w-full gap-1.5 py-1 whitespace-normal"
 										onclick={() => sendSuggestion(prompt)}
 									>
 										<ArrowUpDownIcon aria-hidden="true" />
