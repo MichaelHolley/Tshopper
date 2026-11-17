@@ -15,6 +15,7 @@
 	import { getChat } from '#lib/assistant.svelte.js';
 	import { refreshStoreData } from '#lib/stores.remote.js';
 	import SparklesIcon from '@lucide/svelte/icons/sparkles';
+	import ArrowUpDownIcon from '@lucide/svelte/icons/arrow-up-down';
 	import SquarePenIcon from '@lucide/svelte/icons/square-pen';
 	import WrenchIcon from '@lucide/svelte/icons/wrench';
 	import CheckIcon from '@lucide/svelte/icons/check';
@@ -196,10 +197,10 @@
 			<MessageScroller.Viewport>
 				<MessageScroller.Content class="gap-4 p-4" role="log" aria-live="polite" aria-busy={busy}>
 					{#if chat.messages.length === 0}
-						<Empty.Root class="flex-1">
-							<Empty.Header>
-								<Empty.Media variant="icon">
-									<SparklesIcon />
+						<Empty.Root class="flex-1 gap-5 px-2 py-8">
+							<Empty.Header class="max-w-60">
+								<Empty.Media variant="icon" class="bg-secondary text-primary size-12 rounded-2xl">
+									<SparklesIcon class="size-6" aria-hidden="true" />
 								</Empty.Media>
 								<Empty.Title>No messages yet</Empty.Title>
 								<Empty.Description>
@@ -208,7 +209,13 @@
 							</Empty.Header>
 							<Empty.Content class="flex-row flex-wrap justify-center">
 								{#each SUGGESTIONS as { label, prompt } (prompt)}
-									<Button variant="outline" size="sm" onclick={() => sendSuggestion(prompt)}>
+									<Button
+										variant="outline"
+										size="sm"
+										class="text-muted-foreground h-auto min-h-7 max-w-full gap-1.5 py-1 whitespace-normal"
+										onclick={() => sendSuggestion(prompt)}
+									>
+										<ArrowUpDownIcon aria-hidden="true" />
 										{label}
 									</Button>
 								{/each}
