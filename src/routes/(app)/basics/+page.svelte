@@ -35,7 +35,7 @@
 		await Promise.all([store ? getStoreCatalog(store.id) : null, getItems()])
 	);
 	const items = $derived(catalog?.basicItems ?? []);
-	const history = $derived(catalog?.history ?? []);
+	const history = $derived(catalog?.history.slice(0, 24) ?? []);
 	const openNames = $derived(
 		new Set(openItems(allItems, activeStore.current).map((i) => normalizeItemName(i.item)))
 	);
