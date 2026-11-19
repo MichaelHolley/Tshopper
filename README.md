@@ -15,13 +15,18 @@ Built with SvelteKit, Drizzle on libsql, and the AI SDK on OpenRouter.
 - 💬 **Talk to your list**: tell the assistant "add milk and eggs" or "clear everything I've checked" and it just happens
 - 📸 **Snap a recipe or note**: attach a photo in the chat and let the assistant turn it into list items
 - 🛒 **Sorted for the supermarket**: ask the assistant to reorder the list in the order you'd walk through the store
-- 📌 **Basics per store**: keep the items you always buy and add them to the list in one tap
+- 📌 **Basics per store**: keep the items you always buy and add them to the list in one tap, or ask the assistant to list, save, rename, or remove them
 - 💡 **Smart suggestions**: while typing, Tshopper suggests the basics and items you've added to that store before
 - 🔔 **Shopping progress notifications**: see how many items are left without opening the app
 - 📱 **Installable app**: add it to your home screen and use it like a native app
 - 🌗 **Light and dark mode**: easy on the eyes in the store and at home
 - 🔒 **Private by default**: password-protected, with login rate limiting
 - 🏠 **Self-hosted**: your data stays on your own server, deployed with a single Docker Compose file
+
+Saved basics are separate from the current shopping list. For example, ask "save milk and eggs as
+basics", "rename the milk basic to oat milk", or "add my basics to the shopping list". Saving or
+removing a basic does not change shopping items. Basics require a named store and are not available
+for Unassigned.
 
 ## Development
 
@@ -31,6 +36,15 @@ Copy `.env.example` to `.env` and fill it in, then:
 pnpm install
 pnpm run db:migrate
 pnpm run dev
+```
+
+Run the server-side tool tests against a temporary SQLite database (no `.env` required), plus lint
+and type checks:
+
+```sh
+pnpm run test
+pnpm run lint
+pnpm run check
 ```
 
 ## Hosting

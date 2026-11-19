@@ -254,8 +254,29 @@ export async function addBasicItem(storeId: string, name: string): Promise<void>
 		.onConflictDoNothing();
 }
 
-export async function deleteBasicItem(id: string): Promise<void> {
-	await db.delete(basicItem).where(eq(basicItem.id, id));
+export async function updateBasicItem(
+	id: string,
+	storeId: string,
+	name: string
+): Promise<BasicItem> {
+	const trimmed = name.trim();
+	if (!trimmed) throw new Error('Item name cannot be empty');
+
+	const [updated] = await db
+		.update(basicItem)
+		.set({ name: trimmed, normalizedName: normalizeItemName(trimmed) })
+		.where(and(eq(basicItem.id, id), eq(basicItem.storeId, storeId)))
+		.returning();
+	if (!updated) throw new Error('Basic item not found');
+	return updated;
+}
+
+export async function deleteBasicItem(id: string, storeId: string): Promise<boolean> {
+	const deleted = await db
+		.delete(basicItem)
+		.where(and(eq(basicItem.id, id), eq(basicItem.storeId, storeId)))
+		.returning({ id: basicItem.id });
+	return deleted.length > 0;
 }
 
 export async function listItemHistory(storeId: string): Promise<ItemHistoryEntry[]> {
