@@ -12,7 +12,7 @@ export const addBasicItem = command(
 	z.object({ storeId: z.string(), name: z.string() }),
 	async ({ storeId, name }) => {
 		requireAuth();
-		await shopping.addBasicItem(storeId, name);
+		await shopping.addBasicItems(storeId, [name]);
 		void getStoreCatalog(storeId).refresh();
 	}
 );

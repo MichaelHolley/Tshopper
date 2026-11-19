@@ -244,13 +244,14 @@ export async function listBasicItems(storeId: string): Promise<BasicItem[]> {
 	return items.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-export async function addBasicItem(storeId: string, name: string): Promise<void> {
-	const trimmed = name.trim();
-	if (!trimmed) throw new Error('Item name cannot be empty');
+export async function addBasicItems(storeId: string, names: string[]): Promise<void> {
+	const trimmed = names.map((name) => name.trim());
+	if (trimmed.some((name) => !name)) throw new Error('Item name cannot be empty');
+	if (trimmed.length === 0) return;
 
 	await db
 		.insert(basicItem)
-		.values({ storeId, name: trimmed, normalizedName: normalizeItemName(trimmed) })
+		.values(trimmed.map((name) => ({ storeId, name, normalizedName: normalizeItemName(name) })))
 		.onConflictDoNothing();
 }
 
@@ -261,10 +262,24 @@ export async function updateBasicItem(
 ): Promise<BasicItem> {
 	const trimmed = name.trim();
 	if (!trimmed) throw new Error('Item name cannot be empty');
+	const normalizedName = normalizeItemName(trimmed);
+
+	const [duplicate] = await db
+		.select({ id: basicItem.id })
+		.from(basicItem)
+		.where(
+			and(
+				eq(basicItem.storeId, storeId),
+				eq(basicItem.normalizedName, normalizedName),
+				ne(basicItem.id, id)
+			)
+		)
+		.limit(1);
+	if (duplicate) throw new Error(`A basic item named "${trimmed}" already exists`);
 
 	const [updated] = await db
 		.update(basicItem)
-		.set({ name: trimmed, normalizedName: normalizeItemName(trimmed) })
+		.set({ name: trimmed, normalizedName })
 		.where(and(eq(basicItem.id, id), eq(basicItem.storeId, storeId)))
 		.returning();
 	if (!updated) throw new Error('Basic item not found');
