@@ -32,7 +32,11 @@
 		set_item_checked: 'Checking an item off',
 		remove_items: 'Removing items',
 		clear_checked: 'Clearing checked items',
-		reorder_items: 'Reordering the list'
+		reorder_items: 'Reordering the list',
+		list_basic_items: 'Reading saved basics',
+		add_basic_items: 'Saving basic items',
+		update_basic_item: 'Renaming a basic item',
+		remove_basic_items: 'Removing saved basics'
 	};
 
 	// Kept in sync with the server's own limit in /api/chat;

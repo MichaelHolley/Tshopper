@@ -12,7 +12,7 @@ export const addBasicItem = command(
 	z.object({ storeId: z.string(), name: z.string() }),
 	async ({ storeId, name }) => {
 		requireAuth();
-		await shopping.addBasicItem(storeId, name);
+		await shopping.addBasicItems(storeId, [name]);
 		void getStoreCatalog(storeId).refresh();
 	}
 );
@@ -21,7 +21,7 @@ export const deleteBasicItem = command(
 	z.object({ id: z.string(), storeId: z.string() }),
 	async ({ id, storeId }) => {
 		requireAuth();
-		await shopping.deleteBasicItem(id);
+		await shopping.deleteBasicItem(id, storeId);
 		void getStoreCatalog(storeId).refresh();
 	}
 );
