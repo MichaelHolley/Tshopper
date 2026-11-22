@@ -23,6 +23,19 @@
 						"i need {item}",
 						"buy {item}"
 					]
+				},
+				{
+					"name": "ReadListIntent",
+					"slots": [{ "name": "store", "type": "AMAZON.SearchQuery" }],
+					"samples": [
+						"what's on the list",
+						"what's on my list",
+						"read the list",
+						"what do i need",
+						"what's on the list for {store}",
+						"read the list for {store}",
+						"what do i need at {store}"
+					]
 				}
 			],
 			"types": []
