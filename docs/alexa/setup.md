@@ -11,7 +11,13 @@ A private Alexa skill, left in development mode, adds items by voice in English 
 - **Parsing:** `OPENROUTER_MODEL` splits the phrase into items, quantities and an optional store.
   Without a store, items go to the default store. If parsing fails, the whole phrase becomes one
   item.
-- **Replies:** Alexa answers in the request's locale, from `REPLIES` in `+server.ts`.
+- **Duplicates:** Alexa skips items already unchecked on the target store's list (or Unassigned
+  when no store is selected), matching names case-insensitively after trimming whitespace.
+  Checked items can be added again. Repeated names in one request are only processed once,
+  keeping the first quantity without merging or summing quantities. UI and chat additions are
+  unchanged.
+- **Replies:** Alexa answers in the request's locale, from `REPLIES` in `+server.ts`, naming both
+  the items added and those already on the list. If all are already there, nothing is added.
 
 ## Skill configuration
 
