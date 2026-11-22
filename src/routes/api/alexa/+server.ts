@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { ALEXA_SKILL_ID } from '$app/env/private';
+import { normalizeItemName } from '#lib/item-name.js';
 import { ask, end, readAlexaRequest, say, type AlexaRequest } from '#lib/server/alexa.js';
 import { parseSpokenItems, type SpokenItems } from '#lib/server/ai.js';
 import * as preferences from '#lib/server/preferences.js';
@@ -12,6 +13,7 @@ type Replies = {
 	addOnly: string;
 	unassigned: string;
 	added: (items: string, store: string) => string;
+	alreadyOnList: (items: string, store: string) => string;
 };
 
 const REPLIES = {
@@ -20,14 +22,16 @@ const REPLIES = {
 		help: 'Say, for example: add milk and two packs of butter.',
 		addOnly: 'I can only add items to your list.',
 		unassigned: 'Unassigned',
-		added: (items, store) => `Added ${items} to ${store}.`
+		added: (items, store) => `Added ${items} to ${store}.`,
+		alreadyOnList: (items, store) => `Already on the list for ${store}: ${items}.`
 	},
 	de: {
 		prompt: 'Was soll ich hinzufügen?',
 		help: 'Sag zum Beispiel: füge Milch und zwei Packungen Butter hinzu.',
 		addOnly: 'Ich kann nur Artikel zu deiner Liste hinzufügen.',
 		unassigned: 'Nicht zugeordnet',
-		added: (items, store) => `${items} zu ${store} hinzugefügt.`
+		added: (items, store) => `${items} zu ${store} hinzugefügt.`,
+		alreadyOnList: (items, store) => `Bereits auf der Liste für ${store}: ${items}.`
 	}
 } satisfies Record<string, Replies>;
 
@@ -93,13 +97,45 @@ async function addSpokenItems(phrase: string, language: Language): Promise<strin
 		stores.find((s) => s.name.toLowerCase() === namedStore) ??
 		stores.find((s) => s.id === defaultStoreId);
 
-	await shopping.addItems(
-		items.map(({ name, quantity }) => ({ item: name, quantity })),
-		store?.id ?? null
+	const storeId = store?.id ?? null;
+	const uncheckedNames = new Set(
+		(await shopping.listItems(storeId))
+			.filter((item) => item.checked === null)
+			.map((item) => normalizeItemName(item.item))
 	);
+	const seenNames = new Set<string>();
+	const itemsToAdd: SpokenItems['items'] = [];
+	const alreadyOnList: string[] = [];
+	for (const item of items) {
+		const normalizedName = normalizeItemName(item.name);
+		if (seenNames.has(normalizedName)) continue;
+		seenNames.add(normalizedName);
+		if (uncheckedNames.has(normalizedName)) {
+			alreadyOnList.push(item.name);
+		} else {
+			itemsToAdd.push(item);
+		}
+	}
+
+	if (itemsToAdd.length) {
+		await shopping.addItems(
+			itemsToAdd.map(({ name, quantity }) => ({ item: name, quantity })),
+			storeId
+		);
+	}
 
 	const replies = REPLIES[language];
-	const spoken = items.map(({ name, quantity }) => (quantity ? `${quantity} ${name}` : name));
-	const list = new Intl.ListFormat(language, { type: 'conjunction' }).format(spoken);
-	return replies.added(list, store?.name ?? replies.unassigned);
+	const storeName = store?.name ?? replies.unassigned;
+	const formatter = new Intl.ListFormat(language, { type: 'conjunction' });
+	const response: string[] = [];
+	if (itemsToAdd.length) {
+		const spoken = itemsToAdd.map(({ name, quantity }) =>
+			quantity ? `${quantity} ${name}` : name
+		);
+		response.push(replies.added(formatter.format(spoken), storeName));
+	}
+	if (alreadyOnList.length) {
+		response.push(replies.alreadyOnList(formatter.format(alreadyOnList), storeName));
+	}
+	return response.join(' ');
 }
