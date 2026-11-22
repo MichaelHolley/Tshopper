@@ -52,13 +52,15 @@ export const POST: RequestHandler = async ({ request }) => {
 	const { type, intent, locale } = alexaRequest;
 	const language = languageOf(locale);
 	const replies = REPLIES[language];
-	if (type === 'LaunchRequest') return ask(replies.prompt);
+	// The SearchQuery slot only matches after a carrier phrase, so the prompt teaches one instead of inviting a bare answer.
+	const prompt = `${replies.prompt} ${replies.help}`;
+	if (type === 'LaunchRequest') return ask(prompt);
 	if (type !== 'IntentRequest' || !intent) return end();
 
 	switch (intent.name) {
 		case 'AddItemIntent': {
 			const phrase = intent.slots?.item?.value?.trim();
-			return phrase ? say(await addSpokenItems(phrase, language)) : ask(replies.prompt);
+			return phrase ? say(await addSpokenItems(phrase, language)) : ask(prompt);
 		}
 		case 'AMAZON.HelpIntent':
 			return ask(replies.help);

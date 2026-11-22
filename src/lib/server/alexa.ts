@@ -46,16 +46,12 @@ function isAmazonCertUrl(raw: string): boolean {
 }
 
 async function fetchChain(url: string): Promise<X509Certificate[]> {
-	const cached = chainCache.get(url);
-	if (cached) return cached;
-
 	const response = await fetch(url, { signal: AbortSignal.timeout(CERT_FETCH_TIMEOUT_MS) });
 	if (!response.ok) throw new Error(`Certificate download failed with ${response.status}`);
 	const chain = ((await response.text()).match(PEM_CERTIFICATE) ?? []).map(
 		(pem) => new X509Certificate(pem)
 	);
 	if (chain.length === 0) throw new Error('Certificate chain is empty');
-	chainCache.set(url, chain);
 	return chain;
 }
 
@@ -87,7 +83,8 @@ export async function readAlexaRequest(request: Request, skillId: string): Promi
 	if (!isAmazonCertUrl(certUrl)) throw new Error(`Untrusted certificate URL ${certUrl}`);
 
 	const body = await request.text();
-	const chain = await fetchChain(certUrl);
+	const cached = chainCache.get(certUrl);
+	const chain = cached ?? (await fetchChain(certUrl));
 	if (!isTrustedChain(chain, new Date())) {
 		chainCache.delete(certUrl);
 		throw new Error('Certificate chain is not trusted');
@@ -103,6 +100,8 @@ export async function readAlexaRequest(request: Request, skillId: string): Promi
 	if (Math.abs(Date.now() - envelope.request.timestamp.getTime()) > MAX_REQUEST_AGE_MS) {
 		throw new Error('Request timestamp is too old');
 	}
+	// Only a fresh request for this skill may add a cache entry; the URL header is unsigned, so anything earlier lets replayed bodies grow the cache.
+	if (!cached) chainCache.set(certUrl, chain);
 	return envelope.request;
 }
 
