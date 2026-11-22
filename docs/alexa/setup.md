@@ -1,7 +1,9 @@
 # Alexa skill
 
 A private Alexa skill, left in development mode, adds items by voice in English or German:
-"Alexa, tell tee shopper to add milk for Aldi" or „Alexa, sag tee shopper, füge Milch hinzu".
+"Alexa, ask kitchen helper to add milk for Aldi" or „Alexa, benutze den Küchenhelfer, um Milch
+hinzuzufügen". Each locale has its own invocation name: "kitchen helper" in English, „küchenhelfer"
+in German. Saying only the invocation name opens the skill and Alexa asks what to add.
 
 - **Endpoint:** Alexa calls `POST /api/alexa`
   ([`+server.ts`](../../src/routes/api/alexa/+server.ts)). It answers `404` until `ALEXA_SKILL_ID`

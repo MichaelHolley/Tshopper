@@ -1,7 +1,7 @@
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "tee shopper",
+			"invocationName": "küchenhelfer",
 			"intents": [
 				{ "name": "AMAZON.CancelIntent", "samples": [] },
 				{ "name": "AMAZON.HelpIntent", "samples": [] },
@@ -22,7 +22,14 @@
 						"schreibe {item} auf die liste",
 						"wir brauchen {item}",
 						"ich brauche {item}",
-						"kauf {item}"
+						"kauf {item}",
+						"{item} hinzuzufügen",
+						"{item} zur liste hinzuzufügen",
+						"{item} auf die liste zu setzen",
+						"{item} auf die liste zu schreiben",
+						"{item} zu kaufen",
+						"wir {item} brauchen",
+						"ich {item} brauche"
 					]
 				}
 			],
