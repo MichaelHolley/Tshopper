@@ -39,8 +39,8 @@ Echo ──▶ Alexa cloud ──HTTPS──▶ POST /api/alexa ──▶ addIte
 - Items are added through the same service layer as the app, so they appear on every open device
   right away.
 
-The code is in [`src/routes/api/alexa/+server.ts`](../src/routes/api/alexa/+server.ts) and
-[`src/lib/server/alexa.ts`](../src/lib/server/alexa.ts).
+The code is in [`src/routes/api/alexa/+server.ts`](../../src/routes/api/alexa/+server.ts) and
+[`src/lib/server/alexa.ts`](../../src/lib/server/alexa.ts).
 
 ## Cost
 
