@@ -25,5 +25,10 @@ export const variables = defineEnvVars({
 	OPENROUTER_MODEL: {
 		description: 'Model the chat assistant runs on, e.g. `openai/gpt-5.6-luna`.',
 		schema: z.string().default('openai/gpt-5.6-luna')
+	},
+	ALEXA_SKILL_ID: {
+		description:
+			'Skill ID of the private Alexa skill, e.g. `amzn1.ask.skill.…`. Leave unset to turn `/api/alexa` off.',
+		schema: z.string().optional()
 	}
 });

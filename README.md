@@ -13,6 +13,7 @@ Built with SvelteKit, Drizzle on libsql, and the AI SDK on OpenRouter.
 - ✋ **Drag to reorder**: arrange items by hand with a drag handle
 - 🏪 **One list per store**: separate lists with their own colors, plus a default store that opens first
 - 💬 **Talk to your list**: tell the assistant "add milk and eggs" or "clear everything I've checked" and it just happens
+- 🗣️ **Add by voice**: "Alexa, tell tee shopper to add milk and eggs" through a private Alexa skill, in English or German ([setup](docs/alexa/setup.md))
 - 📸 **Snap a recipe or note**: attach a photo in the chat and let the assistant turn it into list items
 - 🛒 **Sorted for the supermarket**: ask the assistant to reorder the list in the order you'd walk through the store
 - 📌 **Basics per store**: keep the items you always buy and add them to the list in one tap; the Basics view also shows up to 24 recently used items, newest first

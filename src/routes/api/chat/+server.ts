@@ -1,9 +1,7 @@
 import { convertToModelMessages, stepCountIs, streamText, type UIMessage } from 'ai';
-import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { error } from '@sveltejs/kit';
 import { z } from 'zod';
-import { OPENROUTER_API_KEY, OPENROUTER_MODEL } from '$app/env/private';
-import { shoppingTools, systemPrompt } from '#lib/server/ai.js';
+import { assistantModel, shoppingTools, systemPrompt } from '#lib/server/ai.js';
 import * as shopping from '#lib/server/shopping.js';
 import { UNASSIGNED } from '#lib/store-entries.js';
 import type { RequestHandler } from './$types';
@@ -55,10 +53,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (storeId !== null && !stores.some((s) => s.id === storeId)) error(400, 'Unknown store');
 	const storeName = stores.find((s) => s.id === storeId)?.name ?? UNASSIGNED.name;
 
-	const openrouter = createOpenRouter({ apiKey: OPENROUTER_API_KEY });
-
 	const result = streamText({
-		model: openrouter(OPENROUTER_MODEL),
+		model: assistantModel(),
 		system: systemPrompt(storeName),
 		messages: await convertToModelMessages(messages),
 		tools: shoppingTools(storeId),

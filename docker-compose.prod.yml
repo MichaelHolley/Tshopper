@@ -13,6 +13,7 @@ services:
       - SESSION_SECRET=ReplaceWithAtLeast32RandomCharacters
       - OPENROUTER_API_KEY=your-api-key
       - OPENROUTER_MODEL=openai/gpt-5.6-luna
+      # - ALEXA_SKILL_ID=amzn1.ask.skill.your-skill-id
     depends_on:
       libsql:
         condition: service_healthy

@@ -1,0 +1,32 @@
+{
+	"interactionModel": {
+		"languageModel": {
+			"invocationName": "tee shopper",
+			"intents": [
+				{ "name": "AMAZON.CancelIntent", "samples": [] },
+				{ "name": "AMAZON.HelpIntent", "samples": [] },
+				{ "name": "AMAZON.StopIntent", "samples": [] },
+				{ "name": "AMAZON.NavigateHomeIntent", "samples": [] },
+				{ "name": "AMAZON.FallbackIntent", "samples": [] },
+				{
+					"name": "AddItemIntent",
+					"slots": [{ "name": "item", "type": "AMAZON.SearchQuery" }],
+					"samples": [
+						"füge {item} hinzu",
+						"füg {item} hinzu",
+						"füge {item} zur liste hinzu",
+						"{item} hinzufügen",
+						"setz {item} auf die liste",
+						"setze {item} auf die liste",
+						"schreib {item} auf die liste",
+						"schreibe {item} auf die liste",
+						"wir brauchen {item}",
+						"ich brauche {item}",
+						"kauf {item}"
+					]
+				}
+			],
+			"types": []
+		}
+	}
+}
