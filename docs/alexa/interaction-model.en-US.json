@@ -1,7 +1,7 @@
 {
 	"interactionModel": {
 		"languageModel": {
-			"invocationName": "tee shopper",
+			"invocationName": "kitchen helper",
 			"intents": [
 				{ "name": "AMAZON.CancelIntent", "samples": [] },
 				{ "name": "AMAZON.HelpIntent", "samples": [] },
