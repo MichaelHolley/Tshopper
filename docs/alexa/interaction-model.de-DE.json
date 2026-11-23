@@ -31,6 +31,19 @@
 						"wir {item} brauchen",
 						"ich {item} brauche"
 					]
+				},
+				{
+					"name": "ReadListIntent",
+					"slots": [{ "name": "store", "type": "AMAZON.SearchQuery" }],
+					"samples": [
+						"was steht auf der liste",
+						"was steht auf meiner liste",
+						"lies die liste vor",
+						"was brauche ich",
+						"was steht auf der liste für {store}",
+						"lies die liste für {store} vor",
+						"was brauche ich bei {store}"
+					]
 				}
 			],
 			"types": []
