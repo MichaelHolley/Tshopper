@@ -1,12 +1,14 @@
 # Alexa skill
 
-A private Alexa skill, left in development mode, adds items and reads the list back by voice in
-English or German. Each locale has its own invocation name: "kitchen helper" in English,
+A private Alexa skill, left in development mode, adds items, checks them off and reads the list
+back by voice in English or German. Each locale has its own invocation name: "kitchen helper" in English,
 „küchenhelfer" in German. Saying only the invocation name opens the skill and Alexa asks how it
 can help.
 
 - Add items: "Alexa, ask kitchen helper to add milk for Aldi" or
   „Alexa, benutze den Küchenhelfer, um Milch hinzuzufügen".
+- Check off an item: "Alexa, tell kitchen helper I've got milk", "Alexa, ask kitchen helper to
+  remove milk" or „Alexa, sag Küchenhelfer, ich habe Milch".
 - Read the list: "Alexa, ask kitchen helper what's on the list" or
   „Alexa, frag Küchenhelfer, was steht auf der Liste".
 - Read a store's list: "Alexa, ask kitchen helper what's on the list for Lidl" or
@@ -20,6 +22,12 @@ can help.
 - **Adding items:** `OPENROUTER_MODEL` splits the phrase into items, quantities and an optional store.
   Without a store, items go to the default store. If parsing fails, the whole phrase becomes one
   item.
+- **Checking off items:** no AI call is made. One item name per utterance is matched against
+  unchecked items across all stores, including Unassigned, using `normalizeItemName` (case-insensitive
+  after trimming whitespace). Every match is checked off, even if the name appears in several stores;
+  there is no fuzzy matching, splitting of phrases or clarification question. Items are never deleted
+  by this action, even when you say "remove", so a wrong match can be undone in the UI. Alexa confirms
+  each matched item and its store, or says no unchecked item matched.
 - **Reading the list:** no AI call is made. Store names are matched case-insensitively; an omitted
   or unknown store falls back to the default store (or Unassigned if no default is set). Alexa reads
   only unchecked items, with quantities, in list order. It reads at most 10 items, followed by
@@ -31,6 +39,7 @@ can help.
   unchanged.
 - **Replies:** Alexa answers in the request's locale, from `REPLIES` in `+server.ts`, naming both
   the items added and those already on the list. If all are already there, nothing is added.
+  Help and fallback replies also explain how to check items off.
 
 ## Skill configuration
 
@@ -38,7 +47,8 @@ can help.
   with self-provisioned hosting. Use the same Amazon account as your Echo devices.
 - Paste [`interaction-model.en-US.json`](interaction-model.en-US.json) into each English locale and
   [`interaction-model.de-DE.json`](interaction-model.de-DE.json) into German (DE). Save and build
-  the models. For an existing skill, reimport and rebuild both models to enable `ReadListIntent`.
+  the models. For an existing skill, reimport and rebuild both models to enable `ReadListIntent`
+  and `CheckItemIntent`.
 - Set the HTTPS endpoint to `https://<your-domain>/api/alexa`, with the trusted-CA certificate
   option.
 - Set the skill's ID as `ALEXA_SKILL_ID` on the container.

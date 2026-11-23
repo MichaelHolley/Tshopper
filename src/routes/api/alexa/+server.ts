@@ -17,30 +17,37 @@ type Replies = {
 	empty: (store: string) => string;
 	more: (count: number) => string;
 	alreadyOnList: (items: string, store: string) => string;
+	checkedOff: (item: string, store: string) => string;
+	noMatch: (item: string) => string;
 };
 
 const REPLIES = {
 	en: {
 		prompt: 'How can I help with your list?',
-		help: "Say, for example: add milk and two packs of butter. Or ask: what's on the list, or what's on the list for Lidl?",
-		supportedActions: 'I can add items to your list or read it back.',
+		help: "Say, for example: add milk and two packs of butter. To check an item off, say: I've got milk. Or ask: what's on the list, or what's on the list for Lidl?",
+		supportedActions: 'I can add items to your list, check them off, or read the list back.',
 		unassigned: 'Unassigned',
 		added: (items, store) => `Added ${items} to ${store}.`,
 		list: (items, store) => `On your list for ${store}: ${items}.`,
 		empty: (store) => `Your list for ${store} is empty.`,
 		more: (count) => `${count} more`,
-		alreadyOnList: (items, store) => `Already on the list for ${store}: ${items}.`
+		alreadyOnList: (items, store) => `Already on the list for ${store}: ${items}.`,
+		checkedOff: (item, store) => `Checked off ${item} on your list for ${store}.`,
+		noMatch: (item) => `I couldn't find an unchecked item named ${item} on any list.`
 	},
 	de: {
 		prompt: 'Wie kann ich dir mit deiner Liste helfen?',
-		help: 'Sag zum Beispiel: füge Milch und zwei Packungen Butter hinzu. Oder frag: was steht auf der Liste, oder was brauche ich bei Lidl?',
-		supportedActions: 'Ich kann Artikel zu deiner Liste hinzufügen oder sie vorlesen.',
+		help: 'Sag zum Beispiel: füge Milch und zwei Packungen Butter hinzu. Zum Abhaken sag: ich habe Milch. Oder frag: was steht auf der Liste, oder was brauche ich bei Lidl?',
+		supportedActions:
+			'Ich kann Artikel zu deiner Liste hinzufügen, sie abhaken oder die Liste vorlesen.',
 		unassigned: 'Nicht zugeordnet',
 		added: (items, store) => `${items} zu ${store} hinzugefügt.`,
 		list: (items, store) => `Auf deiner Liste für ${store}: ${items}.`,
 		empty: (store) => `Deine Liste für ${store} ist leer.`,
 		more: (count) => `${count} weitere`,
-		alreadyOnList: (items, store) => `Bereits auf der Liste für ${store}: ${items}.`
+		alreadyOnList: (items, store) => `Bereits auf der Liste für ${store}: ${items}.`,
+		checkedOff: (item, store) => `${item} auf deiner Liste für ${store} abgehakt.`,
+		noMatch: (item) => `Ich habe keinen offenen Artikel namens ${item} auf einer Liste gefunden.`
 	}
 } satisfies Record<string, Replies>;
 
@@ -77,6 +84,10 @@ export const POST: RequestHandler = async ({ request }) => {
 			const phrase = intent.slots?.item?.value?.trim();
 			return phrase ? say(await addSpokenItems(phrase, language)) : ask(prompt);
 		}
+		case 'CheckItemIntent': {
+			const phrase = intent.slots?.item?.value?.trim();
+			return phrase ? say(await checkSpokenItem(phrase, language)) : ask(prompt);
+		}
 		case 'ReadListIntent':
 			return say(await readSpokenList(intent.slots?.store?.value, language));
 		case 'AMAZON.HelpIntent':
@@ -87,6 +98,24 @@ export const POST: RequestHandler = async ({ request }) => {
 			return end();
 	}
 };
+
+async function checkSpokenItem(phrase: string, language: Language): Promise<string> {
+	const [items, stores] = await Promise.all([shopping.listAllItems(), shopping.listStores()]);
+	const normalizedName = normalizeItemName(phrase);
+	const matches = items.filter(
+		(item) => item.checked === null && normalizeItemName(item.item) === normalizedName
+	);
+	const replies = REPLIES[language];
+	if (matches.length === 0) return replies.noMatch(phrase);
+
+	const response: string[] = [];
+	for (const item of matches) {
+		await shopping.checkItem(item.id);
+		const storeName = stores.find((store) => store.id === item.storeId)?.name ?? replies.unassigned;
+		response.push(replies.checkedOff(item.item, storeName));
+	}
+	return response.join(' ');
+}
 
 async function readSpokenList(storeName: string | undefined, language: Language): Promise<string> {
 	const [stores, { defaultStoreId }] = await Promise.all([
