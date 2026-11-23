@@ -33,6 +33,20 @@
 					]
 				},
 				{
+					"name": "CheckItemIntent",
+					"slots": [{ "name": "item", "type": "AMAZON.SearchQuery" }],
+					"samples": [
+						"entferne {item}",
+						"entferne {item} von der liste",
+						"hake {item} ab",
+						"hak {item} ab",
+						"ich habe {item}",
+						"ich hab {item}",
+						"{item} abzuhaken",
+						"{item} zu entfernen"
+					]
+				},
+				{
 					"name": "ReadListIntent",
 					"slots": [{ "name": "store", "type": "AMAZON.SearchQuery" }],
 					"samples": [
