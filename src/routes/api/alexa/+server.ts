@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { ALEXA_SKILL_ID } from '$app/env/private';
+import { normalizeItemName } from '#lib/item-name.js';
 import { ask, end, readAlexaRequest, say, type AlexaRequest } from '#lib/server/alexa.js';
 import { parseSpokenItems, type SpokenItems } from '#lib/server/ai.js';
 import * as preferences from '#lib/server/preferences.js';
@@ -15,6 +16,7 @@ type Replies = {
 	list: (items: string, store: string) => string;
 	empty: (store: string) => string;
 	more: (count: number) => string;
+	alreadyOnList: (items: string, store: string) => string;
 };
 
 const REPLIES = {
@@ -26,7 +28,8 @@ const REPLIES = {
 		added: (items, store) => `Added ${items} to ${store}.`,
 		list: (items, store) => `On your list for ${store}: ${items}.`,
 		empty: (store) => `Your list for ${store} is empty.`,
-		more: (count) => `${count} more`
+		more: (count) => `${count} more`,
+		alreadyOnList: (items, store) => `Already on the list for ${store}: ${items}.`
 	},
 	de: {
 		prompt: 'Wie kann ich dir mit deiner Liste helfen?',
@@ -36,7 +39,8 @@ const REPLIES = {
 		added: (items, store) => `${items} zu ${store} hinzugefügt.`,
 		list: (items, store) => `Auf deiner Liste für ${store}: ${items}.`,
 		empty: (store) => `Deine Liste für ${store} ist leer.`,
-		more: (count) => `${count} weitere`
+		more: (count) => `${count} weitere`,
+		alreadyOnList: (items, store) => `Bereits auf der Liste für ${store}: ${items}.`
 	}
 } satisfies Record<string, Replies>;
 
@@ -130,13 +134,45 @@ async function addSpokenItems(phrase: string, language: Language): Promise<strin
 		stores.find((s) => s.name.toLowerCase() === namedStore) ??
 		stores.find((s) => s.id === defaultStoreId);
 
-	await shopping.addItems(
-		items.map(({ name, quantity }) => ({ item: name, quantity })),
-		store?.id ?? null
+	const storeId = store?.id ?? null;
+	const uncheckedNames = new Set(
+		(await shopping.listItems(storeId))
+			.filter((item) => item.checked === null)
+			.map((item) => normalizeItemName(item.item))
 	);
+	const seenNames = new Set<string>();
+	const itemsToAdd: SpokenItems['items'] = [];
+	const alreadyOnList: string[] = [];
+	for (const item of items) {
+		const normalizedName = normalizeItemName(item.name);
+		if (seenNames.has(normalizedName)) continue;
+		seenNames.add(normalizedName);
+		if (uncheckedNames.has(normalizedName)) {
+			alreadyOnList.push(item.name);
+		} else {
+			itemsToAdd.push(item);
+		}
+	}
+
+	if (itemsToAdd.length) {
+		await shopping.addItems(
+			itemsToAdd.map(({ name, quantity }) => ({ item: name, quantity })),
+			storeId
+		);
+	}
 
 	const replies = REPLIES[language];
-	const spoken = items.map(({ name, quantity }) => (quantity ? `${quantity} ${name}` : name));
-	const list = new Intl.ListFormat(language, { type: 'conjunction' }).format(spoken);
-	return replies.added(list, store?.name ?? replies.unassigned);
+	const storeName = store?.name ?? replies.unassigned;
+	const formatter = new Intl.ListFormat(language, { type: 'conjunction' });
+	const response: string[] = [];
+	if (itemsToAdd.length) {
+		const spoken = itemsToAdd.map(({ name, quantity }) =>
+			quantity ? `${quantity} ${name}` : name
+		);
+		response.push(replies.added(formatter.format(spoken), storeName));
+	}
+	if (alreadyOnList.length) {
+		response.push(replies.alreadyOnList(formatter.format(alreadyOnList), storeName));
+	}
+	return response.join(' ');
 }

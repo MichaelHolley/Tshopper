@@ -1,14 +1,16 @@
 # Alexa skill
 
 A private Alexa skill, left in development mode, adds items and reads the list back by voice in
-English or German:
+English or German. Each locale has its own invocation name: "kitchen helper" in English,
+„küchenhelfer" in German. Saying only the invocation name opens the skill and Alexa asks how it
+can help.
 
-- Add items: "Alexa, tell tee shopper to add milk for Aldi" or
-  „Alexa, sag tee shopper, füge Milch hinzu".
-- Read the list: "Alexa, ask tee shopper what's on the list" or
-  „Alexa, frag tee shopper, was steht auf der Liste".
-- Read a store's list: "Alexa, ask tee shopper what's on the list for Lidl" or
-  „Alexa, frag tee shopper, was brauche ich bei Lidl".
+- Add items: "Alexa, ask kitchen helper to add milk for Aldi" or
+  „Alexa, benutze den Küchenhelfer, um Milch hinzuzufügen".
+- Read the list: "Alexa, ask kitchen helper what's on the list" or
+  „Alexa, frag Küchenhelfer, was steht auf der Liste".
+- Read a store's list: "Alexa, ask kitchen helper what's on the list for Lidl" or
+  „Alexa, frag Küchenhelfer, was brauche ich bei Lidl".
 
 - **Endpoint:** Alexa calls `POST /api/alexa`
   ([`+server.ts`](../../src/routes/api/alexa/+server.ts)). It answers `404` until `ALEXA_SKILL_ID`
@@ -22,7 +24,13 @@ English or German:
   or unknown store falls back to the default store (or Unassigned if no default is set). Alexa reads
   only unchecked items, with quantities, in list order. It reads at most 10 items, followed by
   "and N more" if needed, and gives a separate reply when the list is empty.
-- **Replies:** Alexa answers in the request's locale, from `REPLIES` in `+server.ts`.
+- **Duplicates:** Alexa skips items already unchecked on the target store's list (or Unassigned
+  when no store is selected), matching names case-insensitively after trimming whitespace.
+  Checked items can be added again. Repeated names in one request are only processed once,
+  keeping the first quantity without merging or summing quantities. UI and chat additions are
+  unchanged.
+- **Replies:** Alexa answers in the request's locale, from `REPLIES` in `+server.ts`, naming both
+  the items added and those already on the list. If all are already there, nothing is added.
 
 ## Skill configuration
 
