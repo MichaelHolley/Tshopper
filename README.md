@@ -17,7 +17,7 @@ Built with SvelteKit, Drizzle on libsql, and the AI SDK on OpenRouter.
 - 📸 **Snap a recipe or note**: attach a photo in the chat and let the assistant turn it into list items
 - 🛒 **Sorted for the supermarket**: ask the assistant to reorder the list in the order you'd walk through the store
 - 📌 **Basics per store**: keep the items you always buy and add them to the list in one tap; the Basics view also shows up to 24 recently used items, newest first
-- 💡 **Smart suggestions**: while typing, Tshopper suggests the basics and items you've added to that store before
+- 💡 **Smart suggestions**: while typing, Tshopper suggests the basics and items you've added to that store before; searches treat `ä`/`a`/`ae`, `ö`/`o`/`oe`, and `ü`/`u`/`ue` as equivalent
 - 🔔 **Shopping progress notifications**: see how many items are left without opening the app
 - 📱 **Installable app**: add it to your home screen and use it like a native app
 - 🌗 **Light and dark mode**: easy on the eyes in the store and at home
