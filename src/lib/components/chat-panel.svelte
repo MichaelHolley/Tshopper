@@ -256,7 +256,7 @@
 													{:else if status === 'running'}
 														<WrenchIcon />
 													{:else}
-														<CheckIcon class="text-primary" />
+														<CheckIcon class="text-secondary dark:text-primary" />
 													{/if}
 												</Trace.Icon>
 												<Trace.Title>{TOOL_LABELS[name] ?? name}</Trace.Title>
